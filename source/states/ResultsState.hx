@@ -144,7 +144,7 @@ class ResultsState extends FlxState
         var ratingLetter = params.ratingName != null ? params.ratingName : "";
         var ratingFC = params.ratingFC != null ? params.ratingFC : "";
         var ratingW = 400;
-        var ratingX = FlxG.width - ratingW - 200; // Más a la izquierda (ajusta el 340 a tu gusto)
+        var ratingX = FlxG.width - ratingW - 150; // Más a la izquierda (ajusta el 340 a tu gusto)
         var ratingY = judgY + 40;
         var ratingText = new FlxText(ratingX, ratingY, ratingW, ratingLetter, 70);
         ratingText.setFormat("vcr.ttf", 70, FlxColor.YELLOW, "center");

@@ -39,7 +39,16 @@ class CreditsState extends MusicBeatState
 
 		var defaultList:Array<Array<String>> = [ //Name - Icon name - Description - Link - BG Color
 			['Plus Engine Team'],
-			['Lenin Asto',          "lel",              "Programmer of Plus Engine",                        "https://www.youtube.com/@Lenin_Anonimo_Of","03FC88"],
+			['Lenin Asto',          "len",              "Programmer of Plus Engine",                        "https://www.youtube.com/@Lenin_Anonimo_Of","03FC88"],
+			[''],
+			['Funkin Modchart Credits'],
+			['TheoDev',             "theo",         "Owner, Lead coder of Funkin Modchart",                       "https://github.com/TheoDevelops",    "FFB347"],
+			['Ne_Eo (aka. Neo)',    "neo",              "Coder, bugfixes & Optimizer",                            "",                                   "7FDBFF"],
+			['Edwhak',              "edd",              "Maintainer",                                             "https://github.com/EdwhakKB",        "B10DC9"],
+			['OpenITG',             "opi",              "Some math taken for modifiers",                          "",                                   "2ECC40"],
+			['4mbr0s3',  "ambro", "Some code taken from Schmovin', his own Modcharting Lib. (really impressive)",   "https://github.com/4mbr0s3-2",     "FFDC00"],
+			['lunarcleint',         "lun",              "Support, such a nice guy!",                              "https://x.com/lunarcleint",          "FF69B4"],
+			['Tsaku',               "tsaku",            "Support, bug finder. (thanks !!!)",                        "https://x.com/Tsaku__",            "FFDAB9"],
 			[''],
 			["Psych Engine Team"],
 			["Shadow Mario",		"shadowmario",		"Main Programmer and Head of Psych Engine",					"https://ko-fi.com/shadowmario",	"444444"],

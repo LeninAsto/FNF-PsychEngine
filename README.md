@@ -9,15 +9,12 @@ Welcome to FNF-PlusEngine! This is a modified version of Friday Night Funkin', b
 - Judgement Counter
 
 ## 📦 Latest Releases
+
+
 > v0.2 - Video in HUD
 - Added support for playing videos on camHUD or camGame.
 - Fix the Achievements an Easter Eggs of Psych.
 - New judgement bop
-
-> v0.1.4 - Stable
-- Added Lua variables for fullscreen toggle and window animations.
-- Fixed rating text misalignment when upscroll is active.
-- Temporarily removed the "Nightmare" songs due to visual issues.
 
 ## 🤝 Contributions... Only me =')
 - Contributions are welcome! If you have ideas, improvements, or fixes, feel free to fork the repo and open a pull request.
