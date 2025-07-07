@@ -164,7 +164,7 @@ class ResultsState extends FlxState
         }
 
         // --- Versiones arriba del texto de continuar ---
-        var engineInfo = "PLUS ENGINE V0.4 | PSYCH ENGINE V1.0.4 | FRIDAY NIGHT FUNKIN' V0.2.8";
+        var engineInfo = "Plus Engine v" + MainMenuState.plusEngineVersion + " | Psych Engine v" + MainMenuState.psychEngineVersion + " | Friday Night Funkin' v0.2.8";
         var engineText = new FlxText(0, FlxG.height - 58, FlxG.width, engineInfo, 22);
         engineText.setFormat("vcr.ttf", 22, FlxColor.CYAN, "center");
         add(engineText);

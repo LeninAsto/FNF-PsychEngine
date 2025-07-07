@@ -3,7 +3,9 @@ package psychlua;
 import openfl.Lib;
 import flixel.math.FlxMath;
 import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
 import flixel.FlxG;
+import flixel.system.scaleModes.RatioScaleMode;
 
 class WindowTweens {
     public static function winTweenX(tag:String, targetX:Int, duration:Float = 1, ease:String = "linear", ?onComplete:Void->Void) {
@@ -75,12 +77,23 @@ class WindowTweens {
         #end
         return null;
     }
+    
+    public static function setWindowBorderless(enable:Bool) {
+    #if windows
+    var window = Lib.current.stage.window;
+    window.borderless = enable;
+    #end
+    }
 
     public static function winTweenSize(targetW:Int, targetH:Int, duration:Float = 1, ease:String = "linear", ?onComplete:Void->Void) {
         #if windows
         var window = Lib.current.stage.window;
         var startW = window.width;
         var startH = window.height;
+
+        // Cambia el modo de escala para que el juego se estire con la ventana
+        FlxG.scaleMode = new flixel.system.scaleModes.RatioScaleMode();
+
         FlxTween.num(0, 1, duration, {
             ease: LuaUtils.getTweenEaseByString(ease),
             onUpdate: function(tween:FlxTween) {

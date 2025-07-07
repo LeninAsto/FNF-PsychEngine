@@ -523,13 +523,13 @@ class PlayState extends MusicBeatState
 
         var versionStr = "Plus Engine v" + MainMenuState.plusEngineVersion + " | " + SONG.song + " (" + Difficulty.getString() + ")";
 
-        versionText = new FlxText(10, FlxG.height - 50, FlxG.width,
+        versionText = new FlxText(10, FlxG.height - 46, FlxG.width,
             timeStr + "\n" + dateStr + "\n" + versionStr, 16);
         versionText.setFormat(Paths.defaultFont(), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
         versionText.scrollFactor.set();
         versionText.alpha = 0.7;
         versionText.borderSize = 1;
-        versionText.cameras = [camOther];
+        versionText.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
         add(versionText);
 
 		Conductor.songPosition = -Conductor.crochet * 5 + Conductor.offset;

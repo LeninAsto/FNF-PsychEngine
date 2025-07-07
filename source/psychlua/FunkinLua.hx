@@ -13,6 +13,9 @@ import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.FlxState;
 import sys.io.Process;
+import lime.app.Application;
+import lime.system.System;
+import cpp.Pointer;
 
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
@@ -742,7 +745,7 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "endSong", function() {
 			
 			#if windows
-            var window = Lib.current.stage.window;
+            var window = Lib.application.window;
             if (FunkinLua.originalWindowTitle != null) window.title = FunkinLua.originalWindowTitle;
             #end
 			game.KillNotes();
@@ -1565,11 +1568,12 @@ class FunkinLua {
 			return closed;
 		});
 
-		Lua_helper.add_callback(lua, "setFullscreen", function(enable:Bool) setFullscreen(enable));
-
 		Lua_helper.add_callback(lua, "winTweenSize", function(width:Int, height:Int, duration:Float = 1, ease:String = "linear") WindowTweens.winTweenSize(width, height, duration, ease));
 		Lua_helper.add_callback(lua, "winTweenX", function(tag:String, targetX:Int, duration:Float = 1, ease:String = "linear") return WindowTweens.winTweenX(tag, targetX, duration, ease));
 		Lua_helper.add_callback(lua, "winTweenY", function(tag:String, targetY:Int, duration:Float = 1, ease:String = "linear") return WindowTweens.winTweenY(tag, targetY, duration, ease));
+
+		Lua_helper.add_callback(lua, "setWinFSC", function(enable:Bool) setFullscreen(enable));
+		Lua_helper.add_callback(lua, "hideWinBorder", function(enable:Bool) WindowTweens.setWindowBorderless(enable));
 
 		#if DISCORD_ALLOWED DiscordClient.addLuaCallbacks(lua); #end
 		#if ACHIEVEMENTS_ALLOWED Achievements.addLuaCallbacks(lua); #end
@@ -1677,29 +1681,6 @@ class FunkinLua {
 				video.videoSprite.bitmap.play();
 		}
 	}
-
-	public static function setTextWin(text:String, animated:Bool = false, duration:Float = 1) {
-    #if windows
-    var window = Lib.current.stage.window;
-    if (originalWindowTitle == null) originalWindowTitle = window.title;
-    if (!animated) {
-        window.title = text;
-    } else {
-        var total = text.length;
-        var current = 0;
-        var interval = duration / Math.max(1, total);
-        window.title = "";
-        var timer = new flixel.util.FlxTimer();
-        timer.start(interval, function(tmr:flixel.util.FlxTimer) {
-            current++;
-            window.title = text.substr(0, current);
-            if (current < total) {
-                tmr.reset(interval);
-            }
-        });
-    }
-    #end
-    }
 
 	public function set(variable:String, data:Dynamic) {
 		if(lua == null) {
@@ -1918,7 +1899,7 @@ class FunkinLua {
 	}
 
 	public static function setFullscreen(enable:Bool) {
-    var stage = Lib.current.stage;
+    var stage = Lib.application.window.stage;
     if (enable)
         stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
     else
