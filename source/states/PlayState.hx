@@ -509,8 +509,8 @@ class PlayState extends MusicBeatState
 		add(noteGroup);
 
 		// Counter
-	    judgementCounterText = new FlxText(10, (FlxG.height / 2) - 100, 0, "", 23); // Más grande y centrado vertical
-		judgementCounterText.setFormat(Paths.defaultFont(), 23, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+	    judgementCounterText = new FlxText(10, (FlxG.height / 2) - 100, 0, "", 20); // Más grande y centrado vertical
+		judgementCounterText.setFormat(Paths.defaultFont(), 20, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		judgementCounterText.scrollFactor.set();
 		judgementCounterText.alpha = 1;
 		judgementCounterText.borderSize = 2;
@@ -1911,10 +1911,10 @@ class PlayState extends MusicBeatState
 	
 	// Velocidad
 	if (curSpeed != lastSpeed) {
-		var diff = Math.round((curSpeed - lastSpeed) * 10) / 10;
+		var diff = Math.round((curSpeed - lastSpeed) * 100) / 100; // Más precisión
 		var sign = diff > 0 ? "+" : "";
 		speedText.text = "Speed: " + Std.string(Math.round(curSpeed * 10) / 10) + "x";
-		var flashColor = (diff > 0) ? FlxColor.RED : FlxColor.LIME;
+		var flashColor = (diff > 0) ? FlxColor.RED : (diff < 0 ? FlxColor.LIME : FlxColor.WHITE);
 		speedText.color = flashColor;
 		speedText.visible = ClientPrefs.data.debugData;
 		speedText.alpha = 0.6;
@@ -1956,14 +1956,14 @@ class PlayState extends MusicBeatState
 				var comboMaximo:Int = maxCombo;
 				judgementCounterText.visible = true;
 				judgementCounterText.text =
-					Language.getPhrase('judgement_eps', 'Epics') + ' |:  ' + ratingsData[0].hits + '\n' +
+					Language.getPhrase('judgement_eps', 'Epics') + ' :  ' + ratingsData[0].hits + '\n' +
 					Language.getPhrase('judgement_sks', 'Sicks') + ' :  ' + ratingsData[1].hits + '\n' +
 					Language.getPhrase('judgement_gds', 'Goods') + ' :  ' + ratingsData[2].hits + '\n' +
 					Language.getPhrase('judgement_bds', 'Bads') + '  :  ' + ratingsData[3].hits + '\n' +
 					Language.getPhrase('judgement_shs', 'Shits') + ' :  ' + ratingsData[4].hits + '\n' +
 					Language.getPhrase('judgement_mis', 'Misses') + ':  ' + songMisses + '\n' +
-					'Combo:      ' + comboActual + '\n' +
-					'High Combo: ' + comboMaximo;
+					'R. Combo: ' + comboActual + '\n' +
+					'M. Combo: ' + comboMaximo;
 			}
 			else
 			{
