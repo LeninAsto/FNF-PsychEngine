@@ -533,7 +533,7 @@ class PlayState extends MusicBeatState
 		speedText.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 		add(speedText);
 		
-		bpmText = new FlxText(14, FlxG.height - 140, 0, "BPM: 100", 16);
+		bpmText = new FlxText(14, FlxG.height - 140, 0, "BPM: " + Std.string(Std.int(Conductor.bpm)), 16);
 		bpmText.setFormat(Paths.defaultFont(), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		bpmText.visible = ClientPrefs.data.debugData;
 		bpmText.scrollFactor.set();
