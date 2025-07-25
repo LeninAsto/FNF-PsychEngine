@@ -180,7 +180,21 @@ class PauseSubState extends MusicBeatSubstate
 		//The time and date live yippee
 		if (dateTimeText != null) {
             var now:Date = Date.now();
-            dateTimeText.text = now.toString();
+            var dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            var monthNames = ["January", "February", "March", "April", "May", "June", 
+                              "July", "August", "September", "October", "November", "December"];
+            
+            var dayName = dayNames[now.getDay()];
+            var monthName = monthNames[now.getMonth()];
+            var day = now.getDate();
+            var year = now.getFullYear();
+            var hours = now.getHours();
+            var minutes = now.getMinutes();
+            
+            // Formatear minutos con cero inicial si es necesario
+            var minutesStr = (minutes < 10) ? "0" + minutes : Std.string(minutes);
+            
+            dateTimeText.text = '$dayName, $monthName $day $year - $hours:${minutesStr}hrs';
         }
 
 		if(controls.BACK)

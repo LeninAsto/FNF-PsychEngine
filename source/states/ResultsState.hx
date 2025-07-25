@@ -1,7 +1,6 @@
 package states;
 
 import flixel.FlxG;
-import flixel.FlxState;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.FlxSprite;
@@ -10,9 +9,10 @@ import states.FreeplayState;
 import backend.CustomFadeTransition;
 import backend.Song;
 import states.PlayState;
+import backend.MusicBeatState;
 import DateTools;
 
-class ResultsState extends FlxState
+class ResultsState extends MusicBeatState
 {
     var bgImage:FlxSprite;
     var songInstrumental:String = "";
@@ -257,11 +257,8 @@ class ResultsState extends FlxState
         if (FlxG.keys.justPressed.ENTER)
         {
             FlxG.sound.music.stop();
-            CustomFadeTransition.finishCallback = function() {
-                FlxG.switchState(new FreeplayState());
-            };
-            openSubState(new CustomFadeTransition(0.6, false));
             playFreakyMenuMusic(params.isMod, params.modFolder);
+            MusicBeatState.switchState(new FreeplayState());
         }
     }
 

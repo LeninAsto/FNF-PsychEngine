@@ -5,31 +5,45 @@ import lime.utils.Assets as LimeAssets;
 
 class CoolUtil
 {
+	public static var hasUpdate:Bool = false;
+	public static var latestVersion:String = "";
+
 	public static function checkForUpdates(url:String = null):String {
 		if (url == null || url.length == 0)
 			url = "https://raw.githubusercontent.com/LeninAsto/FNF-PlusEngine/refs/heads/main/gitVersion.txt";
-		var version:String = states.MainMenuState.plusEngineVersion.trim();
+		
+		var currentVersion:String = states.MainMenuState.plusEngineVersion.trim();
+		hasUpdate = false;
+		latestVersion = currentVersion;
+		
 		if(ClientPrefs.data.checkForUpdates) {
 			trace('checking for updates...');
 			var http = new haxe.Http(url);
 			http.onData = function (data:String)
 			{
-				var newVersion:String = data.split('\n')[0].trim();
-				trace('version online: $newVersion, your version: $version');
-				if(newVersion != version) {
+				var remoteVersion:String = data.split('\n')[0].trim();
+				trace('version online: $remoteVersion, your version: $currentVersion');
+				
+				if(remoteVersion != currentVersion) {
 					trace('versions arent matching! please update');
-					version = newVersion;
-					http.onData = null;
-					http.onError = null;
-					http = null;
+					hasUpdate = true;
+					latestVersion = remoteVersion;
+				} else {
+					trace('versions match! no update needed');
+					hasUpdate = false;
 				}
+				
+				http.onData = null;
+				http.onError = null;
+				http = null;
 			}
 			http.onError = function (error) {
-				trace('error: $error');
+				trace('error checking for updates: $error');
+				hasUpdate = false;
 			}
 			http.request();
 		}
-		return version;
+		return currentVersion;
 	}
 	inline public static function quantize(f:Float, snap:Float){
 		// changed so this actually works lol
