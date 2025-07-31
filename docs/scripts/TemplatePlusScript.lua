@@ -24,7 +24,7 @@ function onStepHit()
 
         --Alternar fullscreen
         --Toggle fullscreen
-        setFullscreen(true)
+        setWinFSC(true)
 
         --Cambiar tamaño de la ventana
         --Change window size
@@ -40,6 +40,19 @@ function onStepHit()
             --> 720 = height
             --> 1.5 = time
             --> "quadInOut" = type of interpolation]]
+
+        --Reescalar la ventana al centro
+        --Resize the window to the center
+        setWinRCenter(1280, 720, false)
+        --[[Donde:
+            --> 1280 = ancho
+            --> 720 = alto
+            --> false = Si quieres animadamente reescalarlo
+            ------
+            Where:
+            --> 1280 = width
+            --> 720 = height
+            --> false = If you want to resize it animatedly]]
 
         --Mover la ventana en el eje X
         --Move the window on the X axis
