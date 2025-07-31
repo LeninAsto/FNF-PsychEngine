@@ -1,3 +1,5 @@
+![Logo Off](docs/img/fond.png)
+
 # 🎮 FNF-PlusEngine
 Welcome to FNF-PlusEngine! This is a modified version of Friday Night Funkin', based on Psych Engine, with added features and improvements for a more dynamic and customizable gameplay experience adding advanced modcharts variables so you can create your craziest modcharts, and more.
 
