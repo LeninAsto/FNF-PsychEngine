@@ -1,18 +1,17 @@
 ![Logo Off](docs/img/fond.png)
 
 # 🎮 FNF-PlusEngine
-Welcome to FNF-PlusEngine! This is a modified version of Friday Night Funkin', based on Psych Engine, with added features and improvements for a more dynamic and customizable gameplay experience adding advanced modcharts variables so you can create your craziest modcharts, and more.
+Engine based on Psych Engine 1.0.4, with modcharts like NotITG and compatible with Psych mods 0.6.3 and 0.7.3.
 
 
 
 ### Features
-- Video in HUD: Now you can play videos directly on camHUD or camGame. Perfect for custom cutscenes or visual effects. More info here.
 - New Lua Variables: Added custom variables like setFullscreen, winTweenSize, winTweenX, and winTweenY for advanced window control.
-- Cool Font.
 - Judgement Counter.
 - Advanced Variables for craziest Modcharts.
 - Fix select json in Charting Editor.
 - New results State and really cool.
+- Compatible with Psych mods 0.6.3 and 0.7.3
 - and More...
 
 ### 🤝 Contributions
