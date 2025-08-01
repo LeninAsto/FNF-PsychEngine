@@ -1,16 +1,12 @@
 # Video Script Guide for FNF PlusEngine
 
-Esta guía te ayudará a reproducir videos en tus charts usando tanto **Haxe** como **Lua**.
+This guide will help you play videos in your charts using **Haxe**.
 
-## 📋 Requisitos
+## 📋 Requirements
 
-- **hxvlc** instalado en tu proyecto
-- Archivo de video en formato `.mp4` en la carpeta `assets/videos/`
-- FNF PlusEngine/Psych Engine
+- Video file in `.mp4` format inside the `mods/"modname"/videos/` folder
 
-## 🎬 Implementación Básica
-
-### Versión Haxe (.hx)
+## 🎬 Basic Implementation
 
 ```haxe
 import hxvlc.flixel.FlxVideoSprite;
@@ -18,7 +14,7 @@ import flixel.FlxCamera;
 import backend.Conductor;
 import Main;
 
-var miVideo:FlxVideoSprite;
+var myVideo:FlxVideoSprite;
 var videoArray:Array<FlxVideoSprite> = [];
 var videosToDestroy:Array<FlxVideoSprite> = [];
 
@@ -26,10 +22,10 @@ function onCreate()
 {
     FlxG.autoPause = false;
 
-    miVideo = new FlxVideoSprite();
-    miVideo.load(Paths.video('nombreDelVideo')); // Sin extensión
+    myVideo = new FlxVideoSprite();
+    myVideo.load(Paths.video('videoName')); // No extension
 
-    videoArray = [miVideo];
+    videoArray = [myVideo];
     
     for (i in videoArray)
     {
@@ -56,7 +52,7 @@ function onCreatePost()
 
 function onSongStart() 
 {
-    playVideo(miVideo, 15.0); // Duración en segundos
+    playVideo(myVideo, 15.0); // Duration in seconds
 }
 
 function playVideo(vid:FlxVideoSprite, endTime:Float)
@@ -95,119 +91,48 @@ function onDestroy() {
 }
 ```
 
-### Versión Lua (.lua)
+## 🎛️ Video Customization
 
-```lua
-function onCreate()
-    addHaxeLibrary('FlxVideoSprite', 'hxvlc.flixel')
-    addHaxeLibrary('FlxCamera', 'flixel')
-    addHaxeLibrary('Conductor', 'backend')
-    addHaxeLibrary('Main')
-    
-    runHaxeCode([[
-        var miVideo:FlxVideoSprite;
-        var videoArray:Array<FlxVideoSprite> = [];
-        var videosToDestroy:Array<FlxVideoSprite> = [];
-        
-        FlxG.autoPause = false;
-
-        miVideo = new FlxVideoSprite();
-        miVideo.load(Paths.video('nombreDelVideo'));
-
-        videoArray = [miVideo];
-        
-        for (i in videoArray)
-        {
-            i.bitmap.rate = game.playbackRate;
-            i.alpha = 0.001;
-            i.cameras = [game.camOther];
-            game.add(i);
-        }
-        
-        function playVideo(vid:FlxVideoSprite, endTime:Float)
-        {
-            vid.screenCenter();
-            vid.alpha = 1;
-            vid.bitmap.time = 0;
-            vid.resume();
-
-            new FlxTimer().start(endTime / game.playbackRate, function(tmr) {
-                vid.alpha = 0.001;
-                var videosToDestroy = getVar('videosToDestroy');
-                videosToDestroy.push(vid);
-                setVar('videosToDestroy', videosToDestroy);
-            });
-        }
-        
-        setVar('miVideo', miVideo);
-        setVar('videoArray', videoArray);
-        setVar('videosToDestroy', videosToDestroy);
-    ]])
-end
-
-function onSongStart()
-    runHaxeCode([[
-        var miVideo = getVar('miVideo');
-        playVideo(miVideo, 15.0);
-    ]])
-end
-
-function onUpdatePost()
-    runHaxeCode([[
-        var videoArray = getVar('videoArray');
-        var videosToDestroy = getVar('videosToDestroy');
-        
-        for (i in videoArray) if (i.alpha == 1) i.screenCenter();
-
-        if (videosToDestroy.length > 0) 
-            for (i in videosToDestroy) 
-                if (i != null) i.destroy();
-    ]])
-end
-```
-
-## 🎛️ Personalización del Video
-
-### Cambiar Tamaño
+### Change Size
 
 ```haxe
-// En la función playVideo, después de vid.bitmap.time = 0;
-vid.scale.set(0.5, 0.5);  // 50% del tamaño original
-// O tamaño específico:
+// In the playVideo function, after vid.bitmap.time = 0;
+vid.scale.set(0.5, 0.5);  // 50% of original size
+// Or specific size:
 vid.setGraphicSize(640, 360);
 vid.updateHitbox();
 ```
 
-### Cambiar Posición
+### Change Position
 
 ```haxe
-// Posición personalizada
+// Custom position
 vid.x = 100;
 vid.y = 50;
 
-// Diferentes posiciones
-vid.screenCenter();           // Centro
-vid.x = 0; vid.y = 0;        // Esquina superior izquierda
-vid.x = FlxG.width - vid.width; // Esquina superior derecha
+// Different positions
+vid.screenCenter();           // Center
+vid.x = 0; vid.y = 0;        // Top left corner
+vid.x = FlxG.width - vid.width; // Top right corner
 ```
 
-### Cambiar Opacidad
+### Change Opacity
 
 ```haxe
-vid.alpha = 0.8;  // 80% de opacidad
+vid.alpha = 0.8;  // 80% opacity
 ```
 
-### Cambiar Cámara
+### Change Camera
 
 ```haxe
-// En onCreate(), cambiar la cámara:
+// In onCreate(), change the camera:
 i.cameras = [game.camHUD];     // UI/HUD
-i.cameras = [game.camGame];    // Juego principal
-i.cameras = [game.camOther];   // Otra cámara
-i.cameras = [FlxG.camera];     // Cámara principal
+i.cameras = [game.camGame];    // Main game
+i.cameras = [game.camOther];   // Other camera
+i.cameras = [FlxG.camera];     // Main camera
 ```
 
-### Reproducir en Diferentes Momentos
+### Play at Different Times
 
 ```haxe
 function onStepHit()
@@ -215,20 +140,20 @@ function onStepHit()
     switch (curStep)
     {
         case 128:  // Step 128
-            playVideo(miVideo, 10.0);
+            playVideo(myVideo, 10.0);
         case 256:  // Step 256
-            playVideo(otroVideo, 5.0);
+            playVideo(otherVideo, 5.0);
     }
 }
 
 function onBeatHit()
 {
     if (curBeat == 32) // Beat 32
-        playVideo(miVideo, 8.0);
+        playVideo(myVideo, 8.0);
 }
 ```
 
-### Múltiples Videos
+### Multiple Videos
 
 ```haxe
 var video1:FlxVideoSprite;
@@ -237,7 +162,7 @@ var video3:FlxVideoSprite;
 
 function onCreate()
 {
-    // ... código base ...
+    // ... base code ...
     
     video1 = new FlxVideoSprite();
     video1.load(Paths.video('intro'));
@@ -250,7 +175,7 @@ function onCreate()
 
     videoArray = [video1, video2, video3];
     
-    // ... resto del código ...
+    // ... rest of the code ...
 }
 
 function onStepHit()
@@ -264,9 +189,9 @@ function onStepHit()
 }
 ```
 
-## 🎨 Efectos Especiales
+## 🎨 Special Effects
 
-### Video con Fade In/Out
+### Video with Fade In/Out
 
 ```haxe
 function playVideoWithFade(vid:FlxVideoSprite, endTime:Float)
@@ -279,7 +204,7 @@ function playVideoWithFade(vid:FlxVideoSprite, endTime:Float)
     // Fade In
     FlxTween.tween(vid, {alpha: 1}, 0.5);
     
-    // Fade Out antes de terminar
+    // Fade Out before ending
     new FlxTimer().start((endTime - 1.0) / game.playbackRate, function(tmr) {
         FlxTween.tween(vid, {alpha: 0}, 1.0, {
             onComplete: function(tween) {
@@ -290,7 +215,7 @@ function playVideoWithFade(vid:FlxVideoSprite, endTime:Float)
 }
 ```
 
-### Video que Gira
+### Spinning Video
 
 ```haxe
 function playVideoSpinning(vid:FlxVideoSprite, endTime:Float)
@@ -300,7 +225,7 @@ function playVideoSpinning(vid:FlxVideoSprite, endTime:Float)
     vid.bitmap.time = 0;
     vid.resume();
     
-    // Rotar continuamente
+    // Rotate continuously
     FlxTween.tween(vid, {angle: 360}, 2.0, {type: LOOPING});
     
     new FlxTimer().start(endTime / game.playbackRate, function(tmr) {
@@ -310,7 +235,7 @@ function playVideoSpinning(vid:FlxVideoSprite, endTime:Float)
 }
 ```
 
-### Video con Zoom
+### Video with Zoom
 
 ```haxe
 function playVideoZoom(vid:FlxVideoSprite, endTime:Float)
@@ -331,17 +256,17 @@ function playVideoZoom(vid:FlxVideoSprite, endTime:Float)
 }
 ```
 
-## ⚙️ Configuraciones Avanzadas
+## ⚙️ Advanced Settings
 
-### Control de Velocidad de Reproducción
+### Playback Speed Control
 
 ```haxe
-// En onCreate()
-vid.bitmap.rate = game.playbackRate * 1.5;  // 1.5x más rápido
-vid.bitmap.rate = game.playbackRate * 0.5;  // 0.5x más lento
+// In onCreate()
+vid.bitmap.rate = game.playbackRate * 1.5;  // 1.5x faster
+vid.bitmap.rate = game.playbackRate * 0.5;  // 0.5x slower
 ```
 
-### Video en Loop
+### Looping Video
 
 ```haxe
 function playVideoLoop(vid:FlxVideoSprite)
@@ -351,38 +276,36 @@ function playVideoLoop(vid:FlxVideoSprite)
     vid.bitmap.time = 0;
     vid.resume();
     vid.bitmap.onEndReached.add(function() {
-        vid.bitmap.time = 0;  // Reiniciar cuando termine
+        vid.bitmap.time = 0;  // Restart when finished
     });
 }
 ```
 
-### Sincronización con BPM
+### BPM Synchronization
 
 ```haxe
 function onBeatHit()
 {
-    // Video cada 4 beats
+    // Video every 4 beats
     if (curBeat % 4 == 0)
-        playVideoShort(efectoVideo, Conductor.stepCrochet * 4 / 1000);
+        playVideoShort(effectVideo, Conductor.stepCrochet * 4 / 1000);
 }
 ```
 
-## 📝 Consejos y Buenas Prácticas
+## 📝 Tips and Best Practices
 
-1. **Formato de Video**: Usa `.mp4` con codec H.264 para mejor compatibilidad
-2. **Rendimiento**: Videos más pequeños (resolución y duración) mejoran el rendimiento
-3. **Memoria**: Siempre limpia los videos con `onDestroy()` para evitar memory leaks
-4. **Timing**: Testa la sincronización en diferentes playback rates
-5. **Cámaras**: Usa `camOther` para videos que no deben afectarse por efectos de cámara
+1. **Video Format**: Use `.mp4` with H.264 codec for best compatibility
+2. **Performance**: Smaller videos (resolution and duration) improve performance
+3. **Memory**: Always clean up videos with `onDestroy()` to avoid memory leaks
+4. **Timing**: Test synchronization at different playback rates
+5. **Cameras**: Use `camOther` for videos that shouldn't be affected by camera effects
 
-## 🐛 Solución de Problemas
+## 🐛 Troubleshooting
 
-- **Video no aparece**: Verifica que el archivo esté en `assets/videos/`
-- **Crashes**: Asegúrate de tener hxvlc instalado correctamente
-- **Lag**: Reduce la resolución del video o usa compresión
-- **Sincronización**: Ajusta los valores de timing según tu BPM
+- **Video doesn't appear**: Check that the file is in `mod/"modname"/videos/`
+- **Lag**: Lower the video resolution or use compression
+- **Synchronization**: Adjust timing values according to your BPM
 
 ---
 
-*¡Disfruta creando charts épicos con videos! 🎵🎬*
-
+*Enjoy creating epic charts with videos! 🎵🎬*
