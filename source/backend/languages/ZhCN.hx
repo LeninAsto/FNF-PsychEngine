@@ -27,9 +27,6 @@ class ZhCN
         // Dialogues
         "dialogue_skip" => "按返回键跳过",
 
-        // System Messages
-        "outdated_warning" => "嘿兄弟。看起来你正在使用过时版本的Plus Engine ({1})。\n-----------------------------------------------\n按ENTER键更新到最新版本 {2}\n如果你已经使用正确的引擎版本，请按ESCAPE。\n你可以通过在选项菜单中取消选中（检查更新）选项来禁用此警告\n----------------------------------------------\n感谢使用Engine！",
-
         "practice_mode" => "练习模式",
         "charting_mode" => "制谱模式",
         "blueballed" => "失败次数: {1}",
@@ -242,35 +239,6 @@ class ZhCN
         "judgement_misses" => "失误   ",
         "judgement_combo" => "连击   ",
         "judgement_max_combo" => "最大连击",
-
-        // Mobile Options
-        "description_extra_controls" => "选择你想要多少个额外按钮？\n它们可以用于LUA或HScript的机制。",
-        "description_mobile_controls_opacity" => "选择移动按钮的透明度（小心不要设为0丢失按钮轨迹）。",
-        "description_allow_phone_screensaver" => "如果选中，手机会在闲置几秒后进入睡眠状态。\n（时间取决于您手机的设置）",
-        "description_wide_screen_mode" => "如果选中，游戏将拉伸以填满整个屏幕。（警告：可能导致图像质量差并破坏一些调整游戏/摄像机大小的模组）",
-        "description_hitbox_design" => "选择你的打击框应该是什么样子。",
-        "description_hitbox_position" => "如果选中，打击框将放在屏幕底部，否则留在顶部。",
-        "description_dynamic_controls_color" => "如果选中，移动控制颜色将设置为你设置中的音符颜色。\n（仅在游戏过程中生效）",
-
-        // Mobile Control Select Sub State
-        "mobileC_exitandsave" => "退出并保存",
-        "mobileC_reset" => "重置",
-        "pad-extra_save" => "Pad-Extra只是一个绑定选项\n请选择其他选项退出。",
-        "mobileC_left" => "左",
-        "mobileC_down" => "下",
-        "mobileC_up" => "上",
-        "mobileC_right" => "右",
-
-        // Mobile Backend Messages
-        "file_save_success" => "{1} 已保存。",
-        "file_save_fail" => "{1} 无法保存。\n({2})",
-        "mobile_success" => "成功！",
-        "mobile_error" => "错误！",
-        "mobile_notice" => "注意！",
-        "permissions_message" => "如果你接受了权限，那就没问题！\n如果你没有接受，那么可能会崩溃\n按OK看看会发生什么",
-        "create_directory_error" => "请在以下位置创建目录\n{1}\n按OK关闭游戏",
-        "touchpad_dpadmode_missing" => "触摸板 dpadMode \"{1}\" 不存在。",
-        "touchpad_actionmode_missing" => "触摸板 actionMode \"{1}\" 不存在。",
 
         "images/menudifficulties/easy" => "images/zh-CN/menudifficulties/easy",
         "images/menudifficulties/normal" => "images/zh-CN/menudifficulties/normal",

@@ -25,7 +25,6 @@ class NoteSplashDebugState extends MusicBeatState implements PsychUIEventHandler
 	var curAnimText:FlxText;
 	var savedText:FlxText;
 	var selecArr:Array<Float> = null;
-	var idk:Bool = (Controls.instance.mobileC) ? true : false; // im lazy to remove and add alot so idk
 
 	var missingTextBG:FlxSprite;
 	var missingText:FlxText;
@@ -137,20 +136,11 @@ class NoteSplashDebugState extends MusicBeatState implements PsychUIEventHandler
 		curAnimText.scrollFactor.set();
 		add(curAnimText);
 
-		var sillyText:String;
-
-		if (controls.mobileC)
-			sillyText = "Press Y to Reset animation\n
-                        Press A twice to save to the loaded Note Splash PNG's folder\n
-                        Press Top LEFT/RIGHT to change selected note - Arrow Keys to change offset\n
-                        C/V - Copy & Paste";
-		else
-			sillyText = "Press SPACE to Reset animation\n
-                        Press ENTER twice to save to the loaded Note Splash PNG's folder\n
-                        A/D change selected note - Arrow Keys to change offset (Hold shift for 10x)\n
-                        Ctrl + C/V - Copy & Paste";
-
-		var text:FlxText = new FlxText(0, 520, FlxG.width, sillyText, 16);
+		var text:FlxText = new FlxText(0, 520, FlxG.width,
+			"Press SPACE to Reset animation\n
+			Press ENTER twice to save to the loaded Note Splash PNG's folder\n
+			A/D change selected note - Arrow Keys to change offset (Hold shift for 10x)\n
+			Ctrl + C/V - Copy & Paste", 16);
 		text.setFormat(Paths.defaultFont(), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		text.scrollFactor.set();
 		add(text);
@@ -174,7 +164,6 @@ class NoteSplashDebugState extends MusicBeatState implements PsychUIEventHandler
 		loadFrames();
 		changeSelection();
 		super.create();
-		addTouchPad('NOTE_SPLASH_DEBUG', 'NOTE_SPLASH_DEBUG');
 		FlxG.mouse.visible = true;
 	}
 
@@ -194,8 +183,8 @@ class NoteSplashDebugState extends MusicBeatState implements PsychUIEventHandler
 
 		if(!notTyping) return;
 		
-		if (FlxG.keys.justPressed.A || touchPad.buttonUp.justPressed) changeSelection(-1);
-		else if (FlxG.keys.justPressed.D || touchPad.buttonDown.justPressed) changeSelection(1);
+		if (FlxG.keys.justPressed.A) changeSelection(-1);
+		else if (FlxG.keys.justPressed.D) changeSelection(1);
 
 		if(maxAnims < 1) return;
 
@@ -203,13 +192,13 @@ class NoteSplashDebugState extends MusicBeatState implements PsychUIEventHandler
 		{
 			var movex = 0;
 			var movey = 0;
-			if(FlxG.keys.justPressed.LEFT || touchPad.buttonLeft2.justPressed) movex = -1;
-			else if(FlxG.keys.justPressed.RIGHT || touchPad.buttonRight2.justPressed) movex = 1;
+			if(FlxG.keys.justPressed.LEFT) movex = -1;
+			else if(FlxG.keys.justPressed.RIGHT) movex = 1;
 
-			if(FlxG.keys.justPressed.UP || touchPad.buttonUp2.justPressed) movey = 1;
-			else if(FlxG.keys.justPressed.DOWN || touchPad.buttonDown2.justPressed) movey = -1;
+			if(FlxG.keys.justPressed.UP) movey = 1;
+			else if(FlxG.keys.justPressed.DOWN) movey = -1;
 			
-			if(FlxG.keys.pressed.SHIFT || touchPad.buttonZ.pressed)
+			if(FlxG.keys.pressed.SHIFT)
 			{
 				movex *= 10;
 				movey *= 10;
@@ -225,16 +214,16 @@ class NoteSplashDebugState extends MusicBeatState implements PsychUIEventHandler
 		}
 
 		// Copy & Paste
-		if(FlxG.keys.pressed.CONTROL || idk)
+		if(FlxG.keys.pressed.CONTROL)
 		{
-			if(FlxG.keys.justPressed.C || touchPad.buttonC.justPressed)
+			if(FlxG.keys.justPressed.C)
 			{
 				var arr:Array<Float> = selectedArray();
 				if(copiedArray == null) copiedArray = [0, 0];
 				copiedArray[0] = arr[0];
 				copiedArray[1] = arr[1];
 			}
-			else if(FlxG.keys.justPressed.V || touchPad.buttonV.justPressed && copiedArray != null)
+			else if(FlxG.keys.justPressed.V && copiedArray != null)
 			{
 				var offs:Array<Float> = selectedArray();
 				offs[0] = copiedArray[0];
@@ -253,9 +242,9 @@ class NoteSplashDebugState extends MusicBeatState implements PsychUIEventHandler
 				savedText.visible = false;
 		}
 
-		if(FlxG.keys.justPressed.ENTER || touchPad.buttonA.justPressed)
+		if(FlxG.keys.justPressed.ENTER)
 		{
-			savedText.text = 'Press ${(controls.mobileC) ? 'A' : 'ENTER'} again to save.';
+			savedText.text = 'Press ENTER again to save.';
 			if(pressEnterToSave > 0) //save
 			{
 				saveFile();
@@ -272,15 +261,15 @@ class NoteSplashDebugState extends MusicBeatState implements PsychUIEventHandler
 		}
 
 		// Reset anim & change anim
-		if (FlxG.keys.justPressed.SPACE || touchPad.buttonY.justPressed)
+		if (FlxG.keys.justPressed.SPACE)
 			changeAnim();
-		else if (FlxG.keys.justPressed.S || touchPad.buttonLeft.justPressed) changeAnim(-1);
-		else if (FlxG.keys.justPressed.W || touchPad.buttonRight.justPressed) changeAnim(1);
+		else if (FlxG.keys.justPressed.S) changeAnim(-1);
+		else if (FlxG.keys.justPressed.W) changeAnim(1);
 
 		// Force frame
 		var updatedFrame:Bool = false;
-		if(updatedFrame = FlxG.keys.justPressed.Q || touchPad.buttonX.justPressed) forceFrame--;
-		else if(updatedFrame = FlxG.keys.justPressed.E || touchPad.buttonE.justPressed) forceFrame++;
+		if(updatedFrame = FlxG.keys.justPressed.Q) forceFrame--;
+		else if(updatedFrame = FlxG.keys.justPressed.E) forceFrame++;
 
 		if(updatedFrame)
 		{
@@ -339,9 +328,8 @@ class NoteSplashDebugState extends MusicBeatState implements PsychUIEventHandler
 		for (offGroup in config.offsets)
 			strToSave += '\n' + offGroup[0] + ' ' + offGroup[1];
 
-		var pathSplit:Array<String> = (Paths.getPath('images/$texturePath.png', IMAGE, true).split('.png')[0]).split(':');
-		var path:String = pathSplit[pathSplit.length-1].trim() + '.txt';
-		var assetsDir:String = '';
+		var pathSplit:Array<String> = (Paths.getPath('images/$texturePath.png', IMAGE, true).split('.png')[0] + '.txt').split(':');
+		var path:String = pathSplit[pathSplit.length-1].trim();
 		savedText.text = 'Saved to: $path';
 		File.saveContent(path, strToSave);
 
@@ -411,8 +399,9 @@ class NoteSplashDebugState extends MusicBeatState implements PsychUIEventHandler
 			curAnim += change;
 			if(curAnim > maxAnims) curAnim = 1;
 			else if(curAnim < 1) curAnim = maxAnims;
-			curAnimText.text = 'Current Animation: $curAnim / $maxAnims\n(Press ${(controls.mobileC) ? 'Top UP/DOWN' : 'W/S'} to change)';
-			curFrameText.text = 'Force Frame Disabled\n(Press ${(controls.mobileC) ? 'Q/E' : 'X/E'} to change)';
+
+			curAnimText.text = 'Current Animation: $curAnim / $maxAnims\n(Press W/S to change)';
+			curFrameText.text = 'Force Frame Disabled\n(Press Q/E to change)';
 
 			for (i in 0...maxNotes)
 			{

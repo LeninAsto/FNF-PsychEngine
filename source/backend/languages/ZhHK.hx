@@ -27,9 +27,6 @@ class ZhHK
         // Dialogues
         "dialogue_skip" => "按返回鍵跳過",
 
-        // System Messages
-        "outdated_warning" => "嘿兄弟。看起來你正在使用過時版本的Plus Engine ({1})。\n-----------------------------------------------\n按ENTER鍵更新到最新版本 {2}\n如果你已經使用正確的引擎版本，請按ESCAPE。\n你可以通過在選項菜單中取消選中（檢查更新）選項來禁用此警告\n----------------------------------------------\n感謝使用Engine！",
-
         // Pause Menu
         "practice_mode" => "練習模式",
         "charting_mode" => "製譜模式",
@@ -231,35 +228,6 @@ class ZhHK
         "judgement_misses" => "失誤   ",
         "judgement_combo" => "連擊   ",
         "judgement_max_combo" => "最大連擊",
-
-        // Mobile Options
-        "description_extra_controls" => "選擇你想要多少個額外按鈕？\n它們可以用於LUA或HScript的機制。",
-        "description_mobile_controls_opacity" => "選擇移動按鈕的透明度（小心不要設為0丟失按鈕軌跡）。",
-        "description_allow_phone_screensaver" => "如果選中，手機會在閒置幾秒後進入睡眠狀態。\n（時間取決於您手機的設定）",
-        "description_wide_screen_mode" => "如果選中，遊戲將拉伸以填滿整個螢幕。（警告：可能導致圖像質量差並破壞一些調整遊戲/攝影機大小的模組）",
-        "description_hitbox_design" => "選擇你的打擊框應該是什麼樣子。",
-        "description_hitbox_position" => "如果選中，打擊框將放在螢幕底部，否則留在頂部。",
-        "description_dynamic_controls_color" => "如果選中，移動控制顏色將設定為你設定中的音符顏色。\n（僅在遊戲過程中生效）",
-
-        // Mobile Control Select Sub State
-        "mobileC_exitandsave" => "退出並儲存",
-        "mobileC_reset" => "重置",
-        "pad-extra_save" => "Pad-Extra只是一個綁定選項\n請選擇其他選項退出。",
-        "mobileC_left" => "左",
-        "mobileC_down" => "下",
-        "mobileC_up" => "上",
-        "mobileC_right" => "右",
-
-        // Mobile Backend Messages
-        "file_save_success" => "{1} 已儲存。",
-        "file_save_fail" => "{1} 無法儲存。\n({2})",
-        "mobile_success" => "成功！",
-        "mobile_error" => "錯誤！",
-        "mobile_notice" => "注意！",
-        "permissions_message" => "如果你接受了權限，那就沒問題！\n如果你沒有接受，那麼可能會當機\n按OK看看會發生什麼",
-        "create_directory_error" => "請在以下位置建立目錄\n{1}\n按OK關閉遊戲",
-        "touchpad_dpadmode_missing" => "觸控板 dpadMode \"{1}\" 不存在。",
-        "touchpad_actionmode_missing" => "觸控板 actionMode \"{1}\" 不存在。",
 
         // ============== IMAGE TRANSLATIONS ==============
         

@@ -27,9 +27,6 @@ class JpJP
         // Dialogues
         "dialogue_skip" => "BACKでスキップ",
 
-        // System Messages
-        "outdated_warning" => "やあブロ。Plus Engine ({1}) の古いバージョンを使用しているようですね。\n-----------------------------------------------\nENTERを押して最新バージョン {2} に更新してください\n正しいエンジンバージョンを使用している場合はESCAPEを押してください。\nオプションメニューで（更新をチェック）オプションのチェックを外すことで、この警告を無効にできます\n----------------------------------------------\nEngineをご利用いただきありがとうございます！",
-
         // Pause Menu
         "practice_mode" => "練習モード",
         "charting_mode" => "チャート編集",
@@ -231,34 +228,5 @@ class JpJP
         "judgement_misses" => "ミス   ",
         "judgement_combo" => "コンボ ",
         "judgement_max_combo" => "最大コンボ",
-
-        // Mobile Options
-        "description_extra_controls" => "いくつの追加ボタンが欲しいですか？\nLUAまたはHScriptのメカニクスに使用できます。",
-        "description_mobile_controls_opacity" => "モバイルボタンの透明度を選択します（0にしてボタンを見失わないよう注意）。",
-        "description_allow_phone_screensaver" => "チェックすると、電話は数秒間非アクティブになった後にスリープします。\n（時間はお使いの電話の設定によります）",
-        "description_wide_screen_mode" => "チェックすると、ゲームは画面全体に引き伸ばされます。（警告：画質の悪化やゲーム/カメラのサイズを変更するMODの破損を引き起こす可能性があります）",
-        "description_hitbox_design" => "ヒットボックスの見た目を選択してください。",
-        "description_hitbox_position" => "チェックすると、ヒットボックスは画面下部に配置され、そうでなければ上部に留まります。",
-        "description_dynamic_controls_color" => "チェックすると、モバイルコントロールの色が設定のノートの色に設定されます。\n（ゲームプレイ中のみ効果があります）",
-
-        // Mobile Control Select Sub State
-        "mobileC_exitandsave" => "終了して保存",
-        "mobileC_reset" => "リセット",
-        "pad-extra_save" => "Pad-Extraはバインディングオプションです\n終了するには別のオプションを選択してください。",
-        "mobileC_left" => "左",
-        "mobileC_down" => "下",
-        "mobileC_up" => "上",
-        "mobileC_right" => "右",
-
-        // Mobile Backend Messages
-        "file_save_success" => "{1} が保存されました。",
-        "file_save_fail" => "{1} を保存できませんでした。\n({2})",
-        "mobile_success" => "成功！",
-        "mobile_error" => "エラー！",
-        "mobile_notice" => "注意！",
-        "permissions_message" => "権限を承認した場合は問題ありません！\n承認しなかった場合はクラッシュが予想されます\nOKを押して何が起こるか見てください",
-        "create_directory_error" => "以下の場所にディレクトリを作成してください\n{1}\nOKを押してゲームを終了",
-        "touchpad_dpadmode_missing" => "タッチパッド dpadMode \"{1}\" が存在しません。",
-        "touchpad_actionmode_missing" => "タッチパッド actionMode \"{1}\" が存在しません。",
     ];
 }

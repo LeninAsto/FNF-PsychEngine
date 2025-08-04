@@ -171,9 +171,6 @@ class PtBR
         "controls_rebinding2" => "Segure ESC para Cancelar\nBackspace para Limpar",
         "reset_to_default_keys" => "Resetar para o Padrão",
 
-        // System Messages
-        "outdated_warning" => "Ei mano. Parece que você está usando uma versão desatualizada do Plus Engine ({1}).\n-----------------------------------------------\nPressione ENTER para atualizar para a versão mais recente {2}\nPressione ESCAPE se você já tem a versão correta do engine.\nVocê pode desativar este aviso desmarcando a opção (Verificar Atualizações) no Menu de Opções\n----------------------------------------------\nObrigado por usar o Engine!",
-
         // Gameplay Changers
         "setting_scroll_type" => "Tipo de Scroll",
         "setting_scroll_type-multiplicative" => "Multiplicativo",
@@ -376,43 +373,6 @@ class PtBR
         "judgement_misses" => "Erros  ",
         "judgement_combo" => "Combo  ",
         "judgement_max_combo" => "Combo Máx",
-
-        // Mobile Options
-        "options_mobile_options" => "Opções Móveis",
-        "setting_extra_controls" => "Controles Extra",
-        "description_extra_controls" => "Selecione quantos botões extras você prefere ter?\nEles podem ser usados para mecânicas com LUA ou HScript.",
-        "setting_mobile_controls_opacity" => "Opacidade dos Controles Móveis",
-        "description_mobile_controls_opacity" => "Seleciona a opacidade para os botões móveis (cuidado para não colocar em 0 e perder o rastro dos seus botões).",
-        "setting_allow_phone_screensaver" => "Permitir Protetor de Tela",
-        "description_allow_phone_screensaver" => "Se marcado, o telefone entrará em suspensão após ficar inativo por alguns segundos.\n(O tempo depende das opções do seu telefone)",
-        "setting_wide_screen_mode" => "Modo Tela Cheia",
-        "description_wide_screen_mode" => "Se marcado, o jogo se esticará para preencher toda a sua tela. (AVISO: Pode resultar em gráficos ruins e quebrar alguns mods que redimensionam o jogo/câmeras)",
-        "setting_hitbox_design" => "Design da Hitbox",
-        "description_hitbox_design" => "Escolha como sua hitbox deve parecer.",
-        "setting_hitbox_position" => "Posição da Hitbox",
-        "description_hitbox_position" => "Se marcado, a hitbox será colocada na parte inferior da tela, caso contrário ficará no topo.",
-        "setting_dynamic_controls_color" => "Cor Dinâmica dos Controles",
-        "description_dynamic_controls_color" => "Se marcado, a cor dos controles móveis será definida para a cor das notas nas suas configurações.\n(tem efeito apenas durante o jogo)",
-
-        // Mobile Control Select Sub State
-        "mobileC_exitandsave" => "Sair e Salvar",
-        "mobileC_reset" => "Redefinir",
-        "pad-extra_save" => "Pad-Extra é Apenas uma Opção de Vínculo\nPor Favor Selecione uma Opção Diferente para Sair.",
-        "mobileC_left" => "ESQUERDA",
-        "mobileC_down" => "BAIXO",
-        "mobileC_up" => "CIMA",
-        "mobileC_right" => "DIREITA",
-
-        // Mobile Backend Messages
-        "file_save_success" => "{1} foi salvo.",
-        "file_save_fail" => "{1} não pôde ser salvo.\n({2})",
-        "mobile_success" => "Sucesso!",
-        "mobile_error" => "Erro!",
-        "mobile_notice" => "Aviso!",
-        "permissions_message" => "Se você aceitou as permissões está tudo bem!\nSe você não aceitou então espere um crash\nPressione OK para ver o que acontece",
-        "create_directory_error" => "Por favor crie o diretório em\n{1}\nPressione OK para fechar o jogo",
-        "touchpad_dpadmode_missing" => "O modo dpadMode \"{1}\" do touchPad não existe.",
-        "touchpad_actionmode_missing" => "O modo actionMode \"{1}\" do touchPad não existe.",
 
         // ============== IMAGE TRANSLATIONS ==============
         

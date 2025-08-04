@@ -9,7 +9,6 @@ import flixel.math.FlxPoint;
 
 import states.StoryMenuState;
 import states.FreeplayState;
-import lime.ui.Haptic;
 
 class GameOverSubstate extends MusicBeatSubstate
 {
@@ -59,9 +58,6 @@ class GameOverSubstate extends MusicBeatSubstate
 	override function create()
 	{
 		instance = this;
-
-		if (ClientPrefs.data.gameOverVibration)
-			Haptic.vibrate(0, 500);
 
 		Conductor.songPosition = 0;
 
@@ -132,9 +128,6 @@ class GameOverSubstate extends MusicBeatSubstate
 				neneKnife.animation.play('anim', true);
 			}
 		}
-
-		addTouchPad('NONE', 'A_B');
-		addTouchPadCamera();
 
 		super.create();
 	}

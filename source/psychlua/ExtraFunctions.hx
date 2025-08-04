@@ -12,59 +12,15 @@ class ExtraFunctions
 	public static function implement(funk:FunkinLua)
 	{
 		var lua:State = funk.lua;
+		
 		// Keyboard & Gamepads
-		Lua_helper.add_callback(lua, "keyboardJustPressed", function(name:String)
-		{
-			switch (name.toUpperCase())
-			{
-				case 'SPACE':
-					var space = Reflect.getProperty(FlxG.keys.justPressed, 'SPACE');
-					var mobileShit:Bool = false;
-					if (Controls.instance.mobileC)
-						if (MusicBeatState.getState().mobileControls != null)
-							mobileShit = MusicBeatState.getState().mobileControls.buttonExtra.justPressed;
-					return space || mobileShit;
+		Lua_helper.add_callback(lua, "keyboardJustPressed", function(name:String) return Reflect.getProperty(FlxG.keys.justPressed, name));
+		Lua_helper.add_callback(lua, "keyboardPressed", function(name:String) return Reflect.getProperty(FlxG.keys.pressed, name));
+		Lua_helper.add_callback(lua, "keyboardReleased", function(name:String) return Reflect.getProperty(FlxG.keys.justReleased, name));
 
-				default:
-					return Reflect.getProperty(FlxG.keys.justPressed, name.toUpperCase());
-			}
-		});
-		Lua_helper.add_callback(lua, "keyboardPressed", function(name:String)
-		{
-			switch (name.toUpperCase())
-			{
-				case 'SPACE':
-					var space = Reflect.getProperty(FlxG.keys.pressed, 'SPACE');
-					var mobileShit:Bool = false;
-					if (Controls.instance.mobileC)
-						if (MusicBeatState.getState().mobileControls != null)
-							mobileShit = MusicBeatState.getState().mobileControls.buttonExtra.pressed;
-					return space || mobileShit;
-
-				default:
-					return Reflect.getProperty(FlxG.keys.pressed, name.toUpperCase());
-			}
-		});
-		Lua_helper.add_callback(lua, "keyboardReleased", function(name:String)
-		{
-			switch (name.toUpperCase())
-			{
-				case 'SPACE':
-					var space = Reflect.getProperty(FlxG.keys.justReleased, 'SPACE');
-					var mobileShit:Bool = false;
-					if (Controls.instance.mobileC)
-						if (MusicBeatState.getState().mobileControls != null)
-							mobileShit = MusicBeatState.getState().mobileControls.buttonExtra.justReleased;
-					return space || mobileShit;
-
-				default:
-					return Reflect.getProperty(FlxG.keys.justReleased, name.toUpperCase());
-			}
-		});
-	
-		Lua_helper.add_callback(lua, "anyGamepadJustPressed", function(name:String) return FlxG.gamepads.anyJustPressed(name.toUpperCase()));
-		Lua_helper.add_callback(lua, "anyGamepadPressed", function(name:String) return FlxG.gamepads.anyPressed(name.toUpperCase()));
-		Lua_helper.add_callback(lua, "anyGamepadReleased", function(name:String) return FlxG.gamepads.anyJustReleased(name.toUpperCase()));
+		Lua_helper.add_callback(lua, "anyGamepadJustPressed", function(name:String) return FlxG.gamepads.anyJustPressed(name));
+		Lua_helper.add_callback(lua, "anyGamepadPressed", function(name:String) FlxG.gamepads.anyPressed(name));
+		Lua_helper.add_callback(lua, "anyGamepadReleased", function(name:String) return FlxG.gamepads.anyJustReleased(name));
 
 		Lua_helper.add_callback(lua, "gamepadAnalogX", function(id:Int, ?leftStick:Bool = true)
 		{
@@ -109,12 +65,6 @@ class ExtraFunctions
 				case 'down': return PlayState.instance.controls.NOTE_DOWN_P;
 				case 'up': return PlayState.instance.controls.NOTE_UP_P;
 				case 'right': return PlayState.instance.controls.NOTE_RIGHT_P;
-				case 'space':
-					var mobileShit:Bool = false;
-					if (Controls.instance.mobileC)
-						if (MusicBeatState.getState().mobileControls != null)
-							mobileShit = MusicBeatState.getState().mobileControls.buttonExtra.justPressed;
-					return PlayState.instance.controls.justPressed('space') || mobileShit;
 				default: return PlayState.instance.controls.justPressed(name);
 			}
 			return false;
@@ -126,12 +76,6 @@ class ExtraFunctions
 				case 'down': return PlayState.instance.controls.NOTE_DOWN;
 				case 'up': return PlayState.instance.controls.NOTE_UP;
 				case 'right': return PlayState.instance.controls.NOTE_RIGHT;
-				case 'space':
-					var mobileShit:Bool = false;
-					if (Controls.instance.mobileC)
-						if (MusicBeatState.getState().mobileControls != null)
-							mobileShit = MusicBeatState.getState().mobileControls.buttonExtra.pressed;
-					return PlayState.instance.controls.pressed('space') || mobileShit;
 				default: return PlayState.instance.controls.pressed(name);
 			}
 			return false;
@@ -143,12 +87,6 @@ class ExtraFunctions
 				case 'down': return PlayState.instance.controls.NOTE_DOWN_R;
 				case 'up': return PlayState.instance.controls.NOTE_UP_R;
 				case 'right': return PlayState.instance.controls.NOTE_RIGHT_R;
-				case 'space':
-					var mobileShit:Bool = false;
-					if (Controls.instance.mobileC)
-						if (MusicBeatState.getState().mobileControls != null)
-							mobileShit = MusicBeatState.getState().mobileControls.buttonExtra.justReleased;
-					return PlayState.instance.controls.justReleased('space') || mobileShit;
 				default: return PlayState.instance.controls.justReleased(name);
 			}
 			return false;
@@ -260,7 +198,7 @@ class ExtraFunctions
 			var list:Array<String> = [];
 			#if sys
 			if(FileSystem.exists(folder)) {
-				for (folder in Paths.readDirectory(folder)) {
+				for (folder in FileSystem.readDirectory(folder)) {
 					if (!list.contains(folder)) {
 						list.push(folder);
 					}

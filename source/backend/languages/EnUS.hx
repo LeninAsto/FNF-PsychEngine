@@ -169,9 +169,6 @@ class EnUS
         "controls_rebinding2" => "Hold ESC to Cancel\nHold Backspace to Delete",
         "reset_to_default_keys" => "Reset to\nDefault Keys",
 
-        // System Messages
-        "outdated_warning" => "Hey bro. Looks like you're using an outdated version of Plus Engine ({1}).\n-----------------------------------------------\nPress ENTER to update to the latest version {2}\nPress ESCAPE if you're on the correct engine version.\nYou can disable this warning by unchecking the (Check for Updates) option in the Options Menu\n----------------------------------------------\nThanks for using Engine!",
-
         // Gameplay Changers
         "setting_scroll_type" => "Scroll Type",
         "setting_scroll_type-multiplicative" => "Multiplicative",
@@ -403,52 +400,6 @@ class EnUS
         "images/storymenu/week5" => "images/storymenu/week5",
         "images/storymenu/week6" => "images/storymenu/week6",
         "images/storymenu/week7" => "images/storymenu/week7",
-
-        // Mobile and another options
-        "setting_vsync" => "VSync",
-        "description_vsync" => "If checked, Enables VSync fixing any screen tearing at the cost of capping the FPS to screen refresh rate.\n(Must restart the game to have an effect)",
-        "setting_game_over_vibration" => "Game Over Vibration",
-        "description_game_over_vibration" => "If checked, your device will vibrate at game over.",
-        "setting_fps_rework" => "FPS Rework",
-        "description_fps_rework" => "If checked, this works around the game becoming \"slow\" and \"smooth\" when the current FPS is lower than the FPS cap.",
-
-        "options_mobile_options" => "Mobile Options",
-
-        "setting_extra_controls" => "Extra Controls",
-        "description_extra_controls" => "Select how many extra buttons you prefer to have?\nThey can be used for mechanics with LUA or HScript.",
-        "setting_mobile_controls_opacity" => "Mobile Controls Opacity",
-        "description_mobile_controls_opacity" => "Selects the opacity for the mobile buttons (careful not to put it at 0 and lose track of your buttons).",
-        "setting_allow_phone_screensaver" => "Allow Phone Screensaver",
-        "description_allow_phone_screensaver" => "If checked, the phone will sleep after going inactive for few seconds.\n(The time depends on your phone\'s options)",
-        "setting_wide_screen_mode" => "Wide Screen Mode",
-        "description_wide_screen_mode" => "If checked, The game will stetch to fill your whole screen. (WARNING: Can result in bad visuals & break some mods that resizes the game/cameras)",
-        "setting_hitbox_design" => "Hitbox Design",
-        "description_hitbox_design" => "Choose how your hitbox should look like.",
-        "setting_hitbox_position" => "Hitbox Position",
-        "description_hitbox_position" => "If checked, the hitbox will be put at the bottom of the screen, otherwise will stay at the top.",
-        "setting_dynamic_controls_color" => "Dynamic Controls Color",
-        "description_dynamic_controls_color" => "If checked, the mobile controls color will be set to the notes color in your settings.\n(have effect during gameplay only)",
-
-        // Mobile Control Select Sub State
-        "mobileC_exitandsave" => "Exit & Save",
-        "mobileC_reset" => "Reset",
-        "pad-extra_save" => "Pad-Extra Is Just A Binding Option\nPlease Select A Different Option To Exit.",
-        "mobileC_left" => "LEFT",
-        "mobileC_down" => "DOWN",
-        "mobileC_up" => "UP",
-        "mobileC_right" => "RIGHT",
-
-        // Mobile Backend Messages
-        "file_save_success" => "{1} has been saved.",
-        "file_save_fail" => "{1} couldn't be saved.\n({2})",
-        "mobile_success" => "Success!",
-        "mobile_error" => "Error!",
-        "mobile_notice" => "Notice!",
-        "permissions_message" => "If you accepted the permissions you are all good!\nIf you didn't then expect a crash\nPress OK to see what happens",
-        "create_directory_error" => "Please create directory to\n{1}\nPress OK to close the game",
-        "touchpad_dpadmode_missing" => "The touchPad dpadMode \"{1}\" doesn't exist.",
-        "touchpad_actionmode_missing" => "The touchPad actionMode \"{1}\" doesn't exist.",
-        
     ];
 }
 

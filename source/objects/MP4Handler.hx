@@ -14,10 +14,8 @@ import hxcodec.flixel.FlxVideoSprite;
  * Wrapper de compatibilidad para MP4Handler de hxcodec 2.5.1
  * Emula la API original usando FlxVideoSprite internamente
  */
-
 class MP4Handler extends FlxSprite
 {
-	#if VIDEOS_ALLOWED
 	public var readyCallback:Void->Void;
 	public var finishCallback:Void->Void;
 
@@ -240,5 +238,4 @@ class MP4Handler extends FlxSprite
 		
 		super.destroy();
 	}
-	#end
 }

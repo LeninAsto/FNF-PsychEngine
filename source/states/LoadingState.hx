@@ -30,6 +30,12 @@ import crowplexus.hscript.Expr.Error as IrisError;
 import crowplexus.hscript.Printer;
 #end
 
+#if cpp
+@:headerCode('
+#include <iostream>
+#include <thread>
+')
+#end
 class LoadingState extends MusicBeatState
 {
 	public static var loaded:Int = 0;
@@ -240,7 +246,7 @@ class LoadingState extends MusicBeatState
 
 		if(!spawnedPessy)
 		{
-			if(!transitioning && (controls.ACCEPT || FlxG.touches.getFirst() != null && FlxG.touches.getFirst().justPressed))
+			if(!transitioning && controls.ACCEPT)
 			{
 				shakeMult = 1;
 				FlxG.sound.play(Paths.sound('cancelMenu'));
@@ -406,7 +412,7 @@ class LoadingState extends MusicBeatState
 	{
 		#if MULTITHREADED_LOADING
 		// Due to the Main thread and Discord thread, we decrease it by 2.
-		var threadCount:Int = Std.int(Math.max(1, CoolUtil.getCPUThreadsCount() - #if DISCORD_ALLOWED 2 #else 1 #end));
+		var threadCount:Int = Std.int(Math.max(1, getCPUThreadsCount() - #if DISCORD_ALLOWED 2 #else 1 #end));
 		#else
 		var threadCount:Int = 1;
 		#end
@@ -618,7 +624,7 @@ class LoadingState extends MusicBeatState
 			{
 				for (subfolder in Mods.directoriesWithFile(Paths.getSharedPath(), '$prefix/$nam'))
 				{
-					for (file in Paths.readDirectory(subfolder))
+					for (file in FileSystem.readDirectory(subfolder))
 					{
 						if(file.endsWith(ext))
 						{
@@ -825,4 +831,15 @@ class LoadingState extends MusicBeatState
 
 		return null;
 	}
+	
+	#if cpp
+	@:functionCode('
+		return std::thread::hardware_concurrency();
+    	')
+	@:noCompletion
+    	public static function getCPUThreadsCount():Int
+    	{
+        	return -1;
+    	}
+    	#end
 }

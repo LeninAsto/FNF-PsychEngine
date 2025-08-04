@@ -152,7 +152,7 @@ class HScript extends Iris
 		set('File', File);
 		set('FileSystem', FileSystem);
 		#end
-		set('FlxG', flixel.FlxG);
+		set('FlxG', CustomFlxG);
 		set('FlxMath', flixel.math.FlxMath);
 		set('FlxSprite', flixel.FlxSprite);
 		set('FlxText', flixel.text.FlxText);
@@ -167,7 +167,6 @@ class HScript extends Iris
 		set('Countdown', backend.BaseStage.Countdown);
 		set('PlayState', PlayState);
 		set('Paths', Paths);
-		set('StorageUtil', StorageUtil);
 		set('Conductor', Conductor);
 		set('ClientPrefs', ClientPrefs);
 		#if ACHIEVEMENTS_ALLOWED
@@ -388,47 +387,6 @@ class HScript extends Iris
 		});
 		#if LUA_ALLOWED
 		set('parentLua', parentLua);
-
-		set("addTouchPad", (DPadMode:String, ActionMode:String) -> {
-			PlayState.instance.makeLuaTouchPad(DPadMode, ActionMode);
-			PlayState.instance.addLuaTouchPad();
-		  });
-  
-		set("removeTouchPad", () -> {
-			PlayState.instance.removeLuaTouchPad();
-		});
-  
-		set("addTouchPadCamera", () -> {
-			if(PlayState.instance.luaTouchPad == null){
-				FunkinLua.luaTrace('addTouchPadCamera: TPAD does not exist.');
-				return;
-			}
-			PlayState.instance.addLuaTouchPadCamera();
-		});
-  
-		set("touchPadJustPressed", function(button:Dynamic):Bool {
-			if(PlayState.instance.luaTouchPad == null){
-			  //FunkinLua.luaTrace('touchPadJustPressed: TPAD does not exist.');
-			  return false;
-			}
-		  return PlayState.instance.luaTouchPadJustPressed(button);
-		});
-  
-		set("touchPadPressed", function(button:Dynamic):Bool {
-			if(PlayState.instance.luaTouchPad == null){
-				//FunkinLua.luaTrace('touchPadPressed: TPAD does not exist.');
-				return false;
-			}
-			return PlayState.instance.luaTouchPadPressed(button);
-		});
-  
-		set("touchPadJustReleased", function(button:Dynamic):Bool {
-			if(PlayState.instance.luaTouchPad == null){
-				//FunkinLua.luaTrace('touchPadJustReleased: TPAD does not exist.');
-				return false;
-			}
-			return PlayState.instance.luaTouchPadJustReleased(button);
-		});
 		#else
 		set('parentLua', null);
 		#end
@@ -601,6 +559,55 @@ class HScript extends Iris
 		}
 
 		return varsToBring = values;
+	}
+}
+
+class CustomFlxG {
+	// Propiedades principales de FlxG
+	public static var state(get, never):Dynamic;
+	public static var game(get, never):Dynamic;
+	public static var sound(get, never):Dynamic;
+	public static var stage(get, never):Dynamic;
+	public static var cameras(get, never):Dynamic;
+	public static var keys(get, never):Dynamic;
+	public static var mouse(get, never):Dynamic;
+	public static var gamepads(get, never):Dynamic;
+	public static var width(get, never):Int;
+	public static var height(get, never):Int;
+	public static var autoPause(get, set):Bool;
+	public static var signals(get, never):Dynamic;
+	
+	// Getters para propiedades
+	static function get_state():Dynamic return FlxG.state;
+	static function get_game():Dynamic return FlxG.game;
+	static function get_sound():Dynamic return FlxG.sound;
+	static function get_stage():Dynamic return FlxG.stage;
+	static function get_cameras():Dynamic return FlxG.cameras;
+	static function get_keys():Dynamic return FlxG.keys;
+	static function get_mouse():Dynamic return FlxG.mouse;
+	static function get_gamepads():Dynamic return FlxG.gamepads;
+	static function get_width():Int return FlxG.width;
+	static function get_height():Int return FlxG.height;
+	static function get_autoPause():Bool return FlxG.autoPause;
+	static function set_autoPause(value:Bool):Bool return FlxG.autoPause = value;
+	static function get_signals():Dynamic return FlxG.signals;
+	
+	// Funciones de compatibilidad para mods antiguos
+	public static function addChildBelowMouse(object:Dynamic, ?IndexModifier:Int = 0):Void {
+		backend.FlxGUtils.addChildBelowMouse(object, IndexModifier);
+	}
+	
+	public static function removeChild(object:Dynamic):Void {
+		backend.FlxGUtils.removeChild(object);
+	}
+	
+	// Delegación de métodos principales de FlxG
+	public static function switchState(nextState:flixel.FlxState):Void {
+		FlxG.switchState(nextState);
+	}
+	
+	public static function resetState():Void {
+		FlxG.resetState();
 	}
 }
 

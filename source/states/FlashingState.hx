@@ -17,9 +17,6 @@ class FlashingState extends MusicBeatState
 	{
 		super.create();
 
-		final enter:String = (controls.mobileC) ? 'A' : 'ENTER';
-		final back:String = (controls.mobileC) ? 'B' : 'BACK';
-
 		bg = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
 		add(bg);
 
@@ -44,13 +41,9 @@ class FlashingState extends MusicBeatState
 			texts.add(button);
 		}
 
-		addTouchPad("LEFT_RIGHT", "A_B");
-		touchPad.alpha = 0;
-
 		FlxTween.tween(texts, {alpha: 1.0}, 0.5, {
 			onComplete: (_) -> updateItems()
 		});
-		FlxTween.tween(touchPad, {alpha: 1.0}, 0.5);
 	}
 
 	override function update(elapsed:Float)
@@ -79,7 +72,6 @@ class FlashingState extends MusicBeatState
 						FlxTween.tween(texts, {alpha: 0}, 0.2, {
 							onComplete: (_) -> MusicBeatState.switchState(new TitleState())
 						});
-						FlxTween.tween(touchPad, {alpha: 0}, 0.2);
 					});
 				});
 			} else {
@@ -87,7 +79,6 @@ class FlashingState extends MusicBeatState
 				FlxTween.tween(texts, {alpha: 0}, 1, {
 					onComplete: (_) -> MusicBeatState.switchState(new TitleState())
 				});
-				FlxTween.tween(touchPad, {alpha: 0}, 1);
 			}
 		}
 		super.update(elapsed);

@@ -27,36 +27,15 @@ To learn about new Advances variables for Modcharts, clic [here](https://github.
 
 # Psych Team
 
-## Customization and build on Android:
+Psych Engine by ShadowMario
 
-### To compile on Android, you must have or install:
-* Android Studio (download sdk android 4.4.4 kitkat)
-* ndk r21e
-* jdk 17
-
-If you wish to disable things like *Lua Scripts* or *Video Cutscenes*, you can refer to the `Project.xml` file.
-
-Inside `Project.xml`, you will find several variables to customize Psych Engine to your liking.
-
-To start you off, disabling *Video Cutscenes* should be simple, simply delete the line `"VIDEOS_ALLOWED"` or comment it out by wrapping the line in XML-like comments, like this: `<!-- YOUR_LINE_HERE -->`
-
-Same goes for *Lua Scripts*, comment out or delete the line with `LUA_ALLOWED`, this and other customization options are all available within the `Project.xml` file.
-
-## Softcoding (.lua/.hx)
-For this you can head over to [the wiki](https://shadowmario.github.io/psychengine.lua)
-
-There you can learn how to use the 212 PlayState funcions in your mod!
-
-## Mobile Credits:
-* Homura - Head Porter of Psych Engine Mobile.
-* Karim - Second Porter of Psych Engine Mobile.
-* Moxie - Helper of Psych Engine Mobile.
+Engine originally used on [Mind Games Mod](https://gamebanana.com/mods/301107), intended to be a fix for the vanilla version's many issues while keeping the casual play aspect of it. Also aiming to be an easier alternative to newbie coders.
 
 ## Credits:
 * Shadow Mario - Main Programmer and Head of Psych Engine.
 * Riveren - Main Artist/Animator of Psych Engine.
 
-### Psych Special Thanks
+## Special Thanks
 * bbpanzu - Ex-Team Member (Programmer).
 * crowplexus - HScript Iris, Input System v3, and Other PRs.
 * Kamizeta - Creator of Pessy, Psych Engine's mascot.

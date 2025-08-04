@@ -2,6 +2,7 @@ package states;
 
 import flixel.FlxObject;
 import flixel.effects.FlxFlicker;
+import flixel.util.FlxTimer; // Agregar esta línea
 import lime.app.Application;
 import states.editors.MasterEditorMenu;
 import options.OptionsState;
@@ -38,6 +39,8 @@ class MainMenuState extends MusicBeatState
 
 	var magenta:FlxSprite;
 	var camFollow:FlxObject;
+
+	var onlineLevelsText:FlxText;
 
 	static var showOutdatedWarning:Bool = true;
 	override function create()
@@ -110,6 +113,11 @@ class MainMenuState extends MusicBeatState
 		add(fnfVer);
 		changeItem();
 
+        onlineLevelsText = new FlxText(12, 12, 0, '', 20);
+        onlineLevelsText.setFormat(null, 20, 0xFFFFFFFF, "left");
+        onlineLevelsText.scrollFactor.set();
+        add(onlineLevelsText);
+
 		#if ACHIEVEMENTS_ALLOWED
 		// Unlocks "Freaky on a Friday Night" achievement if it's a Friday and between 18:00 PM and 23:59 PM
 		var leDate = Date.now();
@@ -120,7 +128,7 @@ class MainMenuState extends MusicBeatState
 		Achievements.reloadList();
 		#end
 		#end
-
+		
 		#if CHECK_FOR_UPDATES
 		if (showOutdatedWarning && ClientPrefs.data.checkForUpdates) {
 			// Verificación inmediata sin delays
@@ -142,8 +150,6 @@ class MainMenuState extends MusicBeatState
 		#end
 
 		FlxG.camera.follow(camFollow, null, 0.15);
-
-		addTouchPad('NONE', 'E');
 	}
 
 	function createMenuItem(name:String, x:Float, y:Float):FlxSprite
@@ -283,7 +289,7 @@ class MainMenuState extends MusicBeatState
 				MusicBeatState.switchState(new TitleState());
 			}
 
-			if (controls.ACCEPT || (FlxG.mouse.overlaps(menuItems, FlxG.camera) && FlxG.mouse.justPressed && allowMouse))
+			if (controls.ACCEPT || (FlxG.mouse.justPressed && allowMouse))
 			{
 				FlxG.sound.play(Paths.sound('confirmMenu'));
 				selectedSomethin = true;
@@ -358,12 +364,14 @@ class MainMenuState extends MusicBeatState
 					FlxTween.tween(memb, {alpha: 0}, 0.4, {ease: FlxEase.quadOut});
 				}
 			}
-			else if (controls.justPressed('debug_1') || touchPad.buttonE.justPressed)
+			#if desktop
+			if (controls.justPressed('debug_1'))
 			{
 				selectedSomethin = true;
 				FlxG.mouse.visible = false;
 				MusicBeatState.switchState(new MasterEditorMenu());
 			}
+			#end
 		}
 
 		super.update(elapsed);

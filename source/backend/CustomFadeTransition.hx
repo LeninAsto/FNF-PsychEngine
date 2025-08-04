@@ -9,8 +9,8 @@ import flixel.FlxCamera;
 import states.MainMenuState;
 
 class CustomFadeTransition extends MusicBeatSubstate {
-	public static var finishCallback:Void->Void;
-	var isTransIn:Bool = false;
+    public static var finishCallback:Void->Void;
+    var isTransIn:Bool = false;
     
     // ← MEJORADO: Sistema de bloqueo más robusto
     public static var isTransitioning:Bool = false;
@@ -29,7 +29,7 @@ class CustomFadeTransition extends MusicBeatSubstate {
     static final DOOR_COLOR_DARK:FlxColor = 0xFF4C1D95;    // Morado oscuro
     static final DOOR_COLOR_DARKER:FlxColor = 0xFF2D1B69;  // Morado muy oscuro
 
-	var duration:Float;
+    var duration:Float;
     var holdTime:Float = 0.5;
     
     // Tweens para mejor control
@@ -78,9 +78,9 @@ class CustomFadeTransition extends MusicBeatSubstate {
     }
 
     public function new(duration:Float = 0.3, isTransIn:Bool, ?holdTime:Float = 0.2)
-	{
-		this.duration = duration;
-		this.isTransIn = isTransIn;
+    {
+        this.duration = duration;
+        this.isTransIn = isTransIn;
         this.holdTime = holdTime;
         this.activeTweens = [];
         this.transitionId = generateId();
@@ -95,11 +95,11 @@ class CustomFadeTransition extends MusicBeatSubstate {
         currentTransition = this;
         isTransitioning = true;
         
-		super();
-	}
+        super();
+    }
 
-	override function create()
-	{
+    override function create()
+    {
         super.create();
         
         // ← VERIFICAR QUE SEGUIMOS SIENDO LA TRANSICIÓN ACTUAL
@@ -209,7 +209,7 @@ class CustomFadeTransition extends MusicBeatSubstate {
             onComplete: function(tween:FlxTween) {
                 if(isValidTransition()) {
                     safeClose();
-	}
+                }
             }
         }));
         
@@ -340,11 +340,11 @@ class CustomFadeTransition extends MusicBeatSubstate {
         cancelAllTweens();
         
         try {
-			close();
+            close();
         } catch(e:Dynamic) {
             trace('Error force closing: $e');
-		}
-	}
+        }
+    }
 
     // Función segura para ejecutar callback
     function safeFinishCallback():Void {
@@ -425,8 +425,8 @@ class CustomFadeTransition extends MusicBeatSubstate {
         }
     }
 
-	override function close():Void
-	{
+    override function close():Void
+    {
         if(isDestroyed) return;
         
         isDestroyed = true;
@@ -441,7 +441,7 @@ class CustomFadeTransition extends MusicBeatSubstate {
         try {
             cancelAllTweens();
             finishCallback = null;
-		super.close();
+            super.close();
         } catch(e:Dynamic) {
             trace("Error in close: " + e);
             // Forzar desbloqueo en caso de error
@@ -465,7 +465,7 @@ class CustomFadeTransition extends MusicBeatSubstate {
         
         try {
             cancelAllTweens();
-			finishCallback = null;
+            finishCallback = null;
             
             // Limpiar objetos de forma segura
             if(topDoor != null) {
@@ -500,6 +500,6 @@ class CustomFadeTransition extends MusicBeatSubstate {
             // Forzar desbloqueo incluso en error
             isTransitioning = false;
             currentTransition = null;
-		}
-	}
+        }
+    }
 }

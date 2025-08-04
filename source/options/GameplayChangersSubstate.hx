@@ -84,8 +84,6 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 
 	public function new()
 	{
-		controls.isInSubstate = true;
-
 		super();
 		
 		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
@@ -137,9 +135,6 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 			updateTextFrom(optionsArray[i]);
 		}
 
-		addTouchPad('LEFT_FULL', 'A_B_C');
-		addTouchPadCamera();
-
 		changeSelection();
 		reloadCheckboxes();
 	}
@@ -159,7 +154,6 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		{
 			close();
 			ClientPrefs.saveSettings();
-			controls.isInSubstate = false;
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 		}
 
@@ -276,7 +270,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 					clearHold();
 			}
 
-			if(controls.RESET || touchPad.buttonC.justPressed)
+			if(controls.RESET)
 			{
 				for (i in 0...optionsArray.length)
 				{
@@ -308,11 +302,6 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 
 		if(nextAccept > 0) {
 			nextAccept -= 1;
-		}
-
-		if (touchPad == null) { //sometimes it dosent add the tpad, hopefully this fixes it
-			addTouchPad('LEFT_FULL', 'A_B_C');
-			addTouchPadCamera();
 		}
 		super.update(elapsed);
 	}

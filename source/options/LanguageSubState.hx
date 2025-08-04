@@ -33,7 +33,7 @@ class LanguageSubState extends MusicBeatSubstate
 		var directories:Array<String> = Mods.directoriesWithFile(Paths.getSharedPath(), 'data/');
 		for (directory in directories)
 		{
-			for (file in Paths.readDirectory(directory))
+			for (file in FileSystem.readDirectory(directory))
 			{
 				if(file.toLowerCase().endsWith('.lang'))
 				{
@@ -100,8 +100,6 @@ class LanguageSubState extends MusicBeatSubstate
 			grpLanguages.add(text);
 		}
 		changeSelected();
-
-		addTouchPad('LEFT_FULL', 'A_B');
 	}
 
 	var changedLanguage:Bool = false;
