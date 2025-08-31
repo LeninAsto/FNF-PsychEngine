@@ -59,3 +59,4 @@ moveWindowToMonitor(index)       -- Mover a monitor específico | Move to specif
 -- Save/load configuration
 saveWindowState()                -- Guardar estado como JSON | Save state as JSON
 loadWindowState(jsonString)      -- Cargar estado desde JSON | Load state from JSON
+

@@ -136,7 +136,10 @@
 	<!-- <haxedef name="HXC_LIBVLC_LOGGING" if="VIDEOS_ALLOWED debug" /> -->
 	<!-- <haxedef name="HXVLC_NO_SHARE_DIRECTORY" if="VIDEOS_ALLOWED" /> -->
 	<define name="x86_BUILD" if="32bits" />
-	
+
+	<!-- Windows API -->
+	<haxelib name="sl-windows-api" if="windows" />
+
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
 	<!--Enable the Flixel core recording system-->
