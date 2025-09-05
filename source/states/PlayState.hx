@@ -1959,7 +1959,7 @@ class PlayState extends MusicBeatState
 			var maxSpeed = 4.0;
 			if (curSpeed >= minSpeed) {
 				var t = Math.min((curSpeed - minSpeed) / (maxSpeed - minSpeed), 1);
-				color = lerpColor(0xFFFFFFFF, 0xFFFF8080, t);
+				color = lerpColor(0xFFFFFFFF, 0xFFFF0000, t);
 				if (t > 0.66) exclam = "!!!";
 				else if (t > 0.33) exclam = "!!";
 				else exclam = "!";
@@ -1978,7 +1978,7 @@ class PlayState extends MusicBeatState
 			var maxBPM = 300.0;
 			if (curBPM >= minBPM) {
 				var t = Math.min((curBPM - minBPM) / (maxBPM - minBPM), 1);
-				color = lerpColor(0xFFFFFFFF, 0xFFFF8080, t);
+				color = lerpColor(0xFFFFFFFF, 0xFFFF0000, t);
 				if (t > 0.66) exclam = "!!!";
 				else if (t > 0.33) exclam = "!!";
 				else exclam = "!";
@@ -1998,7 +1998,7 @@ class PlayState extends MusicBeatState
 			var maxHealth = 25.0;
 			if (healthPercent <= maxHealth) {
 				var t = Math.min((maxHealth - healthPercent) / (maxHealth - minHealth), 1);
-				color = lerpColor(0xFFFFFFFF, 0xFFFF8080, t);
+				color = lerpColor(0xFFFFFFFF, 0xFFFF0000, t);
 				if (t > 0.66) exclam = "!!!";
 				else if (t > 0.33) exclam = "!!";
 				else exclam = "!";
@@ -3193,104 +3193,7 @@ class PlayState extends MusicBeatState
 			startDelay: Conductor.crochet * 0.002 / playbackRate
 		});
 	}
-
-  /*private function popUpMiss():Void
-	{
-		// ← OPTIMIZACIÓN: Usar object pooling para sprites de miss
-		var missSprite:FlxSprite = null;
-		
-		// Buscar un sprite disponible en el pool
-		for (sprite in missSpritesPool) {
-			if (sprite != null && !sprite.visible) {
-				missSprite = sprite;
-				break;
-			}
-		}
-		
-		// Si no hay sprites disponibles, crear uno nuevo (máximo permitido)
-		if (missSprite == null && missSpritesPool.length < MAX_MISS_SPRITES) {
-			missSprite = new FlxSprite();
-			missSpritesPool.push(missSprite);
-			comboGroup.add(missSprite);
-		}
-		
-		// Si aún no tenemos sprite, reutilizar el más antiguo
-		if (missSprite == null && missSpritesPool.length > 0) {
-			missSprite = missSpritesPool[0];
-			FlxTween.cancelTweensOf(missSprite);
-		}
-		
-		if (missSprite == null) return; // Seguridad
-		
-		// Limpiar combos si no se permite stacking
-		if (!ClientPrefs.data.comboStacking && comboGroup.members.length > MAX_MISS_SPRITES)
-		{
-			for (spr in comboGroup)
-			{
-				if(spr == null || spr == missSprite) continue;
-				if (!missSpritesPool.contains(spr)) {
-					comboGroup.remove(spr);
-					spr.destroy();
-				} else {
-					spr.visible = false; // Solo ocultar sprites del pool
-				}
-			}
-		}
-
-		var placement:Float = FlxG.width * 0.35;
-
-		var uiFolder:String = "";
-		var antialias:Bool = ClientPrefs.data.antialiasing;
-		if (stageUI != "normal")
-		{
-			uiFolder = uiPrefix + "UI/";
-			antialias = !isPixelStage;
-		}
-
-		// Configurar el sprite reutilizado
-		var missImagePath = uiFolder + 'combo-break' + uiPostfix;
-		if (!Paths.fileExists('images/' + missImagePath + '.png', IMAGE)) {
-			missImagePath = uiFolder + 'miss' + uiPostfix;
-		}
-		
-		missSprite.loadGraphic(Paths.image(missImagePath));
-		missSprite.screenCenter();
-		missSprite.x = placement - 40;
-		missSprite.y -= 60;
-		missSprite.acceleration.y = 550 * playbackRate * playbackRate;
-		missSprite.velocity.y -= FlxG.random.int(140, 175) * playbackRate;
-		missSprite.velocity.x -= FlxG.random.int(0, 10) * playbackRate;
-		missSprite.visible = (!ClientPrefs.data.hideHud && showRating);
-		missSprite.x += ClientPrefs.data.comboOffset[0];
-		missSprite.y -= ClientPrefs.data.comboOffset[1];
-		missSprite.antialiasing = antialias;
-		missSprite.alpha = 1;
-
-		if (!PlayState.isPixelStage)
-		{
-			missSprite.setGraphicSize(Std.int(missSprite.width * 0.7));
-			missSprite.scale.set(0.2, 0.2);
-			FlxTween.tween(missSprite.scale, {x: 0.65, y: 0.65}, 0.08, {ease: FlxEase.circOut});
-		}
-		else
-		{
-			missSprite.setGraphicSize(Std.int(missSprite.width * daPixelZoom * 0.85));
-			missSprite.scale.set(1, 1);
-			FlxTween.tween(missSprite.scale, {x: 4.5, y: 4.5}, 0.08, {ease: FlxEase.circOut});
-		}
-
-		missSprite.updateHitbox();
-
-		// Hacer que desaparezca (reutilizar en lugar de destruir)
-		FlxTween.tween(missSprite, {alpha: 0}, 0.2 / playbackRate, {
-			onComplete: function(tween:FlxTween)
-			{
-				missSprite.visible = false; // En lugar de destroy()
-			},
-			startDelay: Conductor.crochet * 0.001 / playbackRate
-		});
-	}*/
-
+	
 	public var strumsBlocked:Array<Bool> = [];
 	private function onKeyPress(event:KeyboardEvent):Void
 	{

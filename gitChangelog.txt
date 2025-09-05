@@ -1,6 +1,10 @@
-- Rework del OutdateSubstate.hx
-- La libreria Funkin Modchart se actualizo a la version 1.2.3
-- Mejor optimizacion en el codigo fuente\n- Una marca de agua, porque no UwU
-- Se añadio mas variables paramover la ventana del juego
-- Nuevas funciones con la API de Windows
-- Ahora podras crear Modcharts desde Lua usando function onModchart()
+- Reworked OutdatedSubstate.hx.
+- The Funkin Modchart library has been updated to version 1.2.3.
+- Improved source code optimization.
+- A watermark, because not UwU.
+- Added more variables for moving the game window.
+- New "SL Windows API" haxe library.
+- New functions with the Windows API of the SL Windows API library.
+- You can now create Modcharts from Lua using the "onModchart()" function.
+- OutdatedSubstate.hx will now be displayed promptly in MainMenuState.hx, thanks to the version check at game start.
+- The current state option will no longer be displayed; it seemed to be unused.
