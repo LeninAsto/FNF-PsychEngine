@@ -1,1 +1,6 @@
-- Rework del OutdateSubstate.hx\n- La libreria Funkin Modchart se actualizo a la version 1.2.3\n- Mejor optimizacion en el codigo fuente\n- Una marca de agua, porque no UwU\n- Se añadio mas variables paramover la ventana del juego\n- Nuevas funciones con la API de Windows\n- Ahora podras crear Modcharts desde Lua usando function onModchart()
+- Rework del OutdateSubstate.hx
+- La libreria Funkin Modchart se actualizo a la version 1.2.3
+- Mejor optimizacion en el codigo fuente\n- Una marca de agua, porque no UwU
+- Se añadio mas variables paramover la ventana del juego
+- Nuevas funciones con la API de Windows
+- Ahora podras crear Modcharts desde Lua usando function onModchart()

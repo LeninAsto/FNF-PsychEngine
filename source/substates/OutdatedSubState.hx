@@ -53,7 +53,7 @@ class OutdatedSubState extends MusicBeatSubstate
         changelogText = new FlxText(50, 180, FlxG.width - 100,
             Language.getPhrase('loading_changelog', "Loading changelog...")
         );
-        changelogText.setFormat(Paths.defaultFont(), 18, FlxColor.CYAN, LEFT);
+        changelogText.setFormat(Paths.defaultFont(), 22, FlxColor.CYAN, LEFT);
         changelogText.scrollFactor.set();
         changelogText.alpha = 0.0;
         add(changelogText);
