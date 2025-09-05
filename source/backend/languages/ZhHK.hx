@@ -6,6 +6,8 @@ class ZhHK
     public static var languageCode:String = "zh-HK";
     
     public static var translations:Map<String, String> = [
+        "outdated_warning" => "嘿，兄弟。看起來你正在使用過時的 Plus Engine 版本（{1}）。\n-----------------------------------------------\n按 ENTER 更新到最新版本 {2}\n如果你使用的是正確的引擎版本，請按 ESCAPE。\n你可以通過取消選中選項菜單中的（檢查更新）選項來禁用此警告\n----------------------------------------------\n感謝你使用引擎！",
+
         // Gameplay
         "score_text" => "分數: {1} | 失誤: {2} | 評級: {3}",
         "score_text_instakill" => "分數: {1} | 評級: {2}",

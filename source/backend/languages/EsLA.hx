@@ -6,6 +6,8 @@ class EsLA
     public static var languageCode:String = "es-LA";
     
     public static var translations:Map<String, String> = [
+        "outdated_warning" => "Oye hermano. Parece que estás usando una versión desactualizada de Plus Engine ({1}).\n-----------------------------------------------\nPresiona ENTER para actualizar a la última versión {2}\nPresiona ESCAPE si ya tienes la versión correcta del engine.\nPuedes desactivar esta advertencia desmarcando la opción (Buscar actualizaciones) en el menú de opciones\n----------------------------------------------\n¡Gracias por usar Engine!",
+
         // Gameplay
         "score_text" => "Puntuación: {1} | Perdidas: {2} | Clasificación: {3}",
         "score_text_instakill" => "Puntuación: {1} | Clasificación: {2}",
