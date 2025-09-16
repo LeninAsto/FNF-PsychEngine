@@ -1,18 +1,22 @@
 ![Logo Off](docs/img/fond.png)
 
 # 🎮 FNF-PlusEngine
-Engine based on Psych Engine 1.0.4, with modcharts like NotITG and compatible with Psych mods 0.6.3 and 0.7.3.
-
+Engine based on Psych Engine 1.0.4, with modcharts like NotITG and compatible with hxcodec videos from Psych mods 0.6.3 and 0.7.3.
 
 
 ### Features
-- New Lua Variables: Added custom variables like setFullscreen, winTweenSize, winTweenX, and winTweenY for advanced window control.
+- Variables for window and system management in Lua: Many variables were added, whether to hide the taskbar or window borders, etc.
 - Judgement Counter.
-- Advanced Variables for craziest Modcharts.
-- Fix select json in Charting Editor.
+- Advanced variables in Lua for the craziest Modcharts.
 - New results State and really cool.
-- Compatible with Psych mods 0.6.3 and 0.7.3
-- and More...
+- Compatible wth hxcodec videos from Psych mods 0.6.3 and 0.7.3.
+- Smooth Health Bar
+- 5 languages ​​available: English, Spanish, Portuguese, Chinese (Simplified) - (Traditional) and Japanese
+- New cool transicioning
+- If you are in Charting Mode the step, beat, and section will be displayed in gameplay.
+- FPS Counter rework
+- Rework the OutdatedSubstate.hx
+- More things will continue to be added in the future...
 
 ### 🤝 Contributions
 - **[Funkin Modchart](https://github.com/TheoDevelops/FunkinModchart) - Developed by TheoDev**
@@ -23,7 +27,7 @@ Engine based on Psych Engine 1.0.4, with modcharts like NotITG and compatible wi
 > This project is subject to bugs, fixes, improvements and changes.
 
 To learn about new Lua scripts, click [here](https://github.com/LeninAsto/FNF-PlusEngine/blob/main/docs/scripts/TemplatePlusScript.lua).
-To learn about new Advances variables for Modcharts, clic [here](https://github.com/LeninAsto/FNF-PlusEngine/blob/main/docs/scripts/TemplateAdvancedModchartScript.md)
+To learn about variables Lua for Modcharts, clic [here](https://github.com/LeninAsto/FNF-PlusEngine/blob/main/docs/scripts/DocLuaModchart.md)
 
 # Psych Team
 
@@ -43,7 +47,7 @@ Engine originally used on [Mind Games Mod](https://gamebanana.com/mods/301107), 
 * Keoiki - Note Splash Animations and Latin Alphabet.
 * SqirraRNG - Crash Handler and Base code for Chart Editor's Waveform.
 * EliteMasterEric - Runtime Shaders support and Other PRs.
-* polybiusproxy - .MP4 Video Loader Library (hxcodec).
+* MAJigsaw77 - .MP4 Video Loader Library (hxvlc).
 * iFlicky - Composer of Psync, Tea Time and some sound effects.
 * KadeDev - Fixed some issues on Chart Editor and Other PRs.
 * superpowers04 - LUA JIT Fork.
