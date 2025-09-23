@@ -10,37 +10,37 @@ jobs:
         include:
           - name: Windows
             os: windows-2022
-            buildArgs: windows -64
+            buildArgs: "windows -D officialBuild"
             setupCommand: .\"setup/windows.bat"
             artifactName: windowsBuild-x86_64
             artifactPath: export\release\windows\bin\*
           - name: Linux
             os: ubuntu-22.04
-            buildArgs: linux
+            buildArgs: "linux -D officialBuild"
             setupCommand: sh ./setup/unix.sh
             artifactName: linuxBuild-x86_64
             artifactPath: export/release/linux/bin/*
           - name: macOS x86_64
             os: macos-15
             setupCommand: sh ./setup/unix.sh
-            buildArgs: "mac -64 -D HXCPP_M64"
+            buildArgs: "mac -64 -D HXCPP_M64 -D officialBuild"
             artifactName: macOSBuild-x86_64
             artifactPath: export/release/macos/bin/*
           - name: macOS ARM64
             os: macos-15
             setupCommand: sh ./setup/unix.sh
-            buildArgs: "mac -arm64 -D HXCPP_ARM64"
+            buildArgs: "mac -arm64 -D HXCPP_ARM64 -D officialBuild"
             artifactName: macOSBuild-arm64
             artifactPath: export/release/macos/bin/*
           - name: Android
             os: macos-15
-            buildArgs: "android -ONLY_ARMV7"
+            buildArgs: "android -ONLY_ARMV7 -D officialBuild"
             setupCommand: sh ./setup/unix.sh
             artifactName: androidBuild
             artifactPath: "export/release/android/bin/app/build/outputs/apk/release/*.apk"
           - name: iOS
             os: macos-15
-            buildArgs: "ios -nosign"
+            buildArgs: "ios -nosign -D officialBuild"
             setupCommand: sh ./setup/unix.sh
             artifactName: iOSBuild
             artifactPath: "export/release/ios/build/Release-iphoneos/*.ipa"
