@@ -1,1 +1,5 @@
-Rework 
+- FPS debug redesign, you can now toggle to change content by pressing F2
+- New feature, now you can see traces in-game without using cmd, just press F4 to see them.
+- The Funkin Modchart library was switched to my git version because it had a bug in one of the modifiers.
+- Started using hmm (Haxe Module Manager), why not?
+- You can put a text in FPS Counter, either author or etc., just write in Lua "setModAutor("insert text here")"
