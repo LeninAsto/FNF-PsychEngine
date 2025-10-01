@@ -697,6 +697,8 @@ class PlayState extends MusicBeatState
 		noteGroup.add(grpNoteSplashes);
 		noteGroup.add(grpHoldSplashes);
 
+        initModchartNotITG();
+
 		camFollow = new FlxObject();
 		camFollow.setPosition(camPos.x, camPos.y);
 		camPos.put();
@@ -826,7 +828,6 @@ class PlayState extends MusicBeatState
 
 		stagesFunc(function(stage:BaseStage) stage.createPost());
 		callOnScripts('onCreatePost');
-		callOnScripts('onModchart');
 		
 		var splash:NoteSplash = new NoteSplash();
 		grpNoteSplashes.add(splash);
@@ -849,6 +850,16 @@ class PlayState extends MusicBeatState
 		cachePopUpScore();
 
 		if(eventNotes.length < 1) checkEventNote();
+	}
+
+	function initModchartNotITG()
+	{
+		#if MODCHARTS_NOTITG_ALLOWED
+		if (Manager.instance == null) {
+			add(new Manager());
+		}
+		callOnScripts('onInitModchart');
+		#end
 	}
 
 	function set_songSpeed(value:Float):Float

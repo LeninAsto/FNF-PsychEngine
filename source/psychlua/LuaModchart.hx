@@ -11,24 +11,12 @@ class LuaModchart
         
         // Agregar modificador
         Lua_helper.add_callback(lua, "addModifier", function(name:String, ?field:Int = -1) {
-            var playState = states.PlayState.instance;
-            if (Manager.instance == null && playState != null) {
-                #if LUA_ALLOWED
-                playState.add(new Manager());
-                #end
-            }
             if (Manager.instance != null)
                 Manager.instance.addModifier(name, field);
         });
         
         // Establecer porcentaje de modificador
         Lua_helper.add_callback(lua, "setPercent", function(name:String, value:Float, ?player:Int = -1, ?field:Int = -1) {
-            var playState = states.PlayState.instance;
-            if (Manager.instance == null && playState != null) {
-                #if LUA_ALLOWED
-                playState.add(new Manager());
-                #end
-            }
             if (Manager.instance != null)
                 Manager.instance.setPercent(name, value, player, field);
         });
@@ -42,24 +30,12 @@ class LuaModchart
         
         // Establecer valor en un beat específico
         Lua_helper.add_callback(lua, "set", function(name:String, beat:Float, value:Float, ?player:Int = -1, ?field:Int = -1) {
-            var playState = states.PlayState.instance;
-            if (Manager.instance == null && playState != null) {
-                #if LUA_ALLOWED
-                playState.add(new Manager());
-                #end
-            }
             if (Manager.instance != null)
                 Manager.instance.set(name, beat, value, player, field);
         });
         
         // Aplicar easing a un modificador
         Lua_helper.add_callback(lua, "ease", function(name:String, beat:Float, length:Float, value:Float, easeName:String, ?player:Int = -1, ?field:Int = -1) {
-            var playState = states.PlayState.instance;
-            if (Manager.instance == null && playState != null) {
-                #if LUA_ALLOWED
-                playState.add(new Manager());
-                #end
-            }
             if (Manager.instance != null) {
                 var easeFunc = getEaseFunction(easeName);
                 Manager.instance.ease(name, beat, length, value, easeFunc, player, field);

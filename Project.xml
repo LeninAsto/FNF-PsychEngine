@@ -21,6 +21,7 @@
 	<!-- ______________________ PSYCH ENGINE CUSTOMIZATION ______________________ -->
 
 	<define name="MODS_ALLOWED" if="desktop || mobile" />
+	<define name="MODCHARTS_NOTITG_ALLOWED" if="desktop || mobile" />
 	<define name="HSCRIPT_ALLOWED" if="desktop || mobile" />
 	<define name="LUA_ALLOWED" if="cpp" />
 	<define name="ACHIEVEMENTS_ALLOWED" />
@@ -28,6 +29,7 @@
 	<define name="TRANSLATIONS_ALLOWED" />
 	<define name="COPYSTATE_ALLOWED" if="MODS_ALLOWED mobile"/>
 	<define name="IRIS_DEBUG"/>
+	<define name="WINDOWS_FUNCTIONS_ALLOWED" if="desktop" />
 	
 	<define name="MULTITHREADED_LOADING" if="cpp" /> <!-- UNCOMMENTING THIS LINE WILL ENABLE MULTITHREADED LOADING, WHICH IMPROVES LOADING TIMES, BUT WITH A LOW CHANCE FOR THE GAME FREEZE ON SONG LOAD -->
 	<define name="SHOW_LOADING_SCREEN" />
@@ -205,10 +207,12 @@
 
 	<!-- ____________________________ Modcharts? _______________________________ -->
 
-	<haxedef name="FM_ENGINE" value="PSYCH"/>
-    <haxedef name="FM_ENGINE_VERSION" value="1.0"/>
-	<haxelib name="funkin-modchart" version="git"/>
-    <haxeflag name="--macro" value="modchart.backend.macros.Macro.includeFiles()"/>
+    <section if="MODCHARTS_NOTITG_ALLOWED">
+		<haxedef name="FM_ENGINE" value="PSYCH"/>
+    	<haxedef name="FM_ENGINE_VERSION" value="1.0"/>
+		<haxelib name="funkin-modchart" version="git"/>
+    	<haxeflag name="--macro" value="modchart.backend.macros.Macro.includeFiles()"/>
+	</section>
 
 	<!-- _________________________________ Custom _______________________________ -->
 
