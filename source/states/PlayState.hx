@@ -697,8 +697,6 @@ class PlayState extends MusicBeatState
 		noteGroup.add(grpNoteSplashes);
 		noteGroup.add(grpHoldSplashes);
 
-        initModchartNotITG();
-
 		camFollow = new FlxObject();
 		camFollow.setPosition(camPos.x, camPos.y);
 		camPos.put();
@@ -829,6 +827,9 @@ class PlayState extends MusicBeatState
 		stagesFunc(function(stage:BaseStage) stage.createPost());
 		callOnScripts('onCreatePost');
 		
+		// Initialize modcharts after all scripts are loaded
+		initModchartNotITG();
+		
 		var splash:NoteSplash = new NoteSplash();
 		grpNoteSplashes.add(splash);
 		splash.alpha = 0.000001; //cant make it invisible or it won't allow precaching
@@ -855,10 +856,22 @@ class PlayState extends MusicBeatState
 	function initModchartNotITG()
 	{
 		#if MODCHARTS_NOTITG_ALLOWED
-		if (Manager.instance == null) {
-			add(new Manager());
+		try {
+			if (Manager.instance == null) {
+				var manager = new Manager();
+				add(manager);
+				trace("Modchart Manager initialized successfully");
+			}
+			// Wait a frame to ensure Manager is fully initialized
+			var initCallback:Void->Void = null;
+			initCallback = function() {
+				callOnScripts('onInitModchart');
+				FlxG.signals.postUpdate.remove(initCallback);
+			};
+			FlxG.signals.postUpdate.add(initCallback);
+		} catch (e:Dynamic) {
+			trace("Error initializing modcharts: " + e);
 		}
-		callOnScripts('onInitModchart');
 		#end
 	}
 
