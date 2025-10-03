@@ -1,7 +1,7 @@
 ## Modcharting Functions
 ```lua
 -- You must enter all of this only within this function, or else it will not work.
-function onModchart()
+function onInitModchart()
 
     -- [Modifiers Section] --
 

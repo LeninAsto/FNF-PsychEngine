@@ -36,11 +36,6 @@
       "version": "1.1.0"
     },
     {
-      "name": "funkin-modchart",
-      "type": "git",
-      "url": "https://github.com/LeninAsto/FunkinModchart.git"
-    },
-    {
       "name": "flixel-tools",
       "type": "haxelib",
       "version": "1.5.1"

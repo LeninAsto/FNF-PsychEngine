@@ -1,23 +1,7 @@
-If you don't want to use haxe and want to do it only from lua, look [here](https://github.com/LeninAsto/FNF-PlusEngine/blob/main/docs/scripts/DocLuaModchart.md)
+If you don't want to use haxe and want to do it only from lua, which by the way is better to do it in lua since it doesn't alter the mechanics much, look [here](https://github.com/LeninAsto/FNF-PlusEngine/blob/main/docs/scripts/DocLuaModchart.md)
 
 ```haxe
-//To start, you need to import the following so the manager loads
-//Para empezar, tienes que importar lo siguiente para que se cargue el manager
-import modchart.Manager; 
-
-//Then create a null instance
-//Luego, crea una instancia nula
-var instance:Manager = null;
-
-//And finally, create the onCreatePost function. Keep in mind that if you use onCreate, the game will crash
-//Y por último, crea la función onCreatePost. Ten en cuenta que si usas onCreate, el juego se cerrará inesperadamente
-
-function onCreatePost() {
-    // Create an instance and add it
-    // Crea una instancia y añádela
-    instance = new Manager();
-    add(instance);
-
+function onInitModchart() {
     //From here, I'll explain how to use it. There are several things that might blow your mind...
     //De aquí te explicaré cómo usarlo. Hay varias cosas que pueden confundirte...
     //Let's start with the scripts you can use
