@@ -828,7 +828,7 @@ class PlayState extends MusicBeatState
 		callOnScripts('onCreatePost');
 		
 		// Initialize modcharts after all scripts are loaded
-		initModchartNotITG();
+		initModchart();
 		
 		var splash:NoteSplash = new NoteSplash();
 		grpNoteSplashes.add(splash);
@@ -853,7 +853,7 @@ class PlayState extends MusicBeatState
 		if(eventNotes.length < 1) checkEventNote();
 	}
 
-	function initModchartNotITG()
+	function initModchart()
 	{
 		#if MODCHARTS_NOTITG_ALLOWED
 		try {
