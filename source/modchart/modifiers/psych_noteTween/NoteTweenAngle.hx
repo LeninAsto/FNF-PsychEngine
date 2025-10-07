@@ -9,16 +9,13 @@ import modchart.core.util.Constants.Visuals;
 /**
  * Modifier que actúa como puente entre noteTweenAngle del engine y el sistema de modcharts.
  * Lee el valor angle actual del StrumNote (modificado por noteTweenAngle) y lo aplica 
- * como rotación visual (angleZ) a los receptores.
+ * como rotación visual (angleZ) tanto a los receptores como a las notas.
  */
 class NoteTweenAngle extends Modifier {
 	
 	override public function visuals(data:Visuals, params:RenderParams):Visuals {
 		var player = params.player;
 		var lane = params.lane;
-		
-		// Solo aplicar a receptores (StrumNotes), no a notas que se mueven
-		if (params.isTapArrow) return data;
 		
 		// Obtener el StrumNote específico para este lane y player
 		var strumNote:StrumNote = getStrumFromInfo(lane, player);
@@ -28,6 +25,7 @@ class NoteTweenAngle extends Modifier {
 			var currentAngle = strumNote.angle;
 			
 			// Aplicar al sistema de visuals del modchart como rotación visual
+			// Ahora afecta tanto a receptores como a notas
 			data.angleZ += currentAngle;
 		}
 		
@@ -35,8 +33,8 @@ class NoteTweenAngle extends Modifier {
 	}
 	
 	override public function shouldRun(params:RenderParams):Bool {
-		// Solo ejecutar en receptores (StrumNotes)
-		return !params.isTapArrow;
+		// Ejecutar tanto en receptores como en notas
+		return true;
 	}
 	
 	// Función helper para obtener el StrumNote específico
