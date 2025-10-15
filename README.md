@@ -28,7 +28,7 @@ Contributions are welcome! If you have ideas, improvements, or fixes, feel free 
 
 > This project is subject to bugs, fixes, improvements and changes.
 
-To learn about Custom States, click [here](https://github.com/LeninAsto/FNF-PlusEngine/blob/main/docs/scripts/TemplateState.lua).
+To learn about Custom States, click [here](https://github.com/LeninAsto/FNF-PlusEngine/blob/main/docs/scripts/TemplateState.hx).
 To learn about new Lua scripts, click [here](https://github.com/LeninAsto/FNF-PlusEngine/blob/main/docs/scripts/TemplatePlusScript.lua).
 To learn about variables Lua for Modcharts, clic [here](https://github.com/LeninAsto/FNF-PlusEngine/blob/main/docs/scripts/DocLuaModchart.md)
 
