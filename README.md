@@ -1,11 +1,12 @@
 ![Logo Off](docs/img/fond.png)
 
 # 🎮 FNF-PlusEngine
-Engine based on Psych Engine 1.0.4, with modcharts like NotITG and compatible with hxcodec videos from Psych mods 0.6.3 and 0.7.3.
+Engine based on Psych Engine 1.0.4, with modcharts like NotITG, ModStates and compatible with hxcodec videos from Psych mods 0.6.3 and 0.7.3.
 
 
 ### Features
 - Variables for window and system management in Lua: Many variables were added, whether to hide the taskbar or window borders, etc.
+- Support ModState
 - Judgement Counter.
 - Advanced variables in Lua for the craziest Modcharts.
 - New results State and really cool.
@@ -15,7 +16,9 @@ Engine based on Psych Engine 1.0.4, with modcharts like NotITG and compatible wi
 - New cool transicioning
 - If you are in Charting Mode the step, beat, and section will be displayed in gameplay.
 - FPS Counter rework
+- Trace in Game
 - Rework the OutdatedSubstate.hx
+- Rework the FreeplayState.hx
 - More things will continue to be added in the future...
 
 ### 🤝 Contributions
@@ -25,6 +28,7 @@ Contributions are welcome! If you have ideas, improvements, or fixes, feel free 
 
 > This project is subject to bugs, fixes, improvements and changes.
 
+To learn about Custom States, click [here](https://github.com/LeninAsto/FNF-PlusEngine/blob/main/docs/scripts/TemplateState.lua).
 To learn about new Lua scripts, click [here](https://github.com/LeninAsto/FNF-PlusEngine/blob/main/docs/scripts/TemplatePlusScript.lua).
 To learn about variables Lua for Modcharts, clic [here](https://github.com/LeninAsto/FNF-PlusEngine/blob/main/docs/scripts/DocLuaModchart.md)
 
@@ -32,18 +36,6 @@ To learn about variables Lua for Modcharts, clic [here](https://github.com/Lenin
 * Homura - Head Porter of Psych Engine Mobile.
 * Karim - Second Porter of Psych Engine Mobile.
 * Moxie - Helper of Psych Engine Mobile.
-
-### This engine works with hmm, so you need to install it first:
-
-```bash
-
-haxelib install hmm
-
-# After that, run:
-
-haxelib run hmm install
-
-```
 
 ### Build Mobile:
 You need have:

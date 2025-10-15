@@ -1,6 +1,7 @@
 package states;
 
 import flixel.FlxState;
+import flixel.text.FlxText;
 
 #if HSCRIPT_ALLOWED
 import psychlua.HScript;
@@ -47,6 +48,11 @@ class ModState extends MusicBeatState
         callOnScripts('onCreate');
         super.create();
         callOnScripts('onCreatePost');
+        var plusVer:FlxText = new FlxText(12, FlxG.height - 24, 0, "Plus Engine v" + MainMenuState.plusEngineVersion, 12);
+        plusVer.scrollFactor.set();
+        plusVer.alpha = 0.8;
+        plusVer.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+        add(plusVer);
     }
 
     override function update(elapsed:Float)
@@ -146,7 +152,7 @@ class ModState extends MusicBeatState
                     trace('ModState: Shared var get - $name = $value');
                     return value;
                 }
-                trace('ModState: Shared var not found - $name, returning default: $defaultValue');
+                trace('ModState: Shared var $name not found');
                 return defaultValue;
             });
             
@@ -157,7 +163,6 @@ class ModState extends MusicBeatState
             newScript.set('removeSharedVar', function(name:String):Bool {
                 if (sharedVars.exists(name)) {
                     sharedVars.remove(name);
-                    trace('ModState: Shared var removed - $name');
                     return true;
                 }
                 return false;
