@@ -484,6 +484,20 @@ class FPSCounter extends TextField
 			stateName = parts[parts.length - 1];
 		}
 		
+		// Si es un ModState, agregar el nombre del script
+		#if HSCRIPT_ALLOWED
+		if (stateName == "ModState") {
+			try {
+				var modState:states.ModState = cast FlxG.state;
+				if (modState != null && modState.stateName != null && modState.stateName.length > 0) {
+					stateName = 'ModState (${modState.stateName})';
+				}
+			} catch (e:Dynamic) {
+				// Si falla el cast, dejar solo "ModState"
+			}
+		}
+		#end
+		
 		// Verificar si hay un substate activo
 		if (FlxG.state.subState != null) {
 			var subStateName = Type.getClassName(Type.getClass(FlxG.state.subState));

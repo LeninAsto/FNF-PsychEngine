@@ -172,6 +172,9 @@ class HScript extends Iris
 		set('Capabilities', openfl.system.Capabilities);
 		set('RatioScaleMode', flixel.system.scaleModes.RatioScaleMode);
 		set('Countdown', backend.BaseStage.Countdown);
+		set('Difficulty', backend.Difficulty);
+		set('WeekData', backend.WeekData);
+		set('Discord', backend.DiscordClient);
 		set('PlayState', PlayState);
 		set('ModState', states.ModState);
 		set('TitleState', states.TitleState);

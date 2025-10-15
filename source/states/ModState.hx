@@ -36,8 +36,9 @@ class ModState extends MusicBeatState
 
     override function create()
     {
-        // Permitir que el estado continúe actualizando durante transiciones
-        persistentUpdate = persistentDraw = true;
+        // Permitir que los scripts individuales controlen persistentUpdate
+        // Solo establecer persistentDraw en true por defecto
+        persistentDraw = true;
         
         // Cargar scripts automáticamente si se proporciona un stateName
         if(stateName != null && stateName.length > 0)

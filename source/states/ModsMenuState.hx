@@ -345,18 +345,94 @@ class ModsMenuState extends MusicBeatState
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			if(waitingToRestart)
 			{
-				//MusicBeatState.switchState(new TitleState());
-				TitleState.initialized = false;
-				TitleState.closedState = false;
-				FlxG.sound.music.fadeOut(0.3);
-				if(FreeplayState.vocals != null)
+				// Verificar si el mod tiene TitleState personalizado antes de reiniciar
+				#if (HSCRIPT_ALLOWED && sys)
+				Mods.loadTopMod();
+				var hasCustomTitleState:Bool = false;
+				
+				if(Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0)
 				{
-					FreeplayState.vocals.fadeOut(0.3);
-					FreeplayState.vocals = null;
+					var titlePath:String = Paths.hx('TitleState');
+					if(sys.FileSystem.exists(titlePath))
+					{
+						trace('Mod ${Mods.currentModDirectory} tiene TitleState personalizado, reiniciando a ModState(TitleState)');
+						hasCustomTitleState = true;
+						
+						FlxG.sound.music.fadeOut(0.3);
+						if(FreeplayState.vocals != null)
+						{
+							FreeplayState.vocals.fadeOut(0.3);
+							FreeplayState.vocals = null;
+						}
+						FlxG.camera.fade(FlxColor.BLACK, 0.5, false, function() {
+							FlxG.resetGame();
+						}, false);
+					}
 				}
-				FlxG.camera.fade(FlxColor.BLACK, 0.5, false, FlxG.resetGame, false);
+				
+				if(!hasCustomTitleState)
+				#end
+				{
+					// Reiniciar al TitleState del engine si no hay mod personalizado
+					MusicBeatState.switchState(new TitleState());
+					TitleState.initialized = false;
+					TitleState.closedState = false;
+					FlxG.sound.music.fadeOut(0.3);
+					if(FreeplayState.vocals != null)
+					{
+						FreeplayState.vocals.fadeOut(0.3);
+						FreeplayState.vocals = null;
+					}
+					FlxG.camera.fade(FlxColor.BLACK, 0.5, false, FlxG.resetGame, false);
+				}
 			}
-			else MusicBeatState.switchState(new MainMenuState());
+			else 
+			{
+				// Verificar si el mod top tiene states personalizados (TitleState o MainMenuState)
+				#if (HSCRIPT_ALLOWED && sys)
+				Mods.loadTopMod();
+				var hasCustomState:Bool = false;
+				
+				if(Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0)
+				{
+					// Primero verificar si tiene TitleState (como el engine base)
+					var titlePath:String = Paths.hx('TitleState');
+					if(sys.FileSystem.exists(titlePath))
+					{
+						trace('Mod ${Mods.currentModDirectory} tiene TitleState personalizado, yendo a ModState(TitleState)');
+						hasCustomState = true;
+						
+						// Fade out de la música antes de cambiar al mod
+						if(FlxG.sound.music != null)
+							FlxG.sound.music.stop();
+						
+						MusicBeatState.switchState(new ModState('TitleState'));
+					}
+					else
+					{
+						// Si no tiene TitleState, verificar MainMenuState
+						var mainMenuPath:String = Paths.hx('MainMenuState');
+						if(sys.FileSystem.exists(mainMenuPath))
+						{
+							trace('Mod ${Mods.currentModDirectory} tiene MainMenuState personalizado, yendo a ModState(MainMenuState)');
+							hasCustomState = true;
+							
+							// Fade out de la música antes de cambiar al mod
+							if(FlxG.sound.music != null)
+								FlxG.sound.music.stop();
+							
+							MusicBeatState.switchState(new ModState('MainMenuState'));
+						}
+					}
+				}
+				
+				if(!hasCustomState)
+				#end
+				{
+					// Ir al MainMenuState del engine si no hay mod personalizado
+					MusicBeatState.switchState(new MainMenuState());
+				}
+			}
 
 			persistentUpdate = false;
 			FlxG.autoPause = ClientPrefs.data.autoPause;
