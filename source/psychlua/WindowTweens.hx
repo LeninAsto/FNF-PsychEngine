@@ -474,9 +474,11 @@ class WindowTweens {
     }
 
     public static function winResizeCenter(width:Int, height:Int, ?skip:Bool = false) {
-        PlayState.instance.windowResizedByScript = true;
+        #if windows
+        if (PlayState.instance != null) {
+            PlayState.instance.windowResizedByScript = true;
+        }
         var window = Lib.application.window;
-        var camHUD = PlayState.instance.camHUD;
         var winYRatio = 1;
         var winY = height * winYRatio;
         var winX = width * winYRatio;
@@ -490,7 +492,11 @@ class WindowTweens {
                 x: Math.floor((Capabilities.screenResolutionX / 2) - (winX / 2)) + (Capabilities.screenResolutionX * Math.floor(window.x / (Capabilities.screenResolutionX)))
             }, 0.4, {
                 ease: FlxEase.quadInOut,
-                onComplete: function(_) camHUD.fade(FlxColor.BLACK, 0, true)
+                onComplete: function(_) {
+                    if (PlayState.instance != null && PlayState.instance.camHUD != null) {
+                        PlayState.instance.camHUD.fade(FlxColor.BLACK, 0, true);
+                    }
+                }
             });
         } else {
             FlxG.resizeWindow(width, height);
@@ -499,6 +505,7 @@ class WindowTweens {
         }
         FlxG.scaleMode = new RatioScaleMode(true);
         window.resizable = width == 1280;
+        #end
     }
 
     // === NUEVAS FUNCIONES CON WINDOWS API ===

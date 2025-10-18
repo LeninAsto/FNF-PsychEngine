@@ -2989,7 +2989,8 @@ class PlayState extends MusicBeatState
 					#if (HSCRIPT_ALLOWED && sys)
 					var hasCustomState:Bool = false;
 					
-					if(backend.Mods.currentModDirectory != null && backend.Mods.currentModDirectory.length > 0)
+					// ✅ Verificar que el mod tenga permiso para ejecutar custom states
+					if(backend.Mods.canModExecuteStates())
 					{
 						// Prioridad 1: StoryMenuState del mod
 						var storyMenuPath:String = Paths.hx('StoryMenuState');
@@ -3055,28 +3056,27 @@ class PlayState extends MusicBeatState
 
 				canResync = false;
 				
-				// Verificar si el mod tiene FreeplayState personalizado
-				#if (HSCRIPT_ALLOWED && sys)
-				var hasCustomFreeplay:Bool = false;
-				
-				if(backend.Mods.currentModDirectory != null && backend.Mods.currentModDirectory.length > 0)
+			// Verificar si el mod tiene FreeplayState personalizado
+			#if (HSCRIPT_ALLOWED && sys)
+			var hasCustomFreeplay:Bool = false;
+			
+			// ✅ Verificar que el mod tenga permiso para ejecutar custom states
+			if(backend.Mods.canModExecuteStates())
+			{
+				var freeplayPath:String = Paths.hx('FreeplayState');
+				if(sys.FileSystem.exists(freeplayPath))
 				{
-					var freeplayPath:String = Paths.hx('FreeplayState');
-					if(sys.FileSystem.exists(freeplayPath))
-					{
-						trace('Mod ${backend.Mods.currentModDirectory} tiene FreeplayState personalizado');
-						hasCustomFreeplay = true;
-						MusicBeatState.switchState(new states.ModState('FreeplayState'));
-					}
+					trace('Mod ${backend.Mods.currentModDirectory} tiene FreeplayState personalizado');
+					hasCustomFreeplay = true;
+					MusicBeatState.switchState(new states.ModState('FreeplayState'));
 				}
-				
-				if(!hasCustomFreeplay)
-				#end
-				{
-					MusicBeatState.switchState(new FreeplayState());
-				}
-				
-				FlxG.sound.playMusic(Paths.music('freakyMenu'));
+			}
+			
+			if(!hasCustomFreeplay)
+			#end
+			{
+				MusicBeatState.switchState(new FreeplayState());
+			}				FlxG.sound.playMusic(Paths.music('freakyMenu'));
 				changedDifficulty = false;
 			}
 			transitioning = true;
@@ -3819,10 +3819,16 @@ class PlayState extends MusicBeatState
 		// Restaurar el estado original de la ventana al salir de PlayState
 		var window = openfl.Lib.application.window;
 		if (windowResizedByScript) {
-			window.width = originalWinWidth;
-			window.height = originalWinHeight;
-			window.x = originalWinX;
-			window.y = originalWinY;
+			// En lugar de restaurar valores originales, redimensionar a 1280x720 y centrar
+			window.width = 1280;
+			window.height = 720;
+			
+			// Centrar la ventana en la pantalla
+			var screenWidth = openfl.system.Capabilities.screenResolutionX;
+			var screenHeight = openfl.system.Capabilities.screenResolutionY;
+			window.x = Std.int((screenWidth - 1280) / 2);
+			window.y = Std.int((screenHeight - 720) / 2);
+			
 			flixel.FlxG.scaleMode = new flixel.system.scaleModes.RatioScaleMode(true);
 			window.resizable = true;
 		}

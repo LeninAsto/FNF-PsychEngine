@@ -21,6 +21,11 @@ import states.TitleState;
 	public var gameOverVibration:Bool = false;
 	public var fpsRework:Bool = false;
 	
+	// ✅ Mod con permiso para ejecutar custom states
+	// Si es "NONE" o null, no se ejecutarán custom states de ningún mod
+	// Solo el mod especificado aquí podrá ejecutar sus custom states
+	public var activeModState:String = "NONE";
+	
 	public var downScroll:Bool = false;
 	public var middleScroll:Bool = false;
 	public var opponentStrums:Bool = true;

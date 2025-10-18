@@ -8,8 +8,13 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
+import flixel.util.FlxTimer;
 import backend.ClientPrefs;
 import states.TitleState;
+import psychlua.WindowTweens;
+#if windows
+import lime.app.Application;
+#end
 
 #if sys
 import sys.FileSystem;
@@ -105,25 +110,41 @@ class StateModSubstate extends MusicBeatSubstate
         var startY:Float = 150;
         var index:Int = 0;
         
+        // ✅ Obtener el mod activo actual
+        var currentActive:String = ClientPrefs.data.activeModState;
+        if(currentActive == null) currentActive = "NONE";
+        
         // Opción "None"
-        var noneItem = new FlxText(0, startY + (index * 40), FlxG.width, "[ NONE ]", 24);
+        var noneText = currentActive == "NONE" ? "[ NONE ] ★" : "[ NONE ]";
+        var noneItem = new FlxText(0, startY + (index * 40), FlxG.width, noneText, 24);
         noneItem.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
         noneItem.borderSize = 2;
         noneItem.scrollFactor.set(0, 0);
         noneItem.ID = -1;
         itemsGroup.add(noneItem);
+        
+        // Establecer curSelected en el mod activo
+        if(currentActive == "NONE") curSelected = 0;
+        
         index++;
         
         // Lista de mods con states
         for(modData in modsWithStates)
         {
+            var isActive = (modData.mod == currentActive);
             var displayText = '${modData.mod} (${modData.states.length} state${modData.states.length != 1 ? "s" : ""})';
+            if(isActive) displayText += ' ★'; // Marcar el activo
+            
             var item = new FlxText(0, startY + (index * 40), FlxG.width, displayText, 24);
             item.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
             item.borderSize = 2;
             item.scrollFactor.set(0, 0);
             item.ID = index - 1; // ID corresponde al índice en modsWithStates
             itemsGroup.add(item);
+            
+            // Establecer curSelected en el mod activo
+            if(isActive) curSelected = index;
+            
             index++;
         }
         
@@ -137,7 +158,10 @@ class StateModSubstate extends MusicBeatSubstate
             itemsGroup.add(noModsText);
         }
         
-        curSelected = 0;
+        // Si no se encontró el mod activo, volver a NONE
+        if(curSelected == -1) curSelected = 0;
+        
+        previousSelected = curSelected;
         updateSelection();
     }
     
@@ -219,17 +243,23 @@ class StateModSubstate extends MusicBeatSubstate
         if(curSelected == 0) // NONE
         {
             selectedModName = null;
+            
+            // ✅ Guardar "NONE" en ClientPrefs
+            ClientPrefs.data.activeModState = "NONE";
+            ClientPrefs.saveSettings();
+            trace('StateModSubstate: Set activeModState to NONE');
+            
             if(hasChanges)
             {
-                // Reiniciar al TitleState del juego base con intro completa
-                FlxG.sound.music.stop();
-                
-                // Resetear el estado de inicialización para forzar la intro
-                TitleState.initialized = false;
-                TitleState.fromSubstate = true; // Marcar que viene del substate
-                
-                FlxG.camera.fade(FlxColor.BLACK, 0.5, false, function()
-                {
+                // ✅ Redimensionar ventana a 1280x720 con animación antes de ir al TitleState
+                resizeWindowAndRestart(null, function() {
+                    // Reiniciar al TitleState del juego base con intro completa
+                    FlxG.sound.music.stop();
+                    
+                    // Resetear el estado de inicialización para forzar la intro
+                    TitleState.initialized = false;
+                    TitleState.fromSubstate = true; // Marcar que viene del substate
+                    
                     MusicBeatState.switchState(new TitleState());
                 });
             }
@@ -246,15 +276,20 @@ class StateModSubstate extends MusicBeatSubstate
                 var modData = modsWithStates[selectedIndex];
                 selectedModName = modData.mod;
                 
+                // ✅ Guardar el mod seleccionado en ClientPrefs
+                ClientPrefs.data.activeModState = selectedModName;
+                ClientPrefs.saveSettings();
+                trace('StateModSubstate: Set activeModState to $selectedModName');
+                
                 if(hasChanges)
                 {
-                    // Mover el mod al top
-                    moveModToTop(selectedModName);
-                    
-                    // Reiniciar al FlashingState o TitleState del mod
-                    FlxG.sound.music.stop();
-                    FlxG.camera.fade(FlxColor.BLACK, 0.5, false, function()
-                    {
+                    // ✅ Redimensionar ventana a 1280x720 con animación antes de cambiar de estado
+                    resizeWindowAndRestart(selectedModName, function() {
+                        // Mover el mod al top
+                        moveModToTop(selectedModName);
+                        
+                        // Reiniciar al FlashingState o TitleState del mod
+                        FlxG.sound.music.stop();
                         restartToModState(selectedModName);
                     });
                 }
@@ -344,6 +379,63 @@ class StateModSubstate extends MusicBeatSubstate
     {
         FlxG.sound.play(Paths.sound('cancelMenu'), 0.7);
         close();
+    }
+    
+    /**
+     * ✅ Redimensiona la ventana a 1280x720 con animación y ejecuta callback
+     * Sale de pantalla completa si es necesario
+     * @param modName Nombre del mod (para logs)
+     * @param onComplete Función a ejecutar después del resize
+     */
+    function resizeWindowAndRestart(?modName:String, onComplete:Void->Void)
+    {
+        #if windows
+        var window = lime.app.Application.current.window;
+        
+        // Verificar si está en pantalla completa y salir de ella
+        if(WindowTweens.isWindowFullscreen())
+        {
+            trace('StateModSubstate: Exiting fullscreen before resize');
+            WindowTweens.setWindowFullscreen(false);
+            
+            // Esperar un frame para que se aplique el cambio
+            new FlxTimer().start(0.1, function(timer:FlxTimer) {
+                performResize(modName, onComplete);
+            });
+        }
+        else
+        {
+            performResize(modName, onComplete);
+        }
+        #else
+        // En otras plataformas, ejecutar inmediatamente
+        if(onComplete != null) onComplete();
+        #end
+    }
+    
+    function performResize(?modName:String, onComplete:Void->Void)
+    {
+        #if windows
+        var targetWidth = 1280;
+        var targetHeight = 720;
+        
+        trace('StateModSubstate: Resizing window to ${targetWidth}x${targetHeight} for mod: ${modName != null ? modName : "NONE"}');
+        
+        // Fade out la cámara mientras se redimensiona
+        FlxG.camera.fade(FlxColor.BLACK, 0.3, false, function() {
+            // Usar WindowTweens para redimensionar con animación
+            WindowTweens.winResizeCenter(targetWidth, targetHeight, false);
+            
+            // Esperar a que termine la animación de resize (0.4s según WindowTweens)
+            new FlxTimer().start(0.5, function(timer:FlxTimer) {
+                trace('StateModSubstate: Window resize completed');
+                if(onComplete != null) onComplete();
+            });
+        });
+        #else
+        // En otras plataformas, ejecutar inmediatamente
+        if(onComplete != null) onComplete();
+        #end
     }
     
     override function close()

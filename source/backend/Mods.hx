@@ -236,4 +236,33 @@ class Mods
 			Mods.currentModDirectory = list[0];
 		#end
 	}
+	
+	/**
+	 * ✅ Verifica si un mod tiene permiso para ejecutar custom states
+	 * @param modName El nombre del mod a verificar (puede ser null)
+	 * @return true si el mod puede ejecutar custom states, false si no
+	 */
+	public static function canModExecuteStates(?modName:String = null):Bool
+	{
+		#if !MODS_ALLOWED
+		return false;
+		#end
+		
+		// Si activeModState está en "NONE", ningún mod puede ejecutar states
+		if(ClientPrefs.data.activeModState == null || ClientPrefs.data.activeModState == "NONE")
+			return false;
+		
+		// Si no se especifica modName, usar el currentModDirectory
+		if(modName == null || modName == '')
+			modName = currentModDirectory;
+		
+		// Verificar que el mod esté en la lista de habilitados
+		var modsList = parseList();
+		if(!modsList.enabled.contains(modName))
+			return false;
+		
+		// Solo el mod activo en ClientPrefs puede ejecutar states
+		return (modName == ClientPrefs.data.activeModState);
+	}
 }
+

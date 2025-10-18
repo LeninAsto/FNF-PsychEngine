@@ -27,6 +27,7 @@ import objects.StrumNote;
 import objects.Note;
 import objects.NoteSplash;
 import objects.Character;
+import debug.TraceDisplay;
 
 import states.MainMenuState;
 import states.StoryMenuState;
@@ -1753,6 +1754,11 @@ class FunkinLua {
 				return;
 			}
 			PlayState.instance.addTextToDebug(text, color);
+			
+			// También enviar al TraceDisplay si es un error
+			if(color == FlxColor.RED) {
+				TraceDisplay.addLuaError(text);
+			}
 		}
 	}
 

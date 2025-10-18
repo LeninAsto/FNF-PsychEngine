@@ -218,8 +218,10 @@ class AchievementsMenuState extends MusicBeatState
 			
 			// Verificar si venimos de un ModState personalizado
 			#if HSCRIPT_ALLOWED
-			if(states.ModState.sharedVars.exists('cameFromMainMenu') && 
-			   states.ModState.sharedVars.get('cameFromMainMenu') == true)
+			var cameFromModState = states.ModState.sharedVars.exists('cameFromMainMenu') && 
+                       			   states.ModState.sharedVars.get('cameFromMainMenu') == true;
+
+			if(cameFromModState && backend.Mods.canModExecuteStates())
 			{
 				// Volver al MainMenuState personalizado (ModState)
 				MusicBeatState.switchState(new states.ModState('MainMenuState'));

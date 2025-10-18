@@ -171,7 +171,14 @@ class HScript extends Iris
 		set('FlxGroup', flixel.group.FlxGroup);
 		set('Capabilities', openfl.system.Capabilities);
 		set('RatioScaleMode', flixel.system.scaleModes.RatioScaleMode);
+		set('Lib', openfl.Lib);
+		#if windows
+		set('WindowTweens', psychlua.WindowTweens);
+		#end
+		set('Alphabet', objects.Alphabet);
+		set('AlphaCharacter', objects.AlphaCharacter);
 		set('Countdown', backend.BaseStage.Countdown);
+		set('Language', backend.Language);
 		set('Difficulty', backend.Difficulty);
 		set('WeekData', backend.WeekData);
 		set('Discord', backend.DiscordClient);
@@ -272,6 +279,58 @@ class HScript extends Iris
 			}
 			return LuaUtils.getModSetting(saveTag, modName);
 		});
+
+		// Window Functions (shortcuts for WindowTweens)
+		#if windows
+		set('winTweenX', function(tag:String, targetX:Int, duration:Float = 1, ease:String = "linear") {
+			return psychlua.WindowTweens.winTweenX(tag, targetX, duration, ease);
+		});
+		set('winTweenY', function(tag:String, targetY:Int, duration:Float = 1, ease:String = "linear") {
+			return psychlua.WindowTweens.winTweenY(tag, targetY, duration, ease);
+		});
+		set('winTweenSize', function(targetW:Int, targetH:Int, duration:Float = 1, ease:String = "linear") {
+			return psychlua.WindowTweens.winTweenSize(targetW, targetH, duration, ease);
+		});
+		set('winResizeCenter', function(width:Int, height:Int, ?skip:Bool = false) {
+			psychlua.WindowTweens.winResizeCenter(width, height, skip);
+		});
+		set('setWindowX', function(x:Int) {
+			psychlua.WindowTweens.setWindowX(x);
+		});
+		set('setWindowY', function(y:Int) {
+			psychlua.WindowTweens.setWindowY(y);
+		});
+		set('setWindowSize', function(width:Int, height:Int) {
+			psychlua.WindowTweens.setWindowSize(width, height);
+		});
+		set('getWindowX', function() {
+			return psychlua.WindowTweens.getWindowX();
+		});
+		set('getWindowY', function() {
+			return psychlua.WindowTweens.getWindowY();
+		});
+		set('getWindowWidth', function() {
+			return psychlua.WindowTweens.getWindowWidth();
+		});
+		set('getWindowHeight', function() {
+			return psychlua.WindowTweens.getWindowHeight();
+		});
+		set('centerWindow', function() {
+			psychlua.WindowTweens.centerWindow();
+		});
+		set('shakeWindow', function(intensity:Float = 5.0, duration:Float = 0.5) {
+			psychlua.WindowTweens.shakeWindow(intensity, duration);
+		});
+		set('bounceWindow', function(bounces:Int = 3, height:Float = 50.0, duration:Float = 1.0) {
+			psychlua.WindowTweens.bounceWindow(bounces, height, duration);
+		});
+		set('setWindowTitle', function(title:String) {
+			psychlua.WindowTweens.setWindowTitle(title);
+		});
+		set('getWindowTitle', function() {
+			return psychlua.WindowTweens.getWindowTitle();
+		});
+		#end
 
 		// Keyboard & Gamepads
 		set('keyboardJustPressed', function(name:String) return Reflect.getProperty(FlxG.keys.justPressed, name));

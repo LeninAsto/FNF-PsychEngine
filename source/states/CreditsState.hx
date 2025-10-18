@@ -202,11 +202,23 @@ class CreditsState extends MusicBeatState
 				
 				// Verificar si venimos de un ModState personalizado
 				#if HSCRIPT_ALLOWED
-				if(states.ModState.sharedVars.exists('cameFromMainMenu') && 
-				   states.ModState.sharedVars.get('cameFromMainMenu') == true)
+				var cameFromModState = states.ModState.sharedVars.exists('cameFromMainMenu') && 
+									   states.ModState.sharedVars.get('cameFromMainMenu') == true;
+				
+				if(cameFromModState && backend.Mods.canModExecuteStates())
 				{
-					// Volver al MainMenuState personalizado (ModState)
-					MusicBeatState.switchState(new states.ModState('MainMenuState'));
+					// Verificar que el archivo exista antes de cargar ModState
+					var mainMenuPath:String = Paths.hx('MainMenuState');
+					if(sys.FileSystem.exists(mainMenuPath))
+					{
+						// Volver al MainMenuState personalizado (ModState)
+						MusicBeatState.switchState(new states.ModState('MainMenuState'));
+					}
+					else
+					{
+						// El mod no tiene MainMenuState, ir al original
+						MusicBeatState.switchState(new MainMenuState());
+					}
 				}
 				else
 				#end

@@ -360,21 +360,42 @@ class ResultsState extends MusicBeatState
             }
             #end
             
-            // Resetear mod directory antes de ir a freeplay
-            #if MODS_ALLOWED
-            backend.Mods.currentModDirectory = '';
-            #end
-            
             // Ir directamente a FreeplayState (mod o engine)
             #if HSCRIPT_ALLOWED
-            if (params.isMod && params.modFolder != null && params.modFolder != "") {
+            // ✅ Verificar que el mod tenga permiso para ejecutar custom states
+            trace('ResultsState: Verificando permisos para mod ${params.modFolder}');
+            trace('ResultsState: activeModState = ${backend.ClientPrefs.data.activeModState}');
+            
+            if (backend.Mods.canModExecuteStates(params.modFolder)) {
+                trace('ResultsState: Mod ${params.modFolder} tiene permiso para ejecutar custom states');
+                // Asegurar que currentModDirectory esté configurado para este mod
+                backend.Mods.currentModDirectory = params.modFolder;
+                
                 // Volver al FreeplayState personalizado del mod (si existe)
-                MusicBeatState.switchState(new states.ModState('FreeplayState'));
+                var freeplayPath:String = Paths.hx('FreeplayState');
+                trace('ResultsState: Buscando FreeplayState en: $freeplayPath');
+                
+                if(sys.FileSystem.exists(freeplayPath))
+                {
+                    trace('ResultsState: Mod ${params.modFolder} tiene FreeplayState personalizado, cargando ModState');
+                    MusicBeatState.switchState(new states.ModState('FreeplayState'));
+                }
+                else
+                {
+                    trace('ResultsState: Mod ${params.modFolder} no tiene FreeplayState personalizado, usando del engine');
+                    // El mod no tiene FreeplayState personalizado, ir al del engine
+                    backend.Mods.currentModDirectory = '';
+                    MusicBeatState.switchState(new FreeplayState());
+                }
             }
             else
             #end
             {
-                // Volver al FreeplayState original del engine
+                trace('ResultsState: Mod ${params.modFolder} NO tiene permiso o HSCRIPT_ALLOWED está deshabilitado');
+                // Resetear mod directory y volver al FreeplayState original del engine
+                #if MODS_ALLOWED
+                backend.Mods.currentModDirectory = '';
+                #end
                 MusicBeatState.switchState(new FreeplayState());
             }
         }

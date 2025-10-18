@@ -2,6 +2,7 @@ package backend;
 
 import flixel.FlxState;
 import backend.PsychCamera;
+import debug.TraceDisplay;
 
 class MusicBeatState extends FlxState
 {
@@ -103,6 +104,12 @@ class MusicBeatState extends FlxState
 		removeTouchPad();
 		removeMobileControls();
 		
+		// Cleanup TraceDisplay si esta es la última instancia
+		if(traceDisplay != null) {
+			// Solo destruir si no hay otros estados activos
+			// En la práctica, el TraceDisplay debe persistir entre estados
+		}
+		
 		super.destroy();
 	}
 
@@ -110,6 +117,9 @@ class MusicBeatState extends FlxState
 
 	public var variables:Map<String, Dynamic> = new Map<String, Dynamic>();
 	public var videoHandlers:Map<String, Dynamic> = new Map<String, Dynamic>(); // Separar videos de variables normales
+	
+	// TraceDisplay global
+	public static var traceDisplay:TraceDisplay;
 	
 	public static function getVariables()
 		return getState().variables;
@@ -122,6 +132,18 @@ class MusicBeatState extends FlxState
 		#if MODS_ALLOWED Mods.updatedOnState = false; #end
 
 		if(!_psychCameraInitialized) initPsychCamera();
+		
+		// Inicializar TraceDisplay si no existe
+		if(traceDisplay == null && TraceDisplay.instance == null) {
+			traceDisplay = new TraceDisplay();
+			if(FlxG.stage != null) {
+				FlxG.stage.addChild(traceDisplay);
+				traceDisplay.setupBackground();
+			}
+		} else if (TraceDisplay.instance != null) {
+			// Usar la instancia existente
+			traceDisplay = TraceDisplay.instance;
+		}
 
 		super.create();
 

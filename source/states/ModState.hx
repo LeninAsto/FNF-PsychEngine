@@ -1,7 +1,10 @@
 package states;
 
 import flixel.FlxState;
+import flixel.FlxSprite;
 import flixel.text.FlxText;
+import flixel.util.FlxColor;
+import debug.TraceDisplay;
 
 #if HSCRIPT_ALLOWED
 import psychlua.HScript;
@@ -25,6 +28,11 @@ class ModState extends MusicBeatState
     // Variables para cambiar de estado
     public static var nextState:FlxState = null;
     public var stateName:String = '';
+    
+    // Texto de error para mostrar cuando algo falla
+    public var errorText:FlxText;
+    public var hasError:Bool = false;
+    public var bgSprite:FlxSprite;
     
     // Sistema de variables compartidas entre ModStates
     public static var sharedVars:Map<String, Dynamic> = new Map<String, Dynamic>();
@@ -64,6 +72,13 @@ class ModState extends MusicBeatState
         // Permitir que los scripts individuales controlen persistentUpdate
         // Solo establecer persistentDraw en true por defecto
         persistentDraw = true;
+        
+        // Crear texto de error (inicialmente oculto)
+        errorText = new FlxText(10, 50, FlxG.width - 20, "", 16);
+        errorText.color = FlxColor.RED;
+        errorText.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
+        errorText.visible = false;
+        add(errorText);
         
         // Cargar scripts automáticamente si se proporciona un stateName
         if(stateName != null && stateName.length > 0)
@@ -205,7 +220,15 @@ class ModState extends MusicBeatState
         catch(e:IrisError)
         {
             var pos:HScriptInfos = cast {fileName: file, showLine: false};
-            Iris.error(Printer.errorToString(e, false), pos);
+            var errorMsg = Printer.errorToString(e, false);
+            
+            // Mostrar error en el ModState
+            showError('HScript Error in ${extractFileName(file)}:\n$errorMsg');
+            
+            // Enviar error al TraceDisplay
+            TraceDisplay.addHScriptError(errorMsg, file);
+            
+            Iris.error(errorMsg, pos);
             var newScript:HScript = cast (Iris.instances.get(file), HScript);
             if(newScript != null)
                 newScript.destroy();
@@ -230,6 +253,50 @@ class ModState extends MusicBeatState
         return false;
     }
     #end
+    
+    /**
+     * Mostrar un error en pantalla y hacer el fondo negro
+     */
+    public function showError(text:String):Void
+    {
+        hasError = true;
+        
+        // Hacer el fondo negro
+        if (bgSprite == null) {
+            bgSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+            add(bgSprite);
+        }
+        
+        // Mostrar texto de error
+        errorText.text = text;
+        errorText.visible = true;
+        
+        // Asegurar que el texto esté encima del fondo
+        remove(errorText);
+        add(errorText);
+        
+        trace('ModState Error: $text');
+    }
+    
+    /**
+     * Extraer nombre de archivo sin path ni extensión
+     */
+    private function extractFileName(fileName:String):String
+    {
+        if (fileName == null) return "unknown";
+        
+        if (fileName.indexOf("/") != -1) {
+            fileName = fileName.substr(fileName.lastIndexOf("/") + 1);
+        }
+        if (fileName.indexOf("\\") != -1) {
+            fileName = fileName.substr(fileName.lastIndexOf("\\") + 1);
+        }
+        if (fileName.indexOf(".") != -1) {
+            fileName = fileName.substr(0, fileName.lastIndexOf("."));
+        }
+        
+        return fileName;
+    }
 
     // Call functions on all scripts
     public function callOnScripts(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic
@@ -256,19 +323,34 @@ class ModState extends MusicBeatState
             if(script == null || !script.exists(funcToCall) || exclusions.contains(script.origin))
                 continue;
 
-            var callValue = script.call(funcToCall, args);
-            if(callValue != null)
-            {
-                var myValue:Dynamic = callValue.returnValue;
-
-                if((myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops)
+            try {
+                var callValue = script.call(funcToCall, args);
+                if(callValue != null)
                 {
-                    returnVal = myValue;
-                    break;
-                }
+                    var myValue:Dynamic = callValue.returnValue;
 
-                if(myValue != null && !excludeValues.contains(myValue))
-                    returnVal = myValue;
+                    if((myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops)
+                    {
+                        returnVal = myValue;
+                        break;
+                    }
+
+                    if(myValue != null && !excludeValues.contains(myValue))
+                        returnVal = myValue;
+                }
+            }
+            catch(e:Dynamic) {
+                @:privateAccess
+                var fileName = script.origin != null ? script.origin : "unknown";
+                var errorMsg = 'Error calling function "$funcToCall": $e';
+                
+                // Mostrar error en el ModState
+                showError('HScript Runtime Error in ${extractFileName(fileName)}:\nFunction: $funcToCall\nError: $e');
+                
+                // Enviar error al TraceDisplay
+                TraceDisplay.addHScriptError('Runtime error in $funcToCall: $e', fileName);
+                
+                trace('HScript Runtime Error in $fileName: $e');
             }
         }
         #end

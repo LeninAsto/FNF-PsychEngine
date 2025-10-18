@@ -179,7 +179,8 @@ class GameOverSubstate extends MusicBeatSubstate
 					#if (HSCRIPT_ALLOWED && sys)
 					var hasCustomState:Bool = false;
 					
-					if(backend.Mods.currentModDirectory != null && backend.Mods.currentModDirectory.length > 0)
+					// ✅ Verificar que el mod tenga permiso para ejecutar custom states
+					if(backend.Mods.canModExecuteStates())
 					{
 						// Prioridad 1: StoryMenuState del mod
 						var storyMenuPath:String = Paths.hx('StoryMenuState');
@@ -208,31 +209,30 @@ class GameOverSubstate extends MusicBeatSubstate
 						MusicBeatState.switchState(new StoryMenuState());
 					}
 				}
-				else
+			else
+			{
+				// Verificar si el mod tiene FreeplayState personalizado
+				#if (HSCRIPT_ALLOWED && sys)
+				var hasCustomFreeplay:Bool = false;
+				
+				// ✅ Verificar que el mod tenga permiso para ejecutar custom states
+				if(backend.Mods.canModExecuteStates())
 				{
-					// Verificar si el mod tiene FreeplayState personalizado
-					#if (HSCRIPT_ALLOWED && sys)
-					var hasCustomFreeplay:Bool = false;
-					
-					if(backend.Mods.currentModDirectory != null && backend.Mods.currentModDirectory.length > 0)
+					var freeplayPath:String = Paths.hx('FreeplayState');
+					if(sys.FileSystem.exists(freeplayPath))
 					{
-						var freeplayPath:String = Paths.hx('FreeplayState');
-						if(sys.FileSystem.exists(freeplayPath))
-						{
-							trace('Mod ${backend.Mods.currentModDirectory} tiene FreeplayState personalizado');
-							hasCustomFreeplay = true;
-							MusicBeatState.switchState(new states.ModState('FreeplayState'));
-						}
-					}
-					
-					if(!hasCustomFreeplay)
-					#end
-					{
-						MusicBeatState.switchState(new FreeplayState());
+						trace('Mod ${backend.Mods.currentModDirectory} tiene FreeplayState personalizado');
+						hasCustomFreeplay = true;
+						MusicBeatState.switchState(new states.ModState('FreeplayState'));
 					}
 				}
-	
-				FlxG.sound.playMusic(Paths.music('freakyMenu'));
+				
+				if(!hasCustomFreeplay)
+				#end
+				{
+					MusicBeatState.switchState(new FreeplayState());
+				}
+			}				FlxG.sound.playMusic(Paths.music('freakyMenu'));
 				PlayState.instance.callOnScripts('onGameOverConfirm', [false]);
 			}
 			else if (justPlayedLoop)
