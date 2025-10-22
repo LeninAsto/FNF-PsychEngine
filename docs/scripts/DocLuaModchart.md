@@ -1,43 +1,9 @@
 # Sistema de Modchart - Documentación Completa
 
 ## 📚 Índice
-1. [Diferencias entre Lua y Haxe](#diferencias-lua-vs-haxe)
-2. [Sistema de Eventos](#sistema-de-eventos)
-3. [Funciones de Modchart](#funciones-de-modchart)
-4. [Ejemplos Prácticos](#ejemplos-prácticos)
-
----
-
-## Diferencias Lua vs Haxe
-
-### **Lua (Recomendado para principiantes)**
-- ✅ **Más simple y directo** - No requiere compilación
-- ✅ **Hot reload** - Puedes editar en tiempo real
-- ✅ **Menos propenso a errores** - El engine maneja la mayoría de casos
-- ✅ **Ideal para modcharts** - Diseñado específicamente para esto
-- ❌ **Menos control** - No puedes crear eventos completamente personalizados
-- ❌ **Performance ligeramente menor** - Pero imperceptible en la mayoría de casos
-
-**Cuándo usar Lua:**
-- Quieres hacer modcharts estándar (efectos visuales, movimientos de flechas)
-- Necesitas iterar rápidamente sin recompilar
-- Prefieres sintaxis simple y legible
-- Estás empezando con modcharts
-
-### **Haxe (Para usuarios avanzados)**
-- ✅ **Control total** - Acceso directo al Manager y PlayField
-- ✅ **Performance máxima** - Código compilado nativamente
-- ✅ **Tipos personalizados** - Puedes crear tus propios eventos y modificadores
-- ✅ **Acceso a APIs internas** - Todo el sistema de modchart
-- ❌ **Requiere compilación** - Cada cambio necesita rebuild
-- ❌ **Más complejo** - Necesitas entender la arquitectura
-- ❌ **Mayor probabilidad de errores** - Puedes romper el sistema
-
-**Cuándo usar Haxe:**
-- Necesitas crear modificadores completamente nuevos
-- Quieres eventos con comportamiento único
-- Necesitas máxima performance (modcharts muy complejos)
-- Estás contribuyendo al engine
+1. [Sistema de Eventos](#sistema-de-eventos)
+2. [Funciones de Modchart](#funciones-de-modchart)
+3. [Ejemplos Prácticos](#ejemplos-prácticos)
 
 ---
 
@@ -110,7 +76,7 @@ add('drunk', 0, 4, 0.25, 'linear', 0, -1)  -- Va de 50% a 75% (50% + 25% = 75%)
 ```lua
 repeater(80, 16, 'myRepeaterFunc', -1)
 
-function myRepeaterFunc(event)
+function myRepeaterFunc()
     -- Este código se ejecuta CADA FRAME
     local beat = (getSongPosition() / 1000) / (60 / bpm) * 4
     debugPrint('Beat: ' .. beat)
@@ -128,7 +94,7 @@ end
 ```lua
 callback(64, 'myCallbackFunc', -1)
 
-function myCallbackFunc(event)
+function myCallbackFunc()
     debugPrint('¡Llegamos al beat 64!')
     setPercent('tipsy', 0.75, 0, -1)
 end
@@ -140,10 +106,6 @@ end
 ---
 
 ## Funciones de Modchart
-
-```lua
--- Todo debe estar dentro de esta función para funcionar correctamente
-function onInitModchart()
 
 ```lua
 -- Todo debe estar dentro de esta función para funcionar correctamente
@@ -284,7 +246,7 @@ function onInitModchart()
     callback(64, 'resetModchart', -1)
 end
 
-function resetModchart(event)
+function resetModchart()
     debugPrint('¡Reseteando modchart!')
     setPercent('reverse', 0, -1, -1)
     setPercent('drunk', 0, -1, -1)
@@ -315,7 +277,7 @@ function onInitModchart()
     repeater(32, 32, 'pulseEffect', -1)
 end
 
-function pulseEffect(event)
+function pulseEffect()
     -- Calcular beat actual con decimales
     local beat = (getSongPosition() / 1000) / (60 / bpm) * 4
     local beatFraction = beat % 1 -- 0.0 a 1.0 dentro del beat
@@ -343,7 +305,7 @@ function onInitModchart()
     callback(64, 'resetAll', -1)
 end
 
-function dropEffect(event)
+function dropEffect()
     debugPrint('¡DROP!')
     -- Activar múltiples efectos instantáneamente
     setPercent('flip', 1, -1, -1)
@@ -351,7 +313,7 @@ function dropEffect(event)
     setPercent('reverse', 1, -1, -1)
 end
 
-function resetAll(event)
+function resetAll()
     setPercent('flip', 0, -1, -1)
     setPercent('invert', 0, -1, -1)
     setPercent('reverse', 0, -1, -1)
@@ -447,7 +409,7 @@ ease('drunk', 16, 16, 0, 'cubeInOut', 1, -1)
 **3. Usar repeater para sincronización perfecta:**
 ```lua
 repeater(0, 999, 'beatSync', -1) -- Durante toda la canción
-function beatSync(event)
+function beatSync()
     local pos = getSongPosition() / 1000
     local beat = pos / (60 / bpm) * 4
     if beat % 4 < 0.1 then -- Cada 4 beats
