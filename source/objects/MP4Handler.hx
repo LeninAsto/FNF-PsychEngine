@@ -137,7 +137,6 @@ class MP4Handler extends FlxSprite
 	{
 		// Evitar llamadas múltiples con bandera específica
 		if (endReachedCalled || isDestroyed) {
-			trace('MP4Handler[${instanceId}]: onVideoFinished already called or destroyed, skipping');
 			return;
 		}
 		
@@ -146,19 +145,15 @@ class MP4Handler extends FlxSprite
 		
 		// Evitar llamadas múltiples con el flag de reproducción
 		if (!isCurrentlyPlaying) {
-			trace('MP4Handler[${instanceId}]: Not currently playing, skipping onVideoFinished');
 			return;
 		}
 		
 		// Verificar que se permita la destrucción
 		if (!allowDestroy) {
-			trace('MP4Handler[${instanceId}]: Destruction not allowed yet, ignoring');
 			isCurrentlyPlaying = true; // Restaurar
 			endReachedCalled = false; // Permitir otra llamada
 			return;
 		}
-		
-		trace('MP4Handler[${instanceId}]: Processing video end...');
 		
 		isCurrentlyPlaying = false;
 		cleanupVideoSprite();
@@ -169,18 +164,13 @@ class MP4Handler extends FlxSprite
 
 	private function cleanupVideoSprite():Void
 	{
-		trace('MP4Handler[${instanceId}]: cleanupVideoSprite called from:');
-		trace(haxe.CallStack.toString(haxe.CallStack.callStack()));
-		
 		// Evitar múltiples limpiezas
 		if (isDestroyed) {
-			trace('MP4Handler[${instanceId}]: Already destroyed, skipping cleanup');
 			return;
 		}
 		
 		// No permitir cleanup si no se ha autorizado
 		if (!allowDestroy) {
-			trace('MP4Handler[${instanceId}]: Destruction not allowed, skipping cleanup');
 			return;
 		}
 		
@@ -188,7 +178,6 @@ class MP4Handler extends FlxSprite
 		isDestroyed = true;
 		
 		if (videoSprite != null) {
-			trace('MP4Handler[${instanceId}]: Cleaning up video sprite...');
 			
 			// Remover callbacks de forma segura
 			#if hxvlc
@@ -206,12 +195,10 @@ class MP4Handler extends FlxSprite
 			try {
 				if (FlxG.state != null && FlxG.state.members != null && FlxG.state.members.contains(videoSprite)) {
 					FlxG.state.remove(videoSprite);
-					trace('MP4Handler[${instanceId}]: Removed videoSprite from state');
 				}
 				
 				videoSprite.destroy();
 				videoSprite = null;
-				trace('MP4Handler[${instanceId}]: Video sprite destroyed and set to null');
 			} catch (e:Dynamic) {
 				trace('MP4Handler[${instanceId}]: Error destroying video sprite: $e');
 				videoSprite = null; // Asegurar que se establezca a null incluso si falla
@@ -249,7 +236,6 @@ class MP4Handler extends FlxSprite
 	{
 		#if hxvlc
 		if (videoSprite != null && !isDestroyed) {
-			trace('MP4Handler[${instanceId}]: Finishing video...');
 			videoSprite.stop();
 			if (!endReachedCalled) {
 				haxe.Timer.delay(onVideoFinished, 1);
@@ -262,10 +248,9 @@ class MP4Handler extends FlxSprite
 	{
 		#if hxvlc
 		if (videoSprite != null && !isDestroyed) {
-			trace('MP4Handler[${instanceId}]: Pausing video...');
 			videoSprite.pause();
 		} else {
-			trace('MP4Handler[${instanceId}]: Cannot pause - videoSprite is null or destroyed');
+			//XD
 		}
 		#else
 		trace('MP4Handler[${instanceId}]: Cannot pause - hxvlc not available');
@@ -276,10 +261,9 @@ class MP4Handler extends FlxSprite
 	{
 		#if hxvlc
 		if (videoSprite != null && !isDestroyed) {
-			trace('MP4Handler[${instanceId}]: Resuming video...');
 			videoSprite.resume();
 		} else {
-			trace('MP4Handler[${instanceId}]: Cannot resume - videoSprite is null or destroyed');
+			//XD
 		}
 		#else
 		trace('MP4Handler[${instanceId}]: Cannot resume - hxvlc not available');
@@ -361,11 +345,8 @@ class MP4Handler extends FlxSprite
 
 	override function destroy():Void 
 	{
-		trace('MP4Handler[${instanceId}]: destroy() called, allowDestroy=$allowDestroy, isDestroyed=$isDestroyed');
-		
 		// Bloquear destrucción si no está permitida o ya fue destruido
 		if (!allowDestroy || isDestroyed) {
-			trace('MP4Handler[${instanceId}]: Destroy blocked');
 			return;
 		}
 		
@@ -380,13 +361,11 @@ class MP4Handler extends FlxSprite
 		}
 		
 		super.destroy();
-		trace('MP4Handler[${instanceId}]: Destroy completed');
 	}
 	
 	// Método de emergencia para forzar limpieza
 	public function forceCleanup():Void 
 	{
-		trace('MP4Handler[${instanceId}]: Force cleanup requested');
 		allowDestroy = true;
 		isDestroyed = false; // Permitir una limpieza final
 		cleanupVideoSprite();

@@ -84,6 +84,24 @@ class LuaModchart
         Lua_helper.add_callback(lua, "getArrowSizeDiv2", function():Float {
             return Manager.ARROW_SIZEDIV2;
         });
+        
+        // Evento callback: ejecutar una función en un beat específico
+        Lua_helper.add_callback(lua, "callback", function(beat:Float, funcName:String, ?field:Int = -1) {
+            if (Manager.instance != null) {
+                Manager.instance.callback(beat, function(event) {
+                    funk.call(funcName, []); // No pasar el objeto event a Lua
+                }, field);
+            }
+        });
+        
+        // Evento repeater: ejecutar una función repetidamente durante un período
+        Lua_helper.add_callback(lua, "repeater", function(beat:Float, length:Float, funcName:String, ?field:Int = -1) {
+            if (Manager.instance != null) {
+                Manager.instance.repeater(beat, length, function(event) {
+                    funk.call(funcName, []); // No pasar el objeto event a Lua
+                }, field);
+            }
+        });
     }
     
     // Función auxiliar para convertir nombres de easing a funciones
