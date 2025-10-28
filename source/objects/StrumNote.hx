@@ -1,6 +1,7 @@
 package objects;
 
 import backend.animation.PsychAnimationController;
+import backend.ExtraKeysHandler;
 
 import shaders.RGBPalette;
 import shaders.RGBPalette.RGBShaderReference;
@@ -32,10 +33,36 @@ class StrumNote extends FlxSprite
 		rgbShader.enabled = false;
 		if(PlayState.SONG != null && PlayState.SONG.disableNoteRGB) useRGBShader = false;
 		
-		var arr:Array<FlxColor> = ClientPrefs.data.arrowRGB[leData];
-		if(PlayState.isPixelStage) arr = ClientPrefs.data.arrowRGBPixel[leData];
+		var arr:Array<FlxColor> = null;
 		
-		if(leData <= arr.length)
+		// Manejar Extra Keys - obtener colores apropiados
+		if (leData < 4) {
+			// Usar colores estándar para las primeras 4 teclas
+			arr = ClientPrefs.data.arrowRGB[leData];
+			if(PlayState.isPixelStage) arr = ClientPrefs.data.arrowRGBPixel[leData];
+		} else {
+			// Para Extra Keys, usar colores del ExtraKeysHandler o colores por defecto
+			if (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
+				var numKeys = (PlayState.SONG != null && PlayState.SONG.mania != null) ? PlayState.SONG.mania : 4;
+				var index = ExtraKeysHandler.instance.getIndex(numKeys, leData);
+				if (index < ExtraKeysHandler.instance.data.colors.length) {
+					// Crear array de colores desde ExtraKeysHandler
+					var colorData = ExtraKeysHandler.instance.data.colors[index];
+					arr = [
+						FlxColor.fromString('#' + colorData.inner),
+						FlxColor.fromString('#' + colorData.border), 
+						FlxColor.fromString('#' + colorData.outline)
+					];
+				}
+			}
+			
+			// Fallback: usar colores por defecto si no se encontraron
+			if (arr == null) {
+				arr = [FlxColor.PURPLE, FlxColor.WHITE, FlxColor.BLACK]; // Colores por defecto
+			}
+		}
+		
+		if(arr != null && leData < arr.length)
 		{
 			@:bypassAccessor
 			{
@@ -82,7 +109,18 @@ class StrumNote extends FlxSprite
 			animation.add('red', [7]);
 			animation.add('blue', [5]);
 			animation.add('purple', [4]);
-			switch (Math.abs(noteData) % 4)
+			
+			// Obtener animaciones para Extra Keys
+			var animIndex = noteData;
+			if (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
+				var numKeys = (PlayState.SONG != null && PlayState.SONG.mania != null) ? PlayState.SONG.mania : 4;
+				animIndex = ExtraKeysHandler.instance.getIndex(numKeys, noteData);
+			}
+			
+			// Mapear a animaciones estándar si no hay suficientes frames
+			var mappedIndex = animIndex % 4;
+			
+			switch (mappedIndex)
 			{
 				case 0:
 					animation.add('static', [0]);
@@ -113,24 +151,41 @@ class StrumNote extends FlxSprite
 			antialiasing = ClientPrefs.data.antialiasing;
 			setGraphicSize(Std.int(width * 0.7));
 
-			switch (Math.abs(noteData) % 4)
-			{
-				case 0:
-					animation.addByPrefix('static', 'arrowLEFT');
-					animation.addByPrefix('pressed', 'left press', 24, false);
-					animation.addByPrefix('confirm', 'left confirm', 24, false);
-				case 1:
-					animation.addByPrefix('static', 'arrowDOWN');
-					animation.addByPrefix('pressed', 'down press', 24, false);
-					animation.addByPrefix('confirm', 'down confirm', 24, false);
-				case 2:
-					animation.addByPrefix('static', 'arrowUP');
-					animation.addByPrefix('pressed', 'up press', 24, false);
-					animation.addByPrefix('confirm', 'up confirm', 24, false);
-				case 3:
-					animation.addByPrefix('static', 'arrowRIGHT');
-					animation.addByPrefix('pressed', 'right press', 24, false);
-					animation.addByPrefix('confirm', 'right confirm', 24, false);
+			// Obtener animaciones para Extra Keys
+			var animData = null;
+			if (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
+				var numKeys = (PlayState.SONG != null && PlayState.SONG.mania != null) ? PlayState.SONG.mania : 4;
+				var index = ExtraKeysHandler.instance.getIndex(numKeys, noteData);
+				animData = ExtraKeysHandler.instance.getAnimSet(index);
+			}
+			
+			// Usar datos de Extra Keys o fallback al sistema clásico
+			if (animData != null) {
+				// Usar animaciones específicas de Extra Keys
+				animation.addByPrefix('static', 'arrow' + animData.strum);
+				animation.addByPrefix('pressed', animData.anim + ' press', 24, false);
+				animation.addByPrefix('confirm', animData.anim + ' confirm', 24, false);
+			} else {
+				// Fallback al sistema clásico 4K
+				switch (noteData % 4)
+				{
+					case 0:
+						animation.addByPrefix('static', 'arrowLEFT');
+						animation.addByPrefix('pressed', 'left press', 24, false);
+						animation.addByPrefix('confirm', 'left confirm', 24, false);
+					case 1:
+						animation.addByPrefix('static', 'arrowDOWN');
+						animation.addByPrefix('pressed', 'down press', 24, false);
+						animation.addByPrefix('confirm', 'down confirm', 24, false);
+					case 2:
+						animation.addByPrefix('static', 'arrowUP');
+						animation.addByPrefix('pressed', 'up press', 24, false);
+						animation.addByPrefix('confirm', 'up confirm', 24, false);
+					case 3:
+						animation.addByPrefix('static', 'arrowRIGHT');
+						animation.addByPrefix('pressed', 'right press', 24, false);
+						animation.addByPrefix('confirm', 'right confirm', 24, false);
+				}
 			}
 		}
 		updateHitbox();
@@ -139,13 +194,6 @@ class StrumNote extends FlxSprite
 		{
 			playAnim(lastAnim, true);
 		}
-	}
-
-	public function playerPosition()
-	{
-		x += Note.swagWidth * noteData;
-		x += 50;
-		x += ((FlxG.width / 2) * player);
 	}
 
 	override function update(elapsed:Float) {
@@ -167,5 +215,64 @@ class StrumNote extends FlxSprite
 			centerOrigin();
 		}
 		if(useRGBShader) rgbShader.enabled = (animation.curAnim != null && animation.curAnim.name != 'static');
+	}
+
+	// Función para posicionar el strum según la mania
+	public function playerPosition() {
+		if (PlayState.SONG == null) return;
+		
+		var numKeys = (PlayState.SONG.mania != null) ? PlayState.SONG.mania : 4;
+		var keyCount = numKeys;
+		
+		// Obtener escala basándose en la mania
+		var scale = 1.0;
+		if (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
+			var maniaIndex = ExtraKeysHandler.instance.keysToIndex(numKeys);
+			if (PlayState.isPixelStage && ExtraKeysHandler.instance.data.pixelScales != null && 
+				maniaIndex < ExtraKeysHandler.instance.data.pixelScales.length) {
+				scale = ExtraKeysHandler.instance.data.pixelScales[maniaIndex];
+			} else if (!PlayState.isPixelStage && ExtraKeysHandler.instance.data.scales != null && 
+				maniaIndex < ExtraKeysHandler.instance.data.scales.length) {
+				scale = ExtraKeysHandler.instance.data.scales[maniaIndex];
+			}
+		}
+		
+		// Aplicar escala
+		setGraphicSize(Std.int(width * scale));
+		updateHitbox();
+		
+		// Configuración de posicionamiento
+		var strumWidth = width;
+		var separation = strumWidth * 1.0; // Separación entre strums
+		var totalWidth = keyCount * separation;
+		
+		// Posicionamiento basándose en el engine original
+		if (player == 1) {
+			// Player strums
+			if (ClientPrefs.data.middleScroll) {
+				// Middle scroll: centrado
+				var startX = (FlxG.width - totalWidth) / 2;
+				x = startX + (noteData * separation);
+			} else {
+				// Normal positioning: lado derecho
+				x = FlxG.width * 0.75 + (noteData * separation) - (totalWidth / 2);
+			}
+		} else {
+			// Opponent strums
+			if (ClientPrefs.data.middleScroll) {
+				// Middle scroll: lados
+				var baseX = FlxG.width * 0.25;
+				if (noteData < Math.floor(keyCount / 2)) {
+					// Lado izquierdo
+					x = baseX - ((Math.floor(keyCount / 2) - noteData) * separation);
+				} else {
+					// Lado derecho
+					x = FlxG.width * 0.75 + ((noteData - Math.floor(keyCount / 2)) * separation);
+				}
+			} else {
+				// Normal positioning: lado izquierdo
+				x = FlxG.width * 0.25 + (noteData * separation) - (totalWidth / 2);
+			}
+		}
 	}
 }

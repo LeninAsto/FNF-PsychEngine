@@ -3,6 +3,7 @@ package;
 import debug.FPSCounter;
 import debug.TraceDisplay;
 import backend.Highscore;
+import backend.ExtraKeysHandler;
 import flixel.FlxGame;
 import openfl.Lib;
 import openfl.display.Sprite;
@@ -91,6 +92,12 @@ class Main extends Sprite
 
 		FlxG.save.bind('funkin', CoolUtil.getSavePath());
 		Highscore.load();
+
+		// Inicializar ExtraKeysHandler
+		ExtraKeysHandler.instance = new ExtraKeysHandler();
+		
+		// Configurar extra keys
+		ClientPrefs.setupExtraKeys();
 
 		#if HSCRIPT_ALLOWED
 		Iris.warn = function(x, ?pos:haxe.PosInfos) {

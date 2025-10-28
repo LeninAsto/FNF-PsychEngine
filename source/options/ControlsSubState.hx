@@ -1,6 +1,7 @@
 package options;
 
 import backend.InputFormatter;
+import backend.ExtraKeysHandler;
 import flixel.addons.display.FlxBackdrop;
 import flixel.addons.display.FlxGridOverlay;
 import objects.AttachedSprite;
@@ -16,35 +17,7 @@ class ControlsSubState extends MusicBeatSubstate
 	var curAlt:Bool = false;
 
 	//Show on gamepad - Display name - Save file key - Rebind display name
-	var options:Array<Dynamic> = [
-		[true, 'NOTES'],
-		[true, 'Left', 'note_left', 'Note Left'],
-		[true, 'Down', 'note_down', 'Note Down'],
-		[true, 'Up', 'note_up', 'Note Up'],
-		[true, 'Right', 'note_right', 'Note Right'],
-		[true],
-		[true, 'UI'],
-		[true, 'Left', 'ui_left', 'UI Left'],
-		[true, 'Down', 'ui_down', 'UI Down'],
-		[true, 'Up', 'ui_up', 'UI Up'],
-		[true, 'Right', 'ui_right', 'UI Right'],
-		[true],
-		[true, 'Reset', 'reset', 'Reset'],
-		[true, 'Accept', 'accept', 'Accept'],
-		[true, 'Back', 'back', 'Back'],
-		[true, 'Pause', 'pause', 'Pause'],
-		[false],
-		[false, 'VOLUME'],
-		[false, 'Mute', 'volume_mute', 'Volume Mute'],
-		[false, 'Up', 'volume_up', 'Volume Up'],
-		[false, 'Down', 'volume_down', 'Volume Down'],
-		[false],
-		[false, 'DEBUG'],
-		[false, 'Key 1', 'debug_1', 'Debug Key #1'],
-		[false, 'Key 2', 'debug_2', 'Debug Key #2'],
-		[false, 'WINDOW'],
-		[false, 'Fullscreen', 'fullscreen', 'Fullscreen Toggel']
-	];
+	var options:Array<Dynamic> = [];
 	var curOptions:Array<Int>;
 	var curOptionsValid:Array<Int>;
 	static var defaultKey:String = 'Reset to Default Keys';
@@ -71,6 +44,8 @@ class ControlsSubState extends MusicBeatSubstate
 		#if DISCORD_ALLOWED
 		DiscordClient.changePresence("Controls Menu", null);
 		#end
+
+		generateControlsOptions(); // Generar opciones dinámicamente
 
 		options.push([true]);
 		options.push([true]);
@@ -116,6 +91,133 @@ class ControlsSubState extends MusicBeatSubstate
 		createTexts();
 		
 		addTouchPad('NONE', 'B');
+	}
+
+	function generateControlsOptions() {
+		try {
+			// Extra Keys dinámicas basadas en ExtraKeysHandler
+			options.push([true, 'EXTRA KEYS']);
+			options.push([true]);
+			
+			// 1K
+			options.push([true, '1 KEY']);
+			options.push([true, 'Center', 'note_one1', 'Center (1K)']);
+			options.push([true]);
+			
+			// 2K
+			options.push([true, '2 KEYS']);
+			options.push([true, 'Left', 'note_two1', 'Left (2K)']);
+			options.push([true, 'Right', 'note_two2', 'Right (2K)']);
+			options.push([true]);
+			
+			// 3K
+			options.push([true, '3 KEYS']);
+			options.push([true, 'Left', 'note_three1', 'Left (3K)']);
+			options.push([true, 'Center', 'note_three2', 'Center (3K)']);
+			options.push([true, 'Right', 'note_three3', 'Right (3K)']);
+			options.push([true]);
+			
+			// 4K
+			options.push([true, '4 KEYS']);
+			options.push([true, 'Left', 'note_left', 'Left (4K)']);
+			options.push([true, 'Down', 'note_down', 'Down (4K)']);
+			options.push([true, 'Up', 'note_up', 'Up (4K)']);
+			options.push([true, 'Right', 'note_right', 'Right (4K)']);
+			options.push([true]);
+			
+			// 5K
+			options.push([true, '5 KEYS']);
+			options.push([true, 'Left', 'note_five1', 'Left (5K)']);
+			options.push([true, 'Down', 'note_five2', 'Down (5K)']);
+			options.push([true, 'Center', 'note_five3', 'Center (5K)']);
+			options.push([true, 'Up', 'note_five4', 'Up (5K)']);
+			options.push([true, 'Right', 'note_five5', 'Right (5K)']);
+			options.push([true]);
+			
+			// 6K
+			options.push([true, '6 KEYS']);
+			options.push([true, 'Left 1', 'note_six1', 'Left 1 (6K)']);
+			options.push([true, 'Up', 'note_six2', 'Up (6K)']);
+			options.push([true, 'Right 1', 'note_six3', 'Right 1 (6K)']);
+			options.push([true, 'Left 2', 'note_six4', 'Left 2 (6K)']);
+			options.push([true, 'Down', 'note_six5', 'Down (6K)']);
+			options.push([true, 'Right 2', 'note_six6', 'Right 2 (6K)']);
+			options.push([true]);
+			
+			// 7K
+			options.push([true, '7 KEYS']);
+			options.push([true, 'Left 1', 'note_seven1', 'Left 1 (7K)']);
+			options.push([true, 'Up', 'note_seven2', 'Up (7K)']);
+			options.push([true, 'Right 1', 'note_seven3', 'Right 1 (7K)']);
+			options.push([true, 'Center', 'note_seven4', 'Center (7K)']);
+			options.push([true, 'Left 2', 'note_seven5', 'Left 2 (7K)']);
+			options.push([true, 'Down', 'note_seven6', 'Down (7K)']);
+			options.push([true, 'Right 2', 'note_seven7', 'Right 2 (7K)']);
+			options.push([true]);
+			
+			// 8K
+			options.push([true, '8 KEYS']);
+			options.push([true, 'Left 1', 'note_eight1', 'Left 1 (8K)']);
+			options.push([true, 'Down 1', 'note_eight2', 'Down 1 (8K)']);
+			options.push([true, 'Up 1', 'note_eight3', 'Up 1 (8K)']);
+			options.push([true, 'Right 1', 'note_eight4', 'Right 1 (8K)']);
+			options.push([true, 'Left 2', 'note_eight5', 'Left 2 (8K)']);
+			options.push([true, 'Down 2', 'note_eight6', 'Down 2 (8K)']);
+			options.push([true, 'Up 2', 'note_eight7', 'Up 2 (8K)']);
+			options.push([true, 'Right 2', 'note_eight8', 'Right 2 (8K)']);
+			options.push([true]);
+			
+			// 9K
+			options.push([true, '9 KEYS']);
+			options.push([true, 'Left 1', 'note_nine1', 'Left 1 (9K)']);
+			options.push([true, 'Down 1', 'note_nine2', 'Down 1 (9K)']);
+			options.push([true, 'Up 1', 'note_nine3', 'Up 1 (9K)']);
+			options.push([true, 'Right 1', 'note_nine4', 'Right 1 (9K)']);
+			options.push([true, 'Center', 'note_nine5', 'Center (9K)']);
+			options.push([true, 'Left 2', 'note_nine6', 'Left 2 (9K)']);
+			options.push([true, 'Down 2', 'note_nine7', 'Down 2 (9K)']);
+			options.push([true, 'Up 2', 'note_nine8', 'Up 2 (9K)']);
+			options.push([true, 'Right 2', 'note_nine9', 'Right 2 (9K)']);
+			options.push([true]);
+			
+			// UI Controls (no tocar)
+			options.push([true, 'UI']);
+			options.push([true, 'Left', 'ui_left', 'UI Left']);
+			options.push([true, 'Down', 'ui_down', 'UI Down']);
+			options.push([true, 'Up', 'ui_up', 'UI Up']);
+			options.push([true, 'Right', 'ui_right', 'UI Right']);
+			options.push([true]);
+			
+			// Other Controls (no tocar)
+			options.push([true, 'Reset', 'reset', 'Reset']);
+			options.push([true, 'Accept', 'accept', 'Accept']);
+			options.push([true, 'Back', 'back', 'Back']);
+			options.push([true, 'Pause', 'pause', 'Pause']);
+			options.push([false]);
+			
+			// Volume (no tocar)
+			options.push([false, 'VOLUME']);
+			options.push([false, 'Mute', 'volume_mute', 'Volume Mute']);
+			options.push([false, 'Up', 'volume_up', 'Volume Up']);
+			options.push([false, 'Down', 'volume_down', 'Volume Down']);
+			options.push([false]);
+			
+			// Debug (no tocar)
+			options.push([false, 'DEBUG']);
+			options.push([false, 'Key 1', 'debug_1', 'Debug Key #1']);
+			options.push([false, 'Key 2', 'debug_2', 'Debug Key #2']);
+			
+		} catch (e:Dynamic) {
+			trace('Error generating controls list: $e');
+			// Fallback seguro - solo mostrar 4K
+			options.push([true, 'NOTES (SAFE MODE)']);
+			options.push([true]);
+			options.push([true, '4 KEYS']);
+			options.push([true, 'Left', 'note_left', 'Note Left']);
+			options.push([true, 'Down', 'note_down', 'Note Down']);
+			options.push([true, 'Up', 'note_up', 'Note Up']);
+			options.push([true, 'Right', 'note_right', 'Note Right']);
+		}
 	}
 
 	var lastID:Int = 0;
@@ -185,12 +287,26 @@ class ControlsSubState extends MusicBeatSubstate
 	function addKeyText(text:Alphabet, option:Array<Dynamic>, id:Int)
 	{
 		var keys:Array<Null<FlxKey>> = ClientPrefs.keyBinds.get(option[2]);
-		if(keys == null && onKeyboardMode)
-			keys = ClientPrefs.defaultKeys.get(option[2]).copy();
+		if(keys == null && onKeyboardMode) {
+			var defaultKeys = ClientPrefs.defaultKeys.get(option[2]);
+			if(defaultKeys != null) {
+				keys = defaultKeys.copy();
+			} else {
+				// Fallback si no existe la tecla en defaultKeys
+				keys = [NONE, NONE];
+			}
+		}
 
 		var gmpds:Array<Null<FlxGamepadInputID>> = ClientPrefs.gamepadBinds.get(option[2]);
-		if(gmpds == null && !onKeyboardMode)
-			gmpds = ClientPrefs.defaultButtons.get(option[2]).copy();
+		if(gmpds == null && !onKeyboardMode) {
+			var defaultButtons = ClientPrefs.defaultButtons.get(option[2]);
+			if(defaultButtons != null) {
+				gmpds = defaultButtons.copy();
+			} else {
+				// Fallback si no existe el botón en defaultButtons
+				gmpds = [NONE, NONE];
+			}
+		}
 
 		for (n in 0...2)
 		{

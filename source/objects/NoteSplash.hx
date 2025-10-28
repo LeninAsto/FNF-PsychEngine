@@ -1,6 +1,7 @@
 package objects;
 
 import backend.animation.PsychAnimationController;
+import backend.ExtraKeysHandler;
 import shaders.RGBPalette;
 import flixel.system.FlxAssets.FlxShader;
 
@@ -88,7 +89,14 @@ class NoteSplash extends FlxSprite
 			this.config = configs.get(path);
 			for (anim in this.config.animations)
 			{
-				if (anim.noteData % 4 == 0)
+				// Obtener el número máximo de teclas basándose en Extra Keys
+				var maxKeys = 4; // Por defecto 4K
+				if (PlayState.SONG != null && ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
+					var numKeys = (PlayState.SONG.mania != null) ? PlayState.SONG.mania : 4;
+					maxKeys = numKeys;
+				}
+				
+				if (anim.noteData % maxKeys == 0)
 					maxAnims++;
 			}
 			return;
@@ -110,7 +118,15 @@ class NoteSplash extends FlxSprite
 				{
 					var anim:NoteSplashAnim = Reflect.field(config.animations, i);
 					tempConfig.animations.set(i, anim);
-					if (anim.noteData % 4 == 0)
+					
+					// Obtener el número máximo de teclas basándose en Extra Keys
+					var maxKeys = 4; // Por defecto 4K
+					if (PlayState.SONG != null && ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
+						var numKeys = (PlayState.SONG.mania != null) ? PlayState.SONG.mania : 4;
+						maxKeys = numKeys;
+					}
+					
+					if (anim.noteData % maxKeys == 0)
 						maxAnims++;
 				}
 

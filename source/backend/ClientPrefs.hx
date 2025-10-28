@@ -3,6 +3,7 @@ package backend;
 import flixel.util.FlxSave;
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
+import backend.ExtraKeysHandler;
 
 import states.TitleState;
 
@@ -120,11 +121,214 @@ class ClientPrefs {
 	//Every key has two binds, add your key bind down here and then add your control on options/ControlsSubState.hx and Controls.hx
 	public static var keyBinds:Map<String, Array<FlxKey>> = [
 		//Key Bind, Name for ControlsSubState
-		'note_up'		=> [W, UP],
+		// 1K
+		'note_one1'		=> [SPACE, NONE],
+
+		// 2K  
+		'note_two1'		=> [D, NONE],
+		'note_two2'		=> [K, NONE],
+
+		// 3K
+		'note_three1'	=> [D, NONE],
+		'note_three2'	=> [SPACE, NONE],
+		'note_three3'	=> [K, NONE],
+
+		// 4K (Default)
 		'note_left'		=> [A, LEFT],
 		'note_down'		=> [S, DOWN],
+		'note_up'		=> [W, UP],
 		'note_right'	=> [D, RIGHT],
+
+		// 5K
+		'note_five1'	=> [D, NONE],
+		'note_five2'	=> [F, NONE],
+		'note_five3'	=> [SPACE, NONE],
+		'note_five4'	=> [J, NONE],
+		'note_five5'	=> [K, NONE],
+
+		// 6K
+		'note_six1'		=> [S, NONE],
+		'note_six2'		=> [D, NONE],
+		'note_six3'		=> [F, NONE],
+		'note_six4'		=> [J, NONE],
+		'note_six5'		=> [K, NONE],
+		'note_six6'		=> [L, NONE],
+
+		// 7K
+		'note_seven1'	=> [S, NONE],
+		'note_seven2'	=> [D, NONE],
+		'note_seven3'	=> [F, NONE],
+		'note_seven4'	=> [SPACE, NONE],
+		'note_seven5'	=> [J, NONE],
+		'note_seven6'	=> [K, NONE],
+		'note_seven7'	=> [L, NONE],
+
+		// 8K
+		'note_eight1'	=> [A, NONE],
+		'note_eight2'	=> [S, NONE],
+		'note_eight3'	=> [D, NONE],
+		'note_eight4'	=> [F, NONE],
+		'note_eight5'	=> [H, NONE],
+		'note_eight6'	=> [J, NONE],
+		'note_eight7'	=> [K, NONE],
+		'note_eight8'	=> [L, NONE],
+
+		// 9K
+		'note_nine1'	=> [A, NONE],
+		'note_nine2'	=> [S, NONE],
+		'note_nine3'	=> [D, NONE],
+		'note_nine4'	=> [F, NONE],
+		'note_nine5'	=> [SPACE, NONE],
+		'note_nine6'	=> [H, NONE],
+		'note_nine7'	=> [J, NONE],
+		'note_nine8'	=> [K, NONE],
+		'note_nine9'	=> [L, NONE],
+
+		// 10K
+		'note_ten1'		=> [A, NONE],
+		'note_ten2'		=> [S, NONE],
+		'note_ten3'		=> [D, NONE],
+		'note_ten4'		=> [F, NONE],
+		'note_ten5'		=> [G, NONE],
+		'note_ten6'		=> [SPACE, NONE],
+		'note_ten7'		=> [H, NONE],
+		'note_ten8'     => [J, NONE],
+		'note_ten9'		=> [K, NONE],
+		'note_ten10'	=> [L, NONE],
+
+		// 11K
+		'note_elev1'	=> [A, NONE],
+		'note_elev2'	=> [S, NONE],
+		'note_elev3'	=> [D, NONE],
+		'note_elev4'	=> [F, NONE],
+		'note_elev5'	=> [G, NONE],
+		'note_elev6'	=> [SPACE, NONE],
+		'note_elev7'	=> [H, NONE],
+		'note_elev8'    => [J, NONE],
+		'note_elev9'	=> [K, NONE],
+		'note_elev10'	=> [L, NONE],
+		'note_elev11'	=> [PERIOD, NONE],
+
+		// 12K
+		'note_twelve1'	=> [Q, NONE],
+		'note_twelve2'	=> [W, NONE],
+		'note_twelve3'	=> [E, NONE],
+		'note_twelve4'	=> [R, NONE],
+		'note_twelve5'	=> [T, NONE],
+		'note_twelve6'	=> [Y, NONE],
+		'note_twelve7'	=> [U, NONE],
+		'note_twelve8'	=> [I, NONE],
+		'note_twelve9'	=> [O, NONE],
+		'note_twelve10'	=> [P, NONE],
+		'note_twelve11'	=> [LBRACKET, NONE],
+		'note_twelve12'	=> [RBRACKET, NONE],
+
+		// 13K  
+		'note_thirteen1' => [Q, NONE],
+		'note_thirteen2' => [W, NONE],
+		'note_thirteen3' => [E, NONE],
+		'note_thirteen4' => [R, NONE],
+		'note_thirteen5' => [T, NONE],
+		'note_thirteen6' => [Y, NONE],
+		'note_thirteen7' => [SPACE, NONE],
+		'note_thirteen8' => [U, NONE],
+		'note_thirteen9' => [I, NONE],
+		'note_thirteen10' => [O, NONE],
+		'note_thirteen11' => [P, NONE],
+		'note_thirteen12' => [LBRACKET, NONE],
+		'note_thirteen13' => [RBRACKET, NONE],
+
+		// 14K
+		'note_fourteen1' => [Q, NONE],
+		'note_fourteen2' => [W, NONE],
+		'note_fourteen3' => [E, NONE],
+		'note_fourteen4' => [R, NONE],
+		'note_fourteen5' => [T, NONE],
+		'note_fourteen6' => [Y, NONE],
+		'note_fourteen7' => [U, NONE],
+		'note_fourteen8' => [I, NONE],
+		'note_fourteen9' => [O, NONE],
+		'note_fourteen10' => [P, NONE],
+		'note_fourteen11' => [LBRACKET, NONE],
+		'note_fourteen12' => [RBRACKET, NONE],
+		'note_fourteen13' => [BACKSLASH, NONE],
+		'note_fourteen14' => [ENTER, NONE],
+
+		// 15K
+		'note_fifteen1' => [Q, NONE],
+		'note_fifteen2' => [W, NONE],
+		'note_fifteen3' => [E, NONE],
+		'note_fifteen4' => [R, NONE],
+		'note_fifteen5' => [T, NONE],
+		'note_fifteen6' => [Y, NONE],
+		'note_fifteen7' => [U, NONE],
+		'note_fifteen8' => [SPACE, NONE],
+		'note_fifteen9' => [I, NONE],
+		'note_fifteen10' => [O, NONE],
+		'note_fifteen11' => [P, NONE],
+		'note_fifteen12' => [LBRACKET, NONE],
+		'note_fifteen13' => [RBRACKET, NONE],
+		'note_fifteen14' => [BACKSLASH, NONE],
+		'note_fifteen15' => [ENTER, NONE],
+
+		// 16K
+		'note_sixteen1' => [ONE, NONE],
+		'note_sixteen2' => [TWO, NONE],
+		'note_sixteen3' => [THREE, NONE],
+		'note_sixteen4' => [FOUR, NONE],
+		'note_sixteen5' => [FIVE, NONE],
+		'note_sixteen6' => [SIX, NONE],
+		'note_sixteen7' => [SEVEN, NONE],
+		'note_sixteen8' => [EIGHT, NONE],
+		'note_sixteen9' => [NINE, NONE],
+		'note_sixteen10' => [ZERO, NONE],
+		'note_sixteen11' => [MINUS, NONE],
+		'note_sixteen12' => [GRAVEACCENT, NONE],
+		'note_sixteen13' => [BACKSPACE, NONE],
+		'note_sixteen14' => [TAB, NONE],
+		'note_sixteen15' => [Q, NONE],
+		'note_sixteen16' => [W, NONE],
+
+		// 17K
+		'note_seventeen1' => [ONE, NONE],
+		'note_seventeen2' => [TWO, NONE],
+		'note_seventeen3' => [THREE, NONE],
+		'note_seventeen4' => [FOUR, NONE],
+		'note_seventeen5' => [FIVE, NONE],
+		'note_seventeen6' => [SIX, NONE],
+		'note_seventeen7' => [SEVEN, NONE],
+		'note_seventeen8' => [EIGHT, NONE],
+		'note_seventeen9' => [SPACE, NONE],
+		'note_seventeen10' => [NINE, NONE],
+		'note_seventeen11' => [ZERO, NONE],
+		'note_seventeen12' => [MINUS, NONE],
+		'note_seventeen13' => [GRAVEACCENT, NONE],
+		'note_seventeen14' => [BACKSPACE, NONE],
+		'note_seventeen15' => [TAB, NONE],
+		'note_seventeen16' => [Q, NONE],
+		'note_seventeen17' => [W, NONE],
+
+		// 18K
+		'note_eighteen1' => [ONE, NONE],
+		'note_eighteen2' => [TWO, NONE],
+		'note_eighteen3' => [THREE, NONE],
+		'note_eighteen4' => [FOUR, NONE],
+		'note_eighteen5' => [FIVE, NONE],
+		'note_eighteen6' => [SIX, NONE],
+		'note_eighteen7' => [SEVEN, NONE],
+		'note_eighteen8' => [EIGHT, NONE],
+		'note_eighteen9' => [NINE, NONE],
+		'note_eighteen10' => [ZERO, NONE],
+		'note_eighteen11' => [MINUS, NONE],
+		'note_eighteen12' => [GRAVEACCENT, NONE],
+		'note_eighteen13' => [BACKSPACE, NONE],
+		'note_eighteen14' => [TAB, NONE],
+		'note_eighteen15' => [Q, NONE],
+		'note_eighteen16' => [W, NONE],
+		'note_eighteen17' => [E, NONE],
+		'note_eighteen18' => [R, NONE],
 		
+		// UI Controls (no tocar)
 		'ui_up'			=> [W, UP],
 		'ui_left'		=> [A, LEFT],
 		'ui_down'		=> [S, DOWN],
@@ -208,6 +412,50 @@ class ClientPrefs {
 		defaultKeys = keyBinds.copy();
 		defaultButtons = gamepadBinds.copy();
 		defaultMobileBinds = mobileBinds.copy();
+		setupExtraKeys(); // Configurar extra keys dinámicamente
+	}
+
+	// Función para configurar las extra keys dinámicamente
+	public static function setupExtraKeys()
+	{
+		if (ExtraKeysHandler.instance == null || ExtraKeysHandler.instance.data == null) 
+			return;
+
+		var data = ExtraKeysHandler.instance.data;
+		
+		// Configurar keybinds para cada mania
+		for (mania in 0...data.maxKeys + 1) {
+			if (data.keybinds != null && mania < data.keybinds.length) {
+				var maniaKeybinds = data.keybinds[mania];
+				for (keyIndex in 0...maniaKeybinds.length) {
+					var keyCodes = maniaKeybinds[keyIndex];
+					var keyName = '${mania}_key_$keyIndex';
+					
+					// Convertir keycodes a FlxKey
+					var flxKeys:Array<FlxKey> = [];
+					for (code in keyCodes) {
+						// Convertir código numérico directamente a FlxKey
+						var flxKey:FlxKey = cast(code, FlxKey);
+						flxKeys.push(flxKey);
+					}
+					
+					// Si no hay suficientes keys, agregar NONE
+					while (flxKeys.length < 2) {
+						flxKeys.push(NONE);
+					}
+					
+					keyBinds.set(keyName, flxKeys);
+				}
+			}
+		}
+		
+		// Actualizar defaultKeys
+		if (defaultKeys == null) defaultKeys = new Map();
+		for (key => value in keyBinds) {
+			if (key.contains('_key_')) {
+				defaultKeys.set(key, value.copy());
+			}
+		}
 	}
 
 	public static function saveSettings() {

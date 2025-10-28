@@ -50,40 +50,4 @@
 	<SubTexture name="up press0001" x="1344" y="426" width="133" height="146" frameX="-2" frameY="-3" frameWidth="138" frameHeight="152"/>
 	<SubTexture name="up press0002" x="294" y="392" width="138" height="152"/>
 	<SubTexture name="up press0003" x="294" y="392" width="138" height="152"/>
-
-	<SubTexture name="arrowROMBUS0000" x="1435" y="674" width="164" height="164"/>
-
-	<SubTexture name="rombus0000" x="1697" y="664" width="164" height="164"/>
-
-	<SubTexture name="rombus confirm0000" x="566" y="635" width="244" height="244"/>
-	<SubTexture name="rombus confirm0001" x="829" y="630" width="244" height="244"/>
-	<SubTexture name="rombus confirm0002" x="1121" y="637" width="222" height="222" frameX="-11" frameY="-11" frameWidth="244" frameHeight="244"/>
-	<SubTexture name="rombus confirm0003" x="1121" y="637" width="222" height="222" frameX="-11" frameY="-11" frameWidth="244" frameHeight="244"/>
-
-	<SubTexture name="rombus hold end0000" x="1625" y="426" width="146" height="75"/>
-	<SubTexture name="rombus hold piece0000" x="1478" y="426" width="146" height="77"/>
-
-	<SubTexture name="rombus press0000" x="70" y="713" width="163" height="163" frameX="-5" frameY="-5" frameWidth="173" frameHeight="173"/>
-	<SubTexture name="rombus press0001" x="70" y="713" width="163" height="163" frameX="-5" frameY="-5" frameWidth="173" frameHeight="173"/>
-	<SubTexture name="rombus press0002" x="283" y="713" width="173" height="173"/>
-	<SubTexture name="rombus press0003" x="283" y="713" width="173" height="173"/>
-
-
-
-	<SubTexture name="arrowCIRCLE0000" x="1443" y="902" width="152" height="152"/>
-
-	<SubTexture name="circle0000" x="1705" y="899" width="152" height="152"/>
-
-	<SubTexture name="circle confirm0000" x="568" y="880" width="216" height="216" frameX="-2" frameY="-4" frameWidth="222" frameHeight="224"/>
-	<SubTexture name="circle confirm0001" x="846" y="877" width="216" height="216" frameX="-2" frameY="-4" frameWidth="222" frameHeight="224"/>
-	<SubTexture name="circle confirm0002" x="1124" y="870" width="222" height="224"/>
-	<SubTexture name="circle confirm0003" x="1124" y="870" width="222" height="224"/>
-
-	<SubTexture name="circle hold end0000" x="1625" y="426" width="146" height="75"/>
-	<SubTexture name="circle hold piece0000" x="1478" y="426" width="146" height="77"/>
-
-	<SubTexture name="circle press0000" x="79" y="933" width="142" height="142" frameX="-4" frameY="-3" frameWidth="150" frameHeight="149"/>
-	<SubTexture name="circle press0001" x="79" y="933" width="142" height="142" frameX="-4" frameY="-3" frameWidth="150" frameHeight="149"/>
-	<SubTexture name="circle press0002" x="294" y="933" width="150" height="149"/>
-	<SubTexture name="circle press0003" x="294" y="933" width="150" height="149"/>
 </TextureAtlas>

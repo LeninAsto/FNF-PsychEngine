@@ -2,6 +2,7 @@ package objects;
 
 import backend.animation.PsychAnimationController;
 import backend.NoteTypesConfig;
+import backend.ExtraKeysHandler;
 
 import shaders.RGBPalette;
 import shaders.RGBPalette.RGBShaderReference;
@@ -267,9 +268,8 @@ class Note extends FlxSprite
 			texture = '';
 
 			x += swagWidth * (noteData);
-			if(!isSustainNote && noteData < colArray.length) { //Doing this 'if' check to fix the warnings on Senpai songs
-				var animToPlay:String = '';
-				animToPlay = colArray[noteData % colArray.length];
+			if(!isSustainNote) {
+				var animToPlay:String = getHoldAnimName();
 				animation.play(animToPlay + 'Scroll');
 			}
 		}
@@ -289,7 +289,9 @@ class Note extends FlxSprite
 			offsetX += width / 2;
 			copyAngle = false;
 
-			animation.play(colArray[noteData % colArray.length] + 'holdend');
+			// Obtener la animación correcta para Extra Keys
+			var holdEndAnim = getHoldAnimName() + 'holdend';
+			animation.play(holdEndAnim);
 
 			updateHitbox();
 
@@ -300,7 +302,8 @@ class Note extends FlxSprite
 
 			if (prevNote.isSustainNote)
 			{
-				prevNote.animation.play(colArray[prevNote.noteData % colArray.length] + 'hold');
+				var holdAnim = prevNote.getHoldAnimName() + 'hold';
+				prevNote.animation.play(holdAnim);
 
 				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.05;
 				if(createdFrom != null && createdFrom.songSpeed != null) prevNote.scale.y *= createdFrom.songSpeed;
@@ -432,31 +435,96 @@ class Note extends FlxSprite
 		return skin;
 	}
 
-	function loadNoteAnims() {
-		if (colArray[noteData] == null)
-			return;
-
-		if (isSustainNote)
-		{
-			attemptToAddAnimationByPrefix('purpleholdend', 'pruple end hold', 24, true); // this fixes some retarded typo from the original note .FLA
-			animation.addByPrefix(colArray[noteData] + 'holdend', colArray[noteData] + ' hold end', 24, true);
-			animation.addByPrefix(colArray[noteData] + 'hold', colArray[noteData] + ' hold piece', 24, true);
+	public function getHoldAnimName():String {
+		// Obtener la configuración de animación desde ExtraKeysHandler para hold notes
+		var numKeys = (PlayState.SONG != null && PlayState.SONG.mania != null) ? PlayState.SONG.mania : 4;
+		
+		if (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
+			var index = ExtraKeysHandler.instance.getIndex(numKeys, noteData);
+			var animData = ExtraKeysHandler.instance.getAnimSet(index);
+			if (animData != null) {
+				return animData.note;
+			}
 		}
-		else animation.addByPrefix(colArray[noteData] + 'Scroll', colArray[noteData] + '0');
+		
+		// Fallback al sistema original
+		if (noteData >= 0 && noteData < colArray.length) {
+			return colArray[noteData];
+		}
+		
+		return colArray[noteData % colArray.length];
+	}
+
+	function loadNoteAnims() {
+		// Obtener la configuración de animación desde ExtraKeysHandler
+		var numKeys = (PlayState.SONG != null && PlayState.SONG.mania != null) ? PlayState.SONG.mania : 4;
+		var animData = null;
+		
+		if (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
+			var index = ExtraKeysHandler.instance.getIndex(numKeys, noteData);
+			animData = ExtraKeysHandler.instance.getAnimSet(index);
+		}
+		
+		// Fallback al sistema original si no hay datos de extra keys
+		if (animData == null) {
+			if (colArray[noteData] == null)
+				return;
+
+			if (isSustainNote)
+			{
+				attemptToAddAnimationByPrefix('purpleholdend', 'pruple end hold', 24, true); // this fixes some retarded typo from the original note .FLA
+				animation.addByPrefix(colArray[noteData] + 'holdend', colArray[noteData] + ' hold end', 24, true);
+				animation.addByPrefix(colArray[noteData] + 'hold', colArray[noteData] + ' hold piece', 24, true);
+			}
+			else animation.addByPrefix(colArray[noteData] + 'Scroll', colArray[noteData] + '0');
+		} else {
+			// Usar datos de extra keys
+			var noteColor = animData.note;
+			
+			if (isSustainNote)
+			{
+				attemptToAddAnimationByPrefix('purpleholdend', 'pruple end hold', 24, true); // mantener fix para typo
+				animation.addByPrefix(noteColor + 'holdend', noteColor + ' hold end', 24, true);
+				animation.addByPrefix(noteColor + 'hold', noteColor + ' hold piece', 24, true);
+			}
+			else animation.addByPrefix(noteColor + 'Scroll', noteColor + '0');
+		}
 
 		setGraphicSize(Std.int(width * 0.7));
 		updateHitbox();
 	}
 
 	function loadPixelNoteAnims() {
-		if (colArray[noteData] == null)
-			return;
+		// Obtener la configuración de animación desde ExtraKeysHandler
+		var numKeys = (PlayState.SONG != null && PlayState.SONG.mania != null) ? PlayState.SONG.mania : 4;
+		var animData = null;
+		
+		if (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
+			var index = ExtraKeysHandler.instance.getIndex(numKeys, noteData);
+			animData = ExtraKeysHandler.instance.getAnimSet(index);
+		}
+		
+		// Fallback al sistema original si no hay datos de extra keys
+		if (animData == null) {
+			if (colArray[noteData] == null)
+				return;
 
-		if(isSustainNote)
-		{
-			animation.add(colArray[noteData] + 'holdend', [noteData + 4], 24, true);
-			animation.add(colArray[noteData] + 'hold', [noteData], 24, true);
-		} else animation.add(colArray[noteData] + 'Scroll', [noteData + 4], 24, true);
+			if(isSustainNote)
+			{
+				animation.add(colArray[noteData] + 'holdend', [noteData + 4], 24, true);
+				animation.add(colArray[noteData] + 'hold', [noteData], 24, true);
+			} else animation.add(colArray[noteData] + 'Scroll', [noteData + 4], 24, true);
+		} else {
+			// Usar datos de extra keys
+			var noteColor = animData.note;
+			var pixelIndex = animData.pixel;
+			
+			if(isSustainNote)
+			{
+				animation.add(noteColor + 'holdend', [pixelIndex + 4], 24, true);
+				animation.add(noteColor + 'hold', [pixelIndex], 24, true);
+			} else animation.add(noteColor + 'Scroll', [pixelIndex + 4], 24, true);
+		}
 	}
 
 	function attemptToAddAnimationByPrefix(name:String, prefix:String, framerate:Float = 24, doLoop:Bool = true)

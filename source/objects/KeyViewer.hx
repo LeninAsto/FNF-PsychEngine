@@ -5,6 +5,7 @@ import backend.ClientPrefs;
 import backend.Controls;
 import backend.InputFormatter;
 import backend.CoolUtil;
+import backend.ExtraKeysHandler;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
@@ -12,6 +13,7 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
+import flixel.input.keyboard.FlxKey;
 import openfl.display.BitmapData;
 import openfl.display.Shape;
 import openfl.geom.Matrix;
@@ -41,11 +43,23 @@ class KeyViewer extends FlxSpriteGroup
 		super(x, y);
 		instance = this;
 		
-		keyCount = 4;
+		// Detectar número de teclas automáticamente
+		updateKeyCount();
 		
 		createKeyViewer();
 		centerOnScreen();
 		alpha = 0.6;
+	}
+	
+	public function updateKeyCount()
+	{
+		// Obtener el número de teclas desde PlayState o directamente de la mania
+		keyCount = 4; // Por defecto 4K
+		
+		if (PlayState.SONG != null) {
+			var numKeys = (PlayState.SONG.mania != null) ? PlayState.SONG.mania : 4;
+			keyCount = numKeys;
+		}
 	}
 	
 	function createKeyViewer()
@@ -62,9 +76,9 @@ class KeyViewer extends FlxSpriteGroup
 			add(keyButton);
 			
 			var keyName:String = getKeyName(i);
-			var keyText = new FlxText(keyButton.x, keyButton.y, keySize, keyName, 14); 
+			var keyText = new FlxText(keyButton.x, keyButton.y, keySize, keyName, 12); 
 			var textColor = FlxColor.WHITE;
-			keyText.setFormat(Paths.font("vcr.ttf"), 14, textColor, CENTER);
+			keyText.setFormat(Paths.font("vcr.ttf"), 12, textColor, CENTER);
 			keyText.y += (keySize - keyText.height) / 2; 
 			keyText.alpha = 0.6; 
 			keyTexts.push(keyText);
@@ -91,16 +105,47 @@ class KeyViewer extends FlxSpriteGroup
 	
 	function getKeyName(keyIndex:Int):String
 	{
-		var keysArray = ['note_left', 'note_down', 'note_up', 'note_right'];
+		// Obtener keysArray dinámicamente desde PlayState
+		var keysArray = ['note_left', 'note_down', 'note_up', 'note_right']; // Fallback para 4K
 		
-		if (keyIndex < keysArray.length) {
-			var keyBind = Controls.instance.keyboardBinds.get(keysArray[keyIndex]);
-			if (keyBind != null && keyBind.length > 0) {
-				return InputFormatter.getKeyName(keyBind[0]);
+		if (PlayState.instance != null && PlayState.instance.keysArray != null) {
+			// Usar el keysArray del PlayState que ya está configurado para la mania actual
+			if (keyIndex < PlayState.instance.keysArray.length) {
+				var keyName = PlayState.instance.keysArray[keyIndex];
+				var keyBind = Controls.instance.keyboardBinds.get(keyName);
+				if (keyBind != null && keyBind.length > 0) {
+					var primaryKey = InputFormatter.getKeyName(keyBind[0]);
+					var secondaryKey = (keyBind.length > 1 && keyBind[1] != NONE) ? 
+						InputFormatter.getKeyName(keyBind[1]) : "";
+					
+					// Retornar ambas teclas en dos líneas
+					if (secondaryKey != "" && secondaryKey != "NONE") {
+						return primaryKey + "\n" + secondaryKey;
+					} else {
+						return primaryKey + "\n ";
+					}
+				}
+			}
+		} else {
+			// Fallback al sistema original
+			if (keyIndex < keysArray.length) {
+				var keyBind = Controls.instance.keyboardBinds.get(keysArray[keyIndex]);
+				if (keyBind != null && keyBind.length > 0) {
+					var primaryKey = InputFormatter.getKeyName(keyBind[0]);
+					var secondaryKey = (keyBind.length > 1 && keyBind[1] != NONE) ? 
+						InputFormatter.getKeyName(keyBind[1]) : "";
+					
+					// Retornar ambas teclas en dos líneas
+					if (secondaryKey != "" && secondaryKey != "NONE") {
+						return primaryKey + "\n" + secondaryKey;
+					} else {
+						return primaryKey + "\n ";
+					}
+				}
 			}
 		}
 		
-		return "?";
+		return "?\n ";
 	}
 	
 	public function keyPressed(keyIndex:Int)
@@ -199,6 +244,36 @@ class KeyViewer extends FlxSpriteGroup
 			default: 
 				return FlxColor.WHITE;
 		}
+	}
+	
+	public function regenerateKeyViewer()
+	{
+		// Limpiar elementos existentes
+		for (key in keys) {
+			remove(key, true);
+			key.destroy();
+		}
+		for (text in keyTexts) {
+			remove(text, true);
+			text.destroy();
+		}
+		if (kpsText != null) {
+			remove(kpsText, true);
+			kpsText.destroy();
+		}
+		if (totalText != null) {
+			remove(totalText, true);
+			totalText.destroy();
+		}
+		
+		// Limpiar arrays
+		keys = [];
+		keyTexts = [];
+		
+		// Actualizar número de teclas y recrear
+		updateKeyCount();
+		createKeyViewer();
+		centerOnScreen();
 	}
 	
 	public function updateKeyColors()

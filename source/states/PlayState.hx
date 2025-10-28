@@ -6,6 +6,7 @@ import backend.StageData;
 import backend.WeekData;
 import backend.Song;
 import backend.Rating;
+import backend.ExtraKeysHandler;
 
 import flixel.FlxBasic;
 import flixel.FlxObject;
@@ -342,7 +343,7 @@ class PlayState extends MusicBeatState
 	public var introSoundsSuffix:String = '';
 
 	// Less laggy controls
-	private var keysArray:Array<String>;
+	public var keysArray:Array<String>;
 	public var songName:String;
 
 	// Callbacks for stages
@@ -389,12 +390,54 @@ class PlayState extends MusicBeatState
 		PauseSubState.songName = null; //Reset to default
 		playbackRate = ClientPrefs.getGameplaySetting('songspeed');
 
-		keysArray = [
-			'note_left',
-			'note_down',
-			'note_up',
-			'note_right'
-		];
+		// Configurar keysArray dinámicamente basándose en la mania
+		keysArray = [];
+		trace('DEBUG: SONG.mania = ${SONG.mania}');
+		trace('DEBUG: SONG.mania != null = ${SONG.mania != null}');
+		var mania = (SONG.mania != null) ? SONG.mania : 4; // 4K por defecto
+		trace('MANIA DETECTADA: $mania teclas');
+		
+		// El mania directamente representa el número de teclas
+		var keyCount = mania;
+		
+		// Validar que el número de teclas esté en el rango válido
+		if (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
+			var maxKeys = ExtraKeysHandler.instance.data.keys.length;
+			if (keyCount < 1) keyCount = 4; // Mínimo 4K
+			if (keyCount > maxKeys) keyCount = maxKeys; // Máximo disponible
+			trace('KEYCOUNT VALIDADO: $keyCount teclas');
+		}
+		
+		// Generar keysArray usando nombres de ClientPrefs
+		if (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
+			var keyNames = ExtraKeysHandler.instance.getKeyNames(keyCount);
+			if (keyNames != null) {
+				keysArray = keyNames;
+			} else {
+				// Fallback si no se pueden obtener los nombres
+				for (i in 0...keyCount) {
+					keysArray.push('note_${keyCount}${i + 1}');
+				}
+			}
+		} else {
+			// Fallback básico para 4K
+			keysArray = ['note_left', 'note_down', 'note_up', 'note_right'];
+		}
+		trace('KEYSARRAY FINAL: $keysArray');
+		
+		// Debug: Verificar que las teclas existen en ClientPrefs
+		for (i in 0...keysArray.length) {
+			var keyName = keysArray[i];
+			var keyBinds = ClientPrefs.keyBinds.get(keyName);
+			trace('Key $i: $keyName -> $keyBinds');
+		}
+
+		// Key Viewer - Crear después de configurar keysArray
+		if(ClientPrefs.data.showKeyViewer) {
+			keyViewer = new objects.KeyViewer(0, 0);
+			keyViewer.visible = !ClientPrefs.data.hideHud;
+			// Se agregará al uiGroup más adelante
+		}
 
 		// Initialize TPS/NPS system
 		notesHitArray = [];
@@ -771,10 +814,8 @@ class PlayState extends MusicBeatState
 		if(ClientPrefs.data.downScroll)
 			botplayTxt.y = healthBar.y + 70;
 
-		// Key Viewer
-		if(ClientPrefs.data.showKeyViewer) {
-			keyViewer = new objects.KeyViewer(0, 0); // Las coordenadas no importan, se centra automáticamente
-			keyViewer.visible = !ClientPrefs.data.hideHud;
+		// Agregar KeyViewer al uiGroup si fue creado
+		if(keyViewer != null) {
 			uiGroup.add(keyViewer);
 		}
 
@@ -1830,7 +1871,20 @@ class PlayState extends MusicBeatState
 	{
 		var strumLineX:Float = ClientPrefs.data.middleScroll ? STRUM_X_MIDDLESCROLL : STRUM_X;
 		var strumLineY:Float = ClientPrefs.data.downScroll ? (FlxG.height - 150) : 50;
-		for (i in 0...4)
+		var mania = (SONG.mania != null) ? SONG.mania : 4; // 4K por defecto
+		
+		// El mania directamente representa el número de teclas
+		var keyCount = mania;
+		
+		// Validar que el número de teclas esté en el rango válido
+		if (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
+			var maxKeys = ExtraKeysHandler.instance.data.keys.length;
+			if (keyCount < 1) keyCount = 4; // Mínimo 4K
+			if (keyCount > maxKeys) keyCount = maxKeys; // Máximo disponible
+		}
+		trace('GENERATING $keyCount ARROWS FOR PLAYER $player');
+		
+		for (i in 0...keyCount)
 		{
 			// FlxG.log.add(i);
 			var targetAlpha:Float = 1;
@@ -1857,7 +1911,7 @@ class PlayState extends MusicBeatState
 				if(ClientPrefs.data.middleScroll)
 				{
 					babyArrow.x += 310;
-					if(i > 1) { //Up and Right
+					if(i > Math.floor(mania / 2)) { //Up and Right para cualquier mania
 						babyArrow.x += FlxG.width / 2 + 25;
 					}
 				}

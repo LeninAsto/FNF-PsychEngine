@@ -30,6 +30,8 @@ typedef SwagSong =
 
 	@:optional var arrowSkin:String;
 	@:optional var splashSkin:String;
+	
+	@:optional var mania:Int; // Soporte para Extra Keys
 }
 
 typedef SwagSection =
@@ -164,6 +166,9 @@ class Song
 			if(subSong != null && Type.typeof(subSong) == TObject)
 				songJson = subSong;
 		}
+
+		// Inicializar mania si no existe
+		if(songJson.mania == null) songJson.mania = 4; // 4K por defecto
 
 		if(convertTo != null && convertTo.length > 0)
 		{
