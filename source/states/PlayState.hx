@@ -3718,8 +3718,9 @@ class PlayState extends MusicBeatState
 
 	private function keyPressed(key:Int)
 	{
-		// Protección adicional: verificar que playerStrums no esté vacío
-		if(cpuControlled || paused || inCutscene || key < 0 || playerStrums == null || playerStrums.length == 0 || key >= playerStrums.length || !generatedMusic || endingSong || boyfriend.stunned) return;
+		// Protección: verificar que key esté dentro del rango del mania actual
+		// Si key >= playerStrums.length, es una tecla de un mania superior que no debe procesarse
+		if(cpuControlled || paused || inCutscene || key < 0 || key >= playerStrums.length || !generatedMusic || endingSong || boyfriend.stunned) return;
 
 		// Key Viewer
 		if(keyViewer != null) {
@@ -3735,10 +3736,27 @@ class PlayState extends MusicBeatState
 
 		// obtain notes that the player can hit
 		var plrInputNotes:Array<Note> = notes.members.filter(function(n:Note):Bool {
-			var canHit:Bool = n != null && !strumsBlocked[n.noteData] && n.canBeHit && n.mustPress && !n.tooLate && !n.wasGoodHit && !n.blockHit;
+			// Verificar que la nota esté dentro del rango del mania actual
+			if (n == null || n.noteData >= playerStrums.length || n.noteData < 0) return false;
+			
+			var canHit:Bool = !strumsBlocked[n.noteData] && n.canBeHit && n.mustPress && !n.tooLate && !n.wasGoodHit && !n.blockHit;
+			
+			// Validación adicional: verificar que la nota esté dentro de la ventana de timing razonable
+			// Esto previene que notas muy lejanas sean golpeadas prematuramente
+			if (canHit && !n.isSustainNote && n.noteData == key) {
+				var timeDiff = n.strumTime - Conductor.songPosition;
+				// Usar el safeZoneOffset multiplicado por earlyHitMult como límite máximo
+				var maxEarlyHit = Conductor.safeZoneOffset * n.earlyHitMult;
+				if (timeDiff > maxEarlyHit) {
+					return false; // Nota demasiado temprana, ignorar
+				}
+			}
+			
 			return canHit && !n.isSustainNote && n.noteData == key;
 		});
 		plrInputNotes.sort(sortHitNotes);
+
+		var shouldMiss:Bool = !ClientPrefs.data.ghostTapping;
 
 		if (plrInputNotes.length != 0) { // slightly faster than doing `> 0` lol
 			var funnyNote:Note = plrInputNotes[0]; // front note
@@ -3762,12 +3780,10 @@ class PlayState extends MusicBeatState
 			}
 			goodNoteHit(funnyNote);
 		}
-		else
+		else if(shouldMiss)
 		{
-			if (ClientPrefs.data.ghostTapping)
-				callOnScripts('onGhostTap', [key]);
-			else
-				noteMissPress(key);
+			callOnScripts('onGhostTap', [key]);
+			noteMissPress(key);
 		}
 
 		// Needed for the  "Just the Two of Us" achievement.
