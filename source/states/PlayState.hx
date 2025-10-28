@@ -3068,48 +3068,19 @@ class PlayState extends MusicBeatState
 			keysArray = ['note_left', 'note_down', 'note_up', 'note_right'];
 		}
 		
-		// Limpiar notas que estén fuera del rango de la nueva manía
-		var notesToRemove:Array<Note> = [];
-		for (note in unspawnNotes)
-		{
-			if(note != null && note.noteData >= newMania)
-			{
-				notesToRemove.push(note);
-			}
-		}
-		for (note in notesToRemove)
-		{
-			unspawnNotes.remove(note);
-			note.destroy();
-		}
-		
-		notesToRemove = [];
-		notes.forEachAlive(function(note:Note)
-		{
-			if(note != null && note.noteData >= newMania)
-			{
-				notesToRemove.push(note);
-			}
-		});
-		for (note in notesToRemove)
-		{
-			note.active = note.visible = false;
-			invalidateNote(note);
-		}
-		
-		// Regenerar strums
+		// Regenerar strums PRIMERO para tener las nuevas posiciones
 		if (transitionTime <= 0) {
-			// Cambio instantáneo
 			regenerateStrums();
 		} else {
-			// Transición gradual
-			// Primero hacer fade out de los strums actuales
+			// Transición gradual con fade
 			for (strum in playerStrums) {
 				FlxTween.tween(strum, {alpha: 0}, transitionTime / 2, {
 					ease: FlxEase.quadOut,
 					onComplete: function(twn:FlxTween) {
-						// Regenerar y hacer fade in
 						regenerateStrums();
+						// Reposicionar notas después de regenerar strums
+						repositionNotesForMania(newMania);
+						
 						for (newStrum in playerStrums) {
 							newStrum.alpha = 0;
 							FlxTween.tween(newStrum, {alpha: 1}, transitionTime / 2, {ease: FlxEase.quadIn});
@@ -3122,8 +3093,143 @@ class PlayState extends MusicBeatState
 			}
 		}
 		
+		// Si es cambio instantáneo, reposicionar notas inmediatamente
+		if (transitionTime <= 0) {
+			repositionNotesForMania(newMania);
+		}
+		
 		// Notificar scripts del cambio
 		callOnScripts('onManiaChanged', [newMania, transitionTime]);
+	}
+	
+	public function repositionNotesForMania(newMania:Int):Void
+	{
+		trace('Repositioning notes for mania: $newMania');
+		
+		// Calcular escala basándose en la manía
+		var noteScale:Float = 1.0;
+		if (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
+			var maniaIndex = ExtraKeysHandler.instance.keysToIndex(newMania);
+			
+			// Usar scales del ExtraKeysHandler si existen
+			if (isPixelStage && ExtraKeysHandler.instance.data.pixelScales != null && 
+				maniaIndex < ExtraKeysHandler.instance.data.pixelScales.length) {
+				noteScale = ExtraKeysHandler.instance.data.pixelScales[maniaIndex];
+			} else if (!isPixelStage && ExtraKeysHandler.instance.data.scales != null && 
+				maniaIndex < ExtraKeysHandler.instance.data.scales.length) {
+				noteScale = ExtraKeysHandler.instance.data.scales[maniaIndex];
+			} else {
+				// Calcular escala automática para manías mayores a 5K
+				if (newMania > 5) {
+					noteScale = Math.max(0.6, 1.0 - ((newMania - 5) * 0.05));
+				}
+			}
+		} else {
+			// Fallback: escala automática sin ExtraKeysHandler
+			if (newMania > 5) {
+				noteScale = Math.max(0.6, 1.0 - ((newMania - 5) * 0.05));
+			}
+		}
+		
+		trace('Note scale for mania $newMania: $noteScale');
+		
+		// Función helper para reposicionar una nota individual
+		var repositionNote = function(note:Note) {
+			if (note == null) return;
+			
+			// El noteData de la nota ya es relativo (0 a mania-1)
+			// mustPress ya está definido correctamente cuando se creó la nota
+			// NO necesitamos recalcular mustPress, solo verificar que esté en rango
+			
+			// Determinar el grupo de strums correcto basándose en mustPress
+			var strumGroup:FlxTypedGroup<StrumNote> = note.mustPress ? playerStrums : opponentStrums;
+			
+			// Verificar si la nota está dentro del rango de la nueva manía
+			if (note.noteData >= newMania || note.noteData < 0) {
+				// Nota fuera de rango - ocultarla pero NO eliminarla
+				note.visible = false;
+				note.canBeHit = false;
+				return;
+			}
+			
+			// Verificar que el strum exista para ese noteData
+			if (note.noteData >= strumGroup.length) {
+				note.visible = false;
+				note.canBeHit = false;
+				return;
+			}
+			
+			var strum:StrumNote = strumGroup.members[note.noteData];
+			if (strum == null) {
+				note.visible = false;
+				note.canBeHit = false;
+				return;
+			}
+			
+			// La nota está en rango válido - asegurar visibilidad
+			if (!note.wasGoodHit && !note.ignoreNote && !note.missed) {
+				note.visible = true;
+			}
+			
+			// Aplicar escala a la nota
+			if (!note.isSustainNote) {
+				// Notas normales
+				note.scale.set(noteScale, noteScale);
+				note.updateHitbox();
+			} else {
+				// Sustains: solo escala en X, mantener Y para el largo
+				note.scale.set(noteScale, 1.0);
+				note.updateHitbox();
+			}
+			
+			// Recalcular posición X basándose en el nuevo strum
+			// CRÍTICO: Las notas deben seguir la posición del receptor
+			if (note.isSustainNote) {
+				// Sustains necesitan centrarse en el strum
+				note.x = strum.x + (strum.width / 2) - (note.width / 2);
+			} else {
+				// Notas normales se alinean con el strum
+				note.x = strum.x + (strum.width / 2) - (note.width / 2);
+			}
+			
+			// Actualizar propiedades de seguimiento
+			note.copyX = false;
+			note.copyY = false;
+			
+			// Recalcular el ancho de la nota para hit detection
+			note.offsetX = note.width / 2;
+			
+			// Marcar que puede ser golpeada si está en rango
+			if (note.visible && !note.isSustainNote && note.strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * 2)) {
+				note.canBeHit = true;
+			}
+		};
+		
+		// Reposicionar notas no spawneadas (están en unspawnNotes)
+		for (note in unspawnNotes) {
+			repositionNote(note);
+			
+			// También reposicionar las notas de sustain (tail)
+			if (note.tail != null && note.tail.length > 0) {
+				for (sustain in note.tail) {
+					repositionNote(sustain);
+				}
+			}
+		}
+		
+		// Reposicionar notas ya spawneadas (están en notes)
+		notes.forEachAlive(function(note:Note) {
+			repositionNote(note);
+			
+			// También reposicionar las notas de sustain (tail)
+			if (note.tail != null && note.tail.length > 0) {
+				for (sustain in note.tail) {
+					repositionNote(sustain);
+				}
+			}
+		});
+		
+		trace('Notes repositioned successfully with scale: $noteScale');
 	}
 	
 	public function changeManiaWithAnimation(newMania:Int, transitionTime:Float = 0.5):Void

@@ -113,6 +113,11 @@ class FunkinLua {
 		set('chartPath', Song.chartPath);
 		set('startedCountdown', false);
 		set('curStage', PlayState.SONG.stage);
+		
+		// Extra Keys / Mania info
+		set('mania', PlayState.SONG.mania);
+		set('playerStrumCount', PlayState.SONG.mania);
+		set('opponentStrumCount', PlayState.SONG.mania);
 
 		set('isStoryMode', PlayState.isStoryMode);
 		set('difficulty', PlayState.storyDifficulty);
@@ -714,6 +719,43 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "getColorFromName", function(color:String) return FlxColor.fromString(color));
 		Lua_helper.add_callback(lua, "getColorFromString", function(color:String) return FlxColor.fromString(color));
 		Lua_helper.add_callback(lua, "getColorFromHex", function(color:String) return FlxColor.fromString('#$color'));
+
+		// Extra Keys / Mania helpers
+		Lua_helper.add_callback(lua, "getMania", function() {
+			return PlayState.SONG.mania;
+		});
+		Lua_helper.add_callback(lua, "getPlayerStrumCount", function() {
+			return game.playerStrums.length;
+		});
+		Lua_helper.add_callback(lua, "getOpponentStrumCount", function() {
+			return game.opponentStrums.length;
+		});
+		Lua_helper.add_callback(lua, "getTotalStrumCount", function() {
+			return game.strumLineNotes.length;
+		});
+		// Convierte índice global de strumLineNotes a índice local de playerStrums/opponentStrums
+		Lua_helper.add_callback(lua, "getStrumIndex", function(globalIndex:Int, isPlayer:Bool) {
+			var mania:Int = PlayState.SONG.mania;
+			if (isPlayer) {
+				return globalIndex - mania; // player strums empiezan después del opponent
+			}
+			return globalIndex;
+		});
+		// Obtiene el índice global en strumLineNotes desde un índice local
+		Lua_helper.add_callback(lua, "getGlobalStrumIndex", function(localIndex:Int, isPlayer:Bool) {
+			var mania:Int = PlayState.SONG.mania;
+			if (isPlayer) {
+				return localIndex + mania; // player strums empiezan después del opponent
+			}
+			return localIndex;
+		});
+		// Verifica si un índice está en rango válido para el mania actual
+		Lua_helper.add_callback(lua, "isValidStrumIndex", function(index:Int, isPlayer:Bool) {
+			if (isPlayer) {
+				return index >= 0 && index < game.playerStrums.length;
+			}
+			return index >= 0 && index < game.opponentStrums.length;
+		});
 
 		// precaching
 		Lua_helper.add_callback(lua, "addCharacterToList", function(name:String, type:String) {

@@ -220,6 +220,7 @@ class PlayField extends FlxBasic {
 	var drawCB:Array<{callback:Void->Void, z:Float}> = [];
 
 	private function getVisibility(obj:flixel.FlxObject) {
+		if (obj == null) return false; // Protección contra null
 		@:bypassAccessor obj.visible = false;
 		return obj._fmVisible;
 	}
@@ -276,9 +277,9 @@ class PlayField extends FlxBasic {
 			var curItems:Array<Array<FlxSprite>> = playerItems[i];
 
 			// receptors
-			if (receptorLength > 0) {
+			if (receptorLength > 0 && curItems[0] != null) {
 				for (receptor in curItems[0]) {
-					if (!getVisibility(receptor))
+					if (receptor == null || !getVisibility(receptor))
 						continue;
 
 					receptorRenderer.prepare(receptor);
@@ -292,9 +293,9 @@ class PlayField extends FlxBasic {
 			}
 
 			// holds
-			if (holdLength > 0) {
+			if (holdLength > 0 && curItems[2] != null) {
 				for (hold in curItems[2]) {
-					if (!getVisibility(hold)) {
+					if (hold == null || !getVisibility(hold)) {
 						continue;
 				    }
 
@@ -307,9 +308,9 @@ class PlayField extends FlxBasic {
 			}
 
 			// tap arrow
-			if (arrowLength > 0) {
+			if (arrowLength > 0 && curItems[1] != null) {
 				for (arrow in curItems[1]) {
-					if (!getVisibility(arrow))
+					if (arrow == null || !getVisibility(arrow))
 						continue;
 
 					arrowRenderer.prepare(arrow);
@@ -321,9 +322,9 @@ class PlayField extends FlxBasic {
 			}
 
 			// attachments (splashes)
-			if (attachmentLength > 0) {
+			if (attachmentLength > 0 && curItems[3] != null) {
 				for (attachment in curItems[3]) {
-					if (!getVisibility(attachment))
+					if (attachment == null || !getVisibility(attachment))
 						continue;
 
 					attachmentRenderer.prepare(attachment);

@@ -2721,6 +2721,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			iconX += GRID_SIZE * GRID_COLUMNS_PER_PLAYER;
 		}
 
+		// Limpiar notas inválidas que están fuera del rango de la nueva mania
+		cleanInvalidNotesForMania(GRID_COLUMNS_PER_PLAYER);
+		
 		// Actualizar posiciones de elementos existentes
 		updateWaveform();
 		updateHeads(true);
@@ -2758,6 +2761,37 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		
 		// Recargar la sección actual para actualizar todo
 		loadSection();
+	}
+
+	// Limpia notas que están fuera del rango de la mania actual
+	function cleanInvalidNotesForMania(mania:Int):Void
+	{
+		// Iterar sobre todas las secciones y limpiar notas inválidas
+		for (section in PlayState.SONG.notes)
+		{
+			if (section == null || section.sectionNotes == null) continue;
+			
+			// Filtrar notas válidas
+			var validNotes:Array<Dynamic> = [];
+			for (noteData in section.sectionNotes)
+			{
+				if (noteData == null) continue;
+				
+				var noteColumn:Int = Std.int(noteData[1] % (mania * GRID_PLAYERS)); // columna relativa
+				
+				// Si la nota está dentro del rango, mantenerla
+				if (noteColumn >= 0 && noteColumn < mania)
+				{
+					validNotes.push(noteData);
+				}
+				// Si está fuera de rango, la descartamos (no la agregamos a validNotes)
+			}
+			
+			// Reemplazar las notas de la sección con solo las válidas
+			section.sectionNotes = validNotes;
+		}
+		
+		trace('Notas limpiadas para mania $mania');
 	}
 
 	var characterData:Dynamic = {};
@@ -3329,6 +3363,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		});
 
 		objY += 40;
+		// Fila de checkboxes: Change BPM y Change Mania
 		changeBpmCheckBox = new PsychUICheckBox(objX, objY, 'Change BPM', 80, function()
 		{
 			var sec = getCurChartSection();
@@ -3341,36 +3376,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			}
 		});
 
-		objY += 25;
-		changeBpmStepper = new PsychUINumericStepper(objX, objY, 1, 0, 1, 400, 3);
-		changeBpmStepper.onValueChange = function()
-		{
-			var sec = getCurChartSection();
-			if(sec != null)
-			{
-				var oldTimes:Array<Float> = cachedSectionTimes.copy();
-				sec.bpm = changeBpmStepper.value;
-				sec.changeBPM = true;
-				changeBpmCheckBox.checked = true;
-				adaptNotesToNewTimes(oldTimes);
-			}
-		};
-
-		beatsPerSecStepper = new PsychUINumericStepper(objX + 150, objY, 1, 4, 1, 16, 2);
-		beatsPerSecStepper.onValueChange = function()
-		{
-			beatsPerSecStepper.value = Math.round(beatsPerSecStepper.value * 4) / 4;
-			var sec = getCurChartSection();
-			if(sec != null)
-			{
-				var oldTimes:Array<Float> = cachedSectionTimes.copy();
-				sec.sectionBeats = beatsPerSecStepper.value;
-				adaptNotesToNewTimes(oldTimes);
-			}
-		};
-
-		objY += 40;
-		changeManiaCheckBox = new PsychUICheckBox(objX, objY, 'Change Mania', 100, function()
+		changeManiaCheckBox = new PsychUICheckBox(objX + 200, objY, 'Change\nMania', 100, function()
 		{
 			var sec = getCurChartSection();
 			if(sec != null)
@@ -3405,12 +3411,41 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			}
 		});
 
+		objY += 25;
+		// Fila de steppers: BPM, Beats y Mania
+		changeBpmStepper = new PsychUINumericStepper(objX, objY, 1, 0, 1, 400, 3);
+		changeBpmStepper.onValueChange = function()
+		{
+			var sec = getCurChartSection();
+			if(sec != null)
+			{
+				var oldTimes:Array<Float> = cachedSectionTimes.copy();
+				sec.bpm = changeBpmStepper.value;
+				sec.changeBPM = true;
+				changeBpmCheckBox.checked = true;
+				adaptNotesToNewTimes(oldTimes);
+			}
+		};
+
+		beatsPerSecStepper = new PsychUINumericStepper(objX + 100, objY, 1, 4, 1, 16, 2);
+		beatsPerSecStepper.onValueChange = function()
+		{
+			beatsPerSecStepper.value = Math.round(beatsPerSecStepper.value * 4) / 4;
+			var sec = getCurChartSection();
+			if(sec != null)
+			{
+				var oldTimes:Array<Float> = cachedSectionTimes.copy();
+				sec.sectionBeats = beatsPerSecStepper.value;
+				adaptNotesToNewTimes(oldTimes);
+			}
+		};
+
 		var minKeys = (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) ? 
 			ExtraKeysHandler.instance.data.minKeys : 1;
 		var maxKeys = (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) ? 
 			ExtraKeysHandler.instance.data.maxKeys : 18;
 		
-		changeManiaStepper = new PsychUINumericStepper(objX + 150, objY, 1, 4, minKeys, maxKeys, 0);
+		changeManiaStepper = new PsychUINumericStepper(objX + 200, objY, 1, 4, minKeys, maxKeys, 0);
 		changeManiaStepper.onValueChange = function()
 		{
 			var sec = getCurChartSection();
@@ -3558,7 +3593,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		tab_group.add(gfSectionCheckBox);
 		tab_group.add(altAnimSectionCheckBox);
 
-		tab_group.add(new FlxText(beatsPerSecStepper.x, beatsPerSecStepper.y - 15, 100, 'Beats per Section:'));
+		tab_group.add(new FlxText(beatsPerSecStepper.x, beatsPerSecStepper.y - 30, 100, 'Beats per\nSection:'));
 		tab_group.add(changeBpmCheckBox);
 		tab_group.add(changeBpmStepper);
 		tab_group.add(beatsPerSecStepper);
@@ -3814,6 +3849,21 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		//
 		
 		objY += 40;
+		// Mania stepper después de BPM/Scroll/Offset
+		var minKeys = (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) ? 
+			ExtraKeysHandler.instance.data.minKeys : 1;
+		var maxKeys = (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) ? 
+			ExtraKeysHandler.instance.data.maxKeys : 18;
+			
+		maniaStepper = new PsychUINumericStepper(objX, objY, 1, 4, minKeys, maxKeys, 0);
+		maniaStepper.onValueChange = function()
+		{
+			PlayState.SONG.mania = Std.int(maniaStepper.value);
+			GRID_COLUMNS_PER_PLAYER = Std.int(maniaStepper.value);
+			regenerateGridAndStrums();
+		};
+		
+		objY += 40;
 		// Reorganización 2x2: Player y Stage arriba, Opponent y Girlfriend abajo
 		playerDropDown = new PsychUIDropDownMenu(objX, objY, [''], function(id:Int, character:String)
 		{
@@ -3846,27 +3896,16 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			trace('selected $character');
 		});
 		
-		// Mania stepper debajo de todo
-		objY += 50;
-		var minKeys = (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) ? 
-			ExtraKeysHandler.instance.data.minKeys : 1;
-		var maxKeys = (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) ? 
-			ExtraKeysHandler.instance.data.maxKeys : 18;
-			
-		maniaStepper = new PsychUINumericStepper(objX, objY, 1, 4, minKeys, maxKeys, 0);
-		maniaStepper.onValueChange = function()
-		{
-			PlayState.SONG.mania = Std.int(maniaStepper.value);
-			GRID_COLUMNS_PER_PLAYER = Std.int(maniaStepper.value);
-			regenerateGridAndStrums();
-		};
-		
 		tab_group.add(new FlxText(bpmStepper.x, bpmStepper.y - 15, 50, 'BPM:'));
 		tab_group.add(new FlxText(scrollSpeedStepper.x, scrollSpeedStepper.y - 15, 80, 'Scroll Speed:'));
 		tab_group.add(new FlxText(audioOffsetStepper.x, audioOffsetStepper.y - 15, 100, 'Audio Offset (ms):'));
 		tab_group.add(bpmStepper);
 		tab_group.add(scrollSpeedStepper);
 		tab_group.add(audioOffsetStepper);
+
+		// Mania label y stepper
+		tab_group.add(new FlxText(maniaStepper.x, maniaStepper.y - 15, 50, 'Mania:'));
+		tab_group.add(maniaStepper);
 
 		//dropdowns en formato 2x2
 		tab_group.add(new FlxText(playerDropDown.x, playerDropDown.y - 15, 80, 'Player:'));
@@ -3877,10 +3916,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		tab_group.add(stageDropDown);
 		tab_group.add(opponentDropDown);
 		tab_group.add(girlfriendDropDown);
-		
-		// Mania al final
-		tab_group.add(new FlxText(maniaStepper.x, maniaStepper.y - 15, 50, 'Mania:'));
-		tab_group.add(maniaStepper);
 	}
 
 	function addFileTab()
