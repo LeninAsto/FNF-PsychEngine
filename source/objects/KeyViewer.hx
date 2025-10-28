@@ -68,28 +68,40 @@ class KeyViewer extends FlxSpriteGroup
 		var spacing:Float = 6;
 		var totalWidth:Float = (keySize + spacing) * keyCount - spacing;
 		
-		// Crear botones de teclas y texto primero
+		// Crear botones de teclas primero
 		for (i in 0...keyCount)
 		{
 			var keyButton = new KeyButton(i * (keySize + spacing), 0, keySize, i);
 			keys.push(keyButton);
 			add(keyButton);
-			
-			var keyName:String = getKeyName(i);
-			var keyText = new FlxText(keyButton.x, keyButton.y, keySize, keyName, 12); 
-			var textColor = FlxColor.WHITE;
-			keyText.setFormat(Paths.font("vcr.ttf"), 12, textColor, CENTER);
-			keyText.y += (keySize - keyText.height) / 2; 
-			keyText.alpha = 0.6; 
-			keyTexts.push(keyText);
-			add(keyText);
 		}
 		
+		// Crear barras de presión
 		for (i in 0...keyCount)
 		{
 			var pressureBar = new PressureBar(i * (keySize + spacing), 0 - 10, keySize, i);
 			pressureBars.push(pressureBar);
 			add(pressureBar);
+		}
+		
+		// Crear textos al final para que estén encima
+		for (i in 0...keyCount)
+		{
+			var keyButton = keys[i]; // Obtener referencia al botón ya creado
+			var keyName:String = getKeyName(i);
+			
+			var keyText = new FlxText(keyButton.x, keyButton.y, keySize, keyName, 12); 
+			keyText.setFormat(Paths.font("vcr.ttf"), 12, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
+			keyText.borderSize = 1.5;
+			keyText.y += (keySize - keyText.height) / 2; 
+			keyText.alpha = 1.0;
+			
+			keyTexts.push(keyText);
+		}
+		
+		// Agregar los textos DESPUÉS de todo para que se dibujen encima
+		for (text in keyTexts) {
+			add(text);
 		}
 		
 		kpsText = new FlxText(0, keySize + 10, totalWidth, "KPS: 0", 14);
@@ -257,6 +269,10 @@ class KeyViewer extends FlxSpriteGroup
 			remove(text, true);
 			text.destroy();
 		}
+		for (bar in pressureBars) {
+			remove(bar, true);
+			bar.destroy();
+		}
 		if (kpsText != null) {
 			remove(kpsText, true);
 			kpsText.destroy();
@@ -269,11 +285,135 @@ class KeyViewer extends FlxSpriteGroup
 		// Limpiar arrays
 		keys = [];
 		keyTexts = [];
+		pressureBars = [];
 		
 		// Actualizar número de teclas y recrear
 		updateKeyCount();
 		createKeyViewer();
 		centerOnScreen();
+	}
+	
+	public function regenerateKeyViewerWithAnimation(?transitionTime:Float = 0.5)
+	{
+		// Animar salida de elementos existentes
+		var elementsToRemove:Array<FlxSprite> = [];
+		
+		// Animar keys y texts saliendo
+		for (i in 0...keys.length) {
+			var key = keys[i];
+			var text = keyTexts[i];
+			
+			elementsToRemove.push(key);
+			elementsToRemove.push(text);
+			
+			// Animación de salida: desaparece hacia abajo
+			FlxTween.tween(key, {y: key.y + 20, alpha: 0}, transitionTime / 2, {
+				ease: FlxEase.cubeIn,
+				startDelay: i * 0.03
+			});
+			
+			FlxTween.tween(text, {y: text.y + 20, alpha: 0}, transitionTime / 2, {
+				ease: FlxEase.cubeIn,
+				startDelay: i * 0.03
+			});
+		}
+		
+		// Animar bars saliendo
+		for (bar in pressureBars) {
+			if (bar != null) {
+				elementsToRemove.push(bar);
+				FlxTween.tween(bar, {alpha: 0}, transitionTime / 2, {ease: FlxEase.cubeIn});
+			}
+		}
+		
+		// Animar flying bars saliendo
+		for (bar in flyingBars) {
+			if (bar != null) {
+				elementsToRemove.push(bar);
+				FlxTween.tween(bar, {alpha: 0}, transitionTime / 2, {ease: FlxEase.cubeIn});
+			}
+		}
+		
+		// Animar textos de stats saliendo
+		if (kpsText != null) {
+			elementsToRemove.push(kpsText);
+			FlxTween.tween(kpsText, {alpha: 0}, transitionTime / 2, {ease: FlxEase.cubeIn});
+		}
+		if (totalText != null) {
+			elementsToRemove.push(totalText);
+			FlxTween.tween(totalText, {alpha: 0}, transitionTime / 2, {ease: FlxEase.cubeIn});
+		}
+		
+		// Después de la animación de salida, regenerar con animación de entrada
+		new flixel.util.FlxTimer().start(transitionTime / 2, function(tmr:flixel.util.FlxTimer) {
+			// Limpiar elementos viejos
+			for (element in elementsToRemove) {
+				if (element != null) {
+					remove(element, true);
+					element.destroy();
+				}
+			}
+			
+			// Limpiar arrays
+			keys = [];
+			keyTexts = [];
+			pressureBars = [];
+			flyingBars = [];
+			
+			// Actualizar número de teclas y recrear
+			updateKeyCount();
+			createKeyViewer();
+			centerOnScreen();
+			
+			// Animar entrada de nuevos elementos
+			for (i in 0...keys.length) {
+				var key = keys[i];
+				var text = keyTexts[i];
+				
+				// Guardar posiciones finales
+				var finalKeyY = key.y;
+				var finalTextY = text.y;
+				
+				// Posicionar arriba y transparente
+				key.y -= 20;
+				key.alpha = 0;
+				text.y -= 20;
+				text.alpha = 0;
+				
+				// Animar entrada con delay escalonado
+				FlxTween.tween(key, {y: finalKeyY, alpha: 0.6}, transitionTime / 2, {
+					ease: FlxEase.cubeOut,
+					startDelay: i * 0.03
+				});
+				
+				FlxTween.tween(text, {y: finalTextY, alpha: 0.6}, transitionTime / 2, {
+					ease: FlxEase.cubeOut,
+					startDelay: i * 0.03
+				});
+			}
+			
+			// Animar entrada de pressure bars
+			for (i in 0...pressureBars.length) {
+				var bar = pressureBars[i];
+				if (bar != null) {
+					bar.alpha = 0;
+					FlxTween.tween(bar, {alpha: 1}, transitionTime / 2, {
+						ease: FlxEase.cubeOut,
+						startDelay: i * 0.03
+					});
+				}
+			}
+			
+			// Animar entrada de textos de stats
+			if (kpsText != null) {
+				kpsText.alpha = 0;
+				FlxTween.tween(kpsText, {alpha: 0.8}, transitionTime / 2, {ease: FlxEase.cubeOut});
+			}
+			if (totalText != null) {
+				totalText.alpha = 0;
+				FlxTween.tween(totalText, {alpha: 0.8}, transitionTime / 2, {ease: FlxEase.cubeOut});
+			}
+		});
 	}
 	
 	public function updateKeyColors()
@@ -351,7 +491,7 @@ class KeyButton extends FlxSprite
 			shape.graphics.lineStyle(2, FlxColor.WHITE, 0.8);
 			shape.graphics.drawRoundRect(0, 0, size, size, size/6, size/6);
 			shape.graphics.lineStyle();
-			shape.graphics.beginFill(FlxColor.WHITE, 0.3);
+			shape.graphics.beginFill(FlxColor.WHITE, 0.15); // Reducido de 0.3 a 0.15 para que el texto sea más visible
 			shape.graphics.drawRoundRect(0, 0, size, size, size/6, size/6);
 			shape.graphics.endFill();
 			

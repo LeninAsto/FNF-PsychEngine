@@ -43,7 +43,9 @@ class StrumNote extends FlxSprite
 		} else {
 			// Para Extra Keys, usar colores del ExtraKeysHandler o colores por defecto
 			if (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
-				var numKeys = (PlayState.SONG != null && PlayState.SONG.mania != null) ? PlayState.SONG.mania : 4;
+				// Obtener mania desde PlayState.SONG
+				var numKeys:Int = (PlayState.SONG != null && PlayState.SONG.mania != null) ? PlayState.SONG.mania : 4;
+				
 				var index = ExtraKeysHandler.instance.getIndex(numKeys, leData);
 				if (index < ExtraKeysHandler.instance.data.colors.length) {
 					// Crear array de colores desde ExtraKeysHandler
@@ -154,7 +156,9 @@ class StrumNote extends FlxSprite
 			// Obtener animaciones para Extra Keys
 			var animData = null;
 			if (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
-				var numKeys = (PlayState.SONG != null && PlayState.SONG.mania != null) ? PlayState.SONG.mania : 4;
+				// Obtener mania desde PlayState.SONG
+				var numKeys:Int = (PlayState.SONG != null && PlayState.SONG.mania != null) ? PlayState.SONG.mania : 4;
+				
 				var index = ExtraKeysHandler.instance.getIndex(numKeys, noteData);
 				animData = ExtraKeysHandler.instance.getAnimSet(index);
 			}

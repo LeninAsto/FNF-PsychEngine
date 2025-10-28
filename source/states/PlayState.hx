@@ -392,9 +392,14 @@ class PlayState extends MusicBeatState
 
 		// Configurar keysArray dinámicamente basándose en la mania
 		keysArray = [];
+		
+		// Si la canción no tiene manía definida, usar 4K por defecto
+		// (Ya debería estar inicializado en Song.parseJSON, pero por seguridad)
+		if (SONG.mania == null) SONG.mania = 4;
+		
 		trace('DEBUG: SONG.mania = ${SONG.mania}');
 		trace('DEBUG: SONG.mania != null = ${SONG.mania != null}');
-		var mania = (SONG.mania != null) ? SONG.mania : 4; // 4K por defecto
+		var mania = SONG.mania; // Usar directamente el valor de SONG
 		trace('MANIA DETECTADA: $mania teclas');
 		
 		// El mania directamente representa el número de teclas
@@ -1871,7 +1876,10 @@ class PlayState extends MusicBeatState
 	{
 		var strumLineX:Float = ClientPrefs.data.middleScroll ? STRUM_X_MIDDLESCROLL : STRUM_X;
 		var strumLineY:Float = ClientPrefs.data.downScroll ? (FlxG.height - 150) : 50;
-		var mania = (SONG.mania != null) ? SONG.mania : 4; // 4K por defecto
+		
+		// Asegurar que SONG.mania tenga un valor válido
+		if (SONG.mania == null) SONG.mania = 4;
+		var mania = SONG.mania;
 		
 		// El mania directamente representa el número de teclas
 		var keyCount = mania;
@@ -2396,7 +2404,33 @@ class PlayState extends MusicBeatState
 							var strumGroup:FlxTypedGroup<StrumNote> = playerStrums;
 							if(!daNote.mustPress) strumGroup = opponentStrums;
 
+							// Protección: verificar que el strum existe antes de acceder
+							if(daNote.noteData >= strumGroup.length || daNote.noteData < 0)
+							{
+								// Nota fuera de rango - hacerla invisible pero no eliminarla
+								// Esto permite que las notas persistan cuando cambies de mania menor a mayor
+								daNote.visible = false;
+								daNote.canBeHit = false;
+								if(daNote.exists) i++;
+								continue;
+							}
+
 							var strum:StrumNote = strumGroup.members[daNote.noteData];
+							if(strum == null)
+							{
+								// Strum no existe - hacer la nota invisible
+								daNote.visible = false;
+								daNote.canBeHit = false;
+								if(daNote.exists) i++;
+								continue;
+							}
+							
+							// Si llegamos aquí, la nota es válida - asegurar que sea visible
+							if(!daNote.wasGoodHit && !daNote.ignoreNote) {
+								daNote.visible = true;
+								daNote.canBeHit = true;
+							}
+
 							daNote.followStrumNote(strum, fakeCrochet, songSpeed / playbackRate);
 
 							if(daNote.mustPress)
@@ -2881,6 +2915,26 @@ class PlayState extends MusicBeatState
 				if(flValue2 == null) flValue2 = 1;
 				FlxG.sound.play(Paths.sound(value1), flValue2);
 
+			case 'Change Mania':
+				if(flValue1 == null) flValue1 = 4; // Default a 4K si no se especifica
+				if(flValue2 == null) flValue2 = 0; // Sin transición por defecto
+				
+				var newMania:Int = Std.int(flValue1);
+				var transitionTime:Float = flValue2;
+				
+				// Validar mania en el rango válido
+				if (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
+					var minKeys = ExtraKeysHandler.instance.data.minKeys;
+					var maxKeys = ExtraKeysHandler.instance.data.maxKeys;
+					if (newMania < minKeys) newMania = minKeys;
+					if (newMania > maxKeys) newMania = maxKeys;
+				} else {
+					if (newMania < 1) newMania = 4;
+					if (newMania > 18) newMania = 18;
+				}
+				
+				changeMania(newMania, transitionTime);
+
 						// ...existing code...
 			case "Set Camera Bopping":
 				// Value 1: frecuencia (en beats), Value 2: intensidad (1 = default)
@@ -2988,6 +3042,239 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+
+	public function changeMania(newMania:Int, transitionTime:Float = 0):Void
+	{
+		trace('Changing mania from ${SONG.mania} to $newMania with transition time: $transitionTime');
+		
+		// Actualizar SONG.mania
+		var oldMania:Int = SONG.mania;
+		SONG.mania = newMania;
+		
+		// Recalcular keysArray
+		keysArray = [];
+		if (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
+			var keyNames = ExtraKeysHandler.instance.getKeyNames(newMania);
+			if (keyNames != null) {
+				keysArray = keyNames;
+			} else {
+				// Fallback si no se pueden obtener los nombres
+				for (i in 0...newMania) {
+					keysArray.push('note_${newMania}${i + 1}');
+				}
+			}
+		} else {
+			// Fallback básico para 4K
+			keysArray = ['note_left', 'note_down', 'note_up', 'note_right'];
+		}
+		
+		// Limpiar notas que estén fuera del rango de la nueva manía
+		var notesToRemove:Array<Note> = [];
+		for (note in unspawnNotes)
+		{
+			if(note != null && note.noteData >= newMania)
+			{
+				notesToRemove.push(note);
+			}
+		}
+		for (note in notesToRemove)
+		{
+			unspawnNotes.remove(note);
+			note.destroy();
+		}
+		
+		notesToRemove = [];
+		notes.forEachAlive(function(note:Note)
+		{
+			if(note != null && note.noteData >= newMania)
+			{
+				notesToRemove.push(note);
+			}
+		});
+		for (note in notesToRemove)
+		{
+			note.active = note.visible = false;
+			invalidateNote(note);
+		}
+		
+		// Regenerar strums
+		if (transitionTime <= 0) {
+			// Cambio instantáneo
+			regenerateStrums();
+		} else {
+			// Transición gradual
+			// Primero hacer fade out de los strums actuales
+			for (strum in playerStrums) {
+				FlxTween.tween(strum, {alpha: 0}, transitionTime / 2, {
+					ease: FlxEase.quadOut,
+					onComplete: function(twn:FlxTween) {
+						// Regenerar y hacer fade in
+						regenerateStrums();
+						for (newStrum in playerStrums) {
+							newStrum.alpha = 0;
+							FlxTween.tween(newStrum, {alpha: 1}, transitionTime / 2, {ease: FlxEase.quadIn});
+						}
+					}
+				});
+			}
+			for (strum in opponentStrums) {
+				FlxTween.tween(strum, {alpha: 0}, transitionTime / 2, {ease: FlxEase.quadOut});
+			}
+		}
+		
+		// Notificar scripts del cambio
+		callOnScripts('onManiaChanged', [newMania, transitionTime]);
+	}
+	
+	public function changeManiaWithAnimation(newMania:Int, transitionTime:Float = 0.5):Void
+	{
+		trace('Changing mania with animation from ${SONG.mania} to $newMania');
+		
+		// Actualizar SONG.mania
+		var oldMania:Int = SONG.mania;
+		SONG.mania = newMania;
+		
+		// Recalcular keysArray
+		keysArray = [];
+		if (ExtraKeysHandler.instance != null && ExtraKeysHandler.instance.data != null) {
+			var keyNames = ExtraKeysHandler.instance.getKeyNames(newMania);
+			if (keyNames != null) {
+				keysArray = keyNames;
+			} else {
+				for (i in 0...newMania) {
+					keysArray.push('note_${newMania}${i + 1}');
+				}
+			}
+		} else {
+			keysArray = ['note_left', 'note_down', 'note_up', 'note_right'];
+		}
+		
+		// Limpiar notas que estén fuera del rango de la nueva manía
+		// NO eliminar, solo marcar como invisibles para que puedan volver si la mania aumenta
+		for (note in unspawnNotes)
+		{
+			if(note != null)
+			{
+				if (note.noteData >= newMania) {
+					// Marcar como invisible, pero NO eliminar
+					note.visible = false;
+					note.canBeHit = false;
+				} else {
+					// Asegurar que las notas válidas sean visibles
+					note.visible = true;
+					note.canBeHit = true;
+				}
+			}
+		}
+		
+		// Para notas ya spawneadas, solo ocultar las que están fuera de rango
+		notes.forEachAlive(function(note:Note)
+		{
+			if(note != null)
+			{
+				if (note.noteData >= newMania) {
+					note.visible = false;
+					note.canBeHit = false;
+				} else {
+					if (!note.wasGoodHit && !note.ignoreNote) {
+						note.visible = true;
+						note.canBeHit = true;
+					}
+				}
+			}
+		});
+		
+		// Animación: Hacer que los strums actuales se vayan (reversa de aparecer)
+		var strumsToAnimate:Array<StrumNote> = [];
+		playerStrums.forEachAlive(function(strum:StrumNote) {
+			strumsToAnimate.push(strum);
+		});
+		opponentStrums.forEachAlive(function(strum:StrumNote) {
+			strumsToAnimate.push(strum);
+		});
+		
+		for (strum in strumsToAnimate)
+		{
+			// Animación reversa: desaparece hacia abajo con alpha
+			FlxTween.tween(strum, {y: strum.y + 10, alpha: 0}, transitionTime / 2, {
+				ease: FlxEase.cubeIn,
+				onComplete: function(twn:FlxTween) {
+					// Solo regenerar una vez (cuando complete el primer strum)
+					if(strum == strumsToAnimate[0])
+					{
+						regenerateStrums();
+						
+						// Regenerar KeyViewer con animación si está activo
+						if(keyViewer != null) {
+							// Asegurar que keyViewer tenga acceso al keysArray actualizado
+							keyViewer.updateKeyCount();
+							keyViewer.regenerateKeyViewerWithAnimation(transitionTime);
+						}
+						
+						// Animar la entrada de los nuevos strums
+						var newStrums:Array<StrumNote> = [];
+						playerStrums.forEachAlive(function(s:StrumNote) newStrums.push(s));
+						opponentStrums.forEachAlive(function(s:StrumNote) newStrums.push(s));
+						
+						for (i in 0...newStrums.length)
+						{
+							var newStrum = newStrums[i];
+							var targetY = newStrum.y;
+							newStrum.y -= 10;
+							newStrum.alpha = 0;
+							
+							// Delay escalonado para efecto visual
+							FlxTween.tween(newStrum, {y: targetY, alpha: 1}, transitionTime / 2, {
+								ease: FlxEase.cubeOut,
+								startDelay: i * 0.05
+							});
+						}
+					}
+				}
+			});
+		}
+		
+		// Notificar scripts del cambio
+		callOnScripts('onManiaChanged', [newMania, transitionTime]);
+	}
+	
+	public function regenerateStrums():Void
+	{
+		// Guardar las posiciones Y originales si aún no están guardadas
+		if (originalStrumY.length == 0) {
+			playerStrums.forEachAlive(function(strum:StrumNote) {
+				originalStrumY.push(strum.y);
+			});
+		}
+		
+		// Limpiar strums existentes
+		playerStrums.clear();
+		opponentStrums.clear();
+		strumLineNotes.clear();
+		
+		// Regenerar strums con la nueva manía
+		generateStaticArrows(0); // Opponent
+		generateStaticArrows(1); // Player
+		
+		// IMPORTANTE: Actualizar todas las notas existentes para que sigan a los nuevos strums
+		notes.forEachAlive(function(note:Note) {
+			if (note != null) {
+				// Verificar si la nota está dentro del rango de la nueva mania
+				var strumGroup = note.mustPress ? playerStrums : opponentStrums;
+				if (note.noteData >= 0 && note.noteData < strumGroup.length) {
+					// La nota es válida - asegurar que sea visible
+					note.visible = true;
+					note.canBeHit = true;
+				} else {
+					// La nota está fuera de rango - ocultarla
+					note.visible = false;
+					note.canBeHit = false;
+				}
+			}
+		});
+		
+		trace('Strums regenerated for ${SONG.mania} keys');
+	}
 
 	public var transitioning = false;
 	public function endSong()
@@ -3431,7 +3718,8 @@ class PlayState extends MusicBeatState
 
 	private function keyPressed(key:Int)
 	{
-		if(cpuControlled || paused || inCutscene || key < 0 || key >= playerStrums.length || !generatedMusic || endingSong || boyfriend.stunned) return;
+		// Protección adicional: verificar que playerStrums no esté vacío
+		if(cpuControlled || paused || inCutscene || key < 0 || playerStrums == null || playerStrums.length == 0 || key >= playerStrums.length || !generatedMusic || endingSong || boyfriend.stunned) return;
 
 		// Key Viewer
 		if(keyViewer != null) {
@@ -4166,6 +4454,16 @@ class PlayState extends MusicBeatState
 				setOnScripts('crochet', Conductor.crochet);
 				setOnScripts('stepCrochet', Conductor.stepCrochet);
 			}
+			
+			if (SONG.notes[curSection].changeMania && SONG.notes[curSection].sectionMania != null)
+			{
+				var newMania:Int = SONG.notes[curSection].sectionMania;
+				if(newMania != SONG.mania)
+				{
+					changeManiaWithAnimation(newMania, 0.5);
+				}
+			}
+			
 			setOnScripts('mustHitSection', SONG.notes[curSection].mustHitSection);
 			setOnScripts('altAnim', SONG.notes[curSection].altAnim);
 			setOnScripts('gfSection', SONG.notes[curSection].gfSection);
