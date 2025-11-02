@@ -1,4 +1,4 @@
-![Logo Off](docs/img/fond.png)
+![Logo Off](docs/img/PlusEngineLogo.png)
 
 # 🎮 FNF-PlusEngine
 Engine based on Psych Engine 1.0.4, with modcharts like NotITG, ModStates and compatible with hxcodec videos from Psych mods 0.6.3 and 0.7.3.
