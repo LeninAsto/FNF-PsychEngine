@@ -1,5 +1,6 @@
 package states;
 
+import backend.StageData;
 import backend.WeekData;
 import backend.Highscore;
 import backend.Song;
@@ -128,6 +129,9 @@ class FreeplayState extends MusicBeatState
 		}
 		Mods.loadTopMod();
 
+		// Cargar archivos StepMania (.sm)
+		loadStepManiaFiles();
+
 		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		add(bg);
@@ -173,7 +177,13 @@ class FreeplayState extends MusicBeatState
 		
 			var modName:String = songs[i].folder;
 			if (modName == null || modName == '')
-				modName = "Friday Night Funkin";
+			{
+				// Verificar si es una canción de StepMania
+				if (songs[i].isStepMania)
+					modName = "StepMania";
+				else
+					modName = "Friday Night Funkin";
+			}
 
 			var modText:FlxText = new FlxText(0, 0, 400, modName, 20);
 			modText.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, LEFT);
@@ -530,7 +540,38 @@ class FreeplayState extends MusicBeatState
 
 				try
 				{
-					Song.loadFromJson(poop, songLowercase);
+					// Para canciones de StepMania, cargar desde la carpeta ./sm/
+					if (songs[curSelected].isStepMania)
+					{
+						#if MODS_ALLOWED
+						// Buscar el archivo JSON en la carpeta sm usando la carpeta original
+						var smPath:String = './sm/' + songs[curSelected].smFolder + '/' + songLowercase + '.json';
+						if (sys.FileSystem.exists(smPath))
+						{
+							var rawJson:String = sys.io.File.getContent(smPath);
+							PlayState.SONG = Song.parseJSON(rawJson, songLowercase);
+							Song.loadedSongName = songLowercase;
+							Song.chartPath = smPath;
+							
+							// Establecer la ruta de audio personalizada para StepMania
+							PlayState.customAudioPath = './sm/' + songs[curSelected].smFolder + '/';
+							
+							StageData.loadDirectory(PlayState.SONG);
+						}
+						else
+						{
+							throw 'SM chart file not found: $smPath';
+						}
+						#else
+						throw 'StepMania support requires MODS_ALLOWED';
+						#end
+					}
+					else
+					{
+						PlayState.customAudioPath = null; // Limpiar ruta personalizada
+						Song.loadFromJson(poop, songLowercase);
+					}
+					
 					PlayState.isStoryMode = false;
 					PlayState.storyDifficulty = difficultySelector.curSelected;
 
@@ -700,15 +741,33 @@ class FreeplayState extends MusicBeatState
 			}
 		}
 
-		Mods.currentModDirectory = songs[curSelected].folder;
+		// Para canciones de StepMania, no cambiar el directorio de mod
+		if (!songs[curSelected].isStepMania) {
+			Mods.currentModDirectory = songs[curSelected].folder;
+		} else {
+			Mods.currentModDirectory = '';
+		}
+		
 		PlayState.storyWeek = songs[curSelected].week;
-		Difficulty.loadFromWeek();
+		
+		// Solo cargar dificultades desde semana si NO es StepMania
+		if (!songs[curSelected].isStepMania) {
+			Difficulty.loadFromWeek();
+		}
 		
 		// Detect all available difficulties for this song
 		detectAndLoadAllDifficulties();
 		
+		
+		// Protección para canciones de StepMania o sin dificultades
+		if (Difficulty.list == null || Difficulty.list.length == 0) {
+			Difficulty.list = ['Normal']; // Dificultad por defecto
+		}
+		
 		var savedDiff:String = songs[curSelected].lastDifficulty;
+		
 		var lastDiff:Int = Difficulty.list.indexOf(lastDifficultyName);
+		
 		if(savedDiff != null && !Difficulty.list.contains(savedDiff) && Difficulty.list.contains(savedDiff))
 			curDifficulty = Math.round(Math.max(0, Difficulty.list.indexOf(savedDiff)));
 		else if(lastDiff > -1)
@@ -724,7 +783,62 @@ class FreeplayState extends MusicBeatState
 	
 	public function detectAndLoadAllDifficulties():Void
 	{
-		// Detect all available difficulties by checking which chart files exist
+		// Para canciones de StepMania, cargar las dificultades desde el archivo JSON convertido
+		if (songs[curSelected].isStepMania)
+		{
+			var songName:String = Paths.formatToSongPath(songs[curSelected].songName);
+			var availableDiffs:Array<String> = [];
+			
+			// Intentar cargar el chart para detectar qué dificultades existen
+			#if MODS_ALLOWED
+			var smPath:String = './sm/${songs[curSelected].smFolder}/$songName.json';
+			if (FileSystem.exists(smPath))
+			{
+				try {
+					var jsonContent:String = File.getContent(smPath);
+					var songData:Dynamic = haxe.Json.parse(jsonContent);
+					
+					// El archivo .sm convertido usa el nombre de la dificultad como está en el .sm
+					if (songData.song != null && songData.song.song != null)
+					{
+						// Verificar el nombre de la dificultad en el JSON
+						var diffName:String = songData.song.song;
+						// Extraer la dificultad del nombre (ej: "Song-medium" -> "medium")
+						if (diffName.contains('-'))
+						{
+							var parts = diffName.split('-');
+							var smDiff = parts[parts.length - 1]; // Última parte es la dificultad
+							// Capitalizar primera letra
+							smDiff = smDiff.charAt(0).toUpperCase() + smDiff.substr(1);
+							availableDiffs.push(smDiff);
+						}
+						else
+						{
+							availableDiffs.push('Normal');
+						}
+					}
+					else
+					{
+						availableDiffs.push('Normal');
+					}
+				} catch (e:Dynamic) {
+					trace('Error reading SM JSON: ' + e);
+					availableDiffs.push('Normal');
+				}
+			}
+			else
+			{
+				availableDiffs.push('Normal');
+			}
+			#else
+			availableDiffs.push('Normal');
+			#end
+			
+			Difficulty.list = availableDiffs;
+			return;
+		}
+		
+		// Para canciones normales, detectar dificultades de archivos JSON
 		var songName:String = Paths.formatToSongPath(songs[curSelected].songName);
 		var availableDiffs:Array<String> = [];
 		
@@ -836,6 +950,101 @@ class FreeplayState extends MusicBeatState
 		}
 	}		
 	
+	/**
+	 * Escanea la carpeta sm/ en la raíz del juego para cargar archivos .sm
+	 */
+	function loadStepManiaFiles():Void {
+		#if sys
+		var smDir = './sm/';
+		
+		// Verificar si la carpeta sm existe
+		if (!sys.FileSystem.exists(smDir)) {
+			trace('SM folder not found, creating it...');
+			sys.FileSystem.createDirectory(smDir);
+			return;
+		}
+		
+		trace('Scanning for StepMania files...');
+		
+		// Escanear cada subcarpeta en sm/
+		for (folder in sys.FileSystem.readDirectory(smDir)) {
+			var folderPath = smDir + folder;
+			
+			if (!sys.FileSystem.isDirectory(folderPath)) continue;
+			
+			trace('Checking folder: ' + folder);
+			
+			// Buscar archivo .sm en la carpeta
+			var smFile:String = null;
+			for (file in sys.FileSystem.readDirectory(folderPath)) {
+				if (file.endsWith('.sm')) {
+					smFile = file;
+					break;
+				}
+			}
+			
+			if (smFile == null) {
+				trace('No .sm file found in ' + folder);
+				continue;
+			}
+			
+			// Cargar el archivo SM
+			var fullPath = folderPath + '/' + smFile;
+			trace('Loading SM file: ' + fullPath);
+			
+			try {
+				var sm = backend.stepmania.SMFile.loadFile(fullPath);
+				
+				if (sm == null || !sm.isValid) {
+					trace('Invalid SM file: ' + smFile);
+					continue;
+				}
+				
+				// Crear nombre de archivo basado en canción y dificultad
+				var songNameClean = Paths.formatToSongPath(sm.header.TITLE);
+				var diffName = Paths.formatToSongPath(sm.difficulty);
+				var jsonFileName = '$songNameClean.json';
+				var jsonPath = folderPath + '/' + jsonFileName;
+				var needsConversion = !sys.FileSystem.exists(jsonPath);
+				
+				// Convertir el SM a formato FNF
+				if (needsConversion) {
+					trace('Converting SM file: ${sm.header.TITLE} [${sm.difficulty}]');
+					// Pasar el nombre con la dificultad
+					var song = sm.convertToFNF('$songNameClean-$diffName');
+					
+					if (song != null) {
+						// Guardar el JSON convertido
+						var json = haxe.Json.stringify({song: song}, null, '\t');
+						sys.io.File.saveContent(jsonPath, json);
+						trace('Saved converted chart: ' + jsonPath);
+					}
+				}
+				
+				// Agregar la canción a la lista de freeplay con icono stepmania
+				var cleanTitle = sm.header.TITLE;
+				// Limpiar caracteres especiales que pueden causar problemas de renderizado
+				cleanTitle = StringTools.replace(cleanTitle, '\r', '');
+				cleanTitle = StringTools.replace(cleanTitle, '\n', '');
+				
+				addSong(cleanTitle, -1, 'stepmania', FlxColor.fromRGB(255, 140, 0));
+				
+				// Marcar como canción de StepMania
+				var lastSong = songs[songs.length - 1];
+				lastSong.folder = ''; // Dejar vacío para que use el folder por defecto
+				lastSong.isStepMania = true; // Marcar como StepMania
+				lastSong.smFolder = folder; // Guardar la carpeta original del .sm
+				
+			} catch (e:Dynamic) {
+				trace('Error loading SM file ' + smFile + ': ' + e);
+			}
+		}
+		
+		#else
+		trace('StepMania support not available on this platform');
+		#end
+	}
+	
 	override function destroy():Void
 	{
 		super.destroy();
@@ -854,6 +1063,8 @@ class SongMetadata
 	public var color:Int = -7179779;
 	public var folder:String = "";
 	public var lastDifficulty:String = null;
+	public var isStepMania:Bool = false; // Identificador para canciones SM
+	public var smFolder:String = ""; // Carpeta original del archivo .sm
 
 	public function new(song:String, week:Int, songCharacter:String, color:Int)
 	{
@@ -888,11 +1099,16 @@ class DifficultySelector
 	{
 		items.clear();
 		cards.clear();
-		Difficulty.loadFromWeek();
 		
-		// Detect all available difficulties using the FreeplayState function
-		if (FreeplayState.instance != null)
+		// Solo cargar dificultades desde semana si NO es StepMania
+		if (FreeplayState.instance != null && FreeplayState.instance.songs[FreeplayState.curSelected] != null)
 		{
+			if (!FreeplayState.instance.songs[FreeplayState.curSelected].isStepMania)
+			{
+				Difficulty.loadFromWeek();
+			}
+			
+			// Detect all available difficulties using the FreeplayState function
 			FreeplayState.instance.detectAndLoadAllDifficulties();
 		}
 		

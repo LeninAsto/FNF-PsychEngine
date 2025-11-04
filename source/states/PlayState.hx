@@ -188,6 +188,9 @@ class PlayState extends MusicBeatState
 	public static var storyWeek:Int = 0;
 	public static var storyPlaylist:Array<String> = [];
 	public static var storyDifficulty:Int = 1;
+	
+	// Ruta personalizada para archivos de audio de StepMania
+	public static var customAudioPath:String = null;
 
 	public var spawnTime:Float = 2000;
 
@@ -1609,7 +1612,28 @@ class PlayState extends MusicBeatState
 		inst = new FlxSound();
 		try
 		{
-			inst.loadEmbedded(Paths.inst(songData.song));
+			// Si hay una ruta de audio personalizada (StepMania), cargar desde ahí
+			if (customAudioPath != null)
+			{
+				#if sys
+				var instPath = customAudioPath + 'Song.ogg';
+				if (sys.FileSystem.exists(instPath))
+				{
+					inst.loadEmbedded(openfl.media.Sound.fromFile(instPath));
+				}
+				else
+				{
+					trace('Custom audio file not found: $instPath');
+					inst.loadEmbedded(Paths.inst(songData.song));
+				}
+				#else
+				inst.loadEmbedded(Paths.inst(songData.song));
+				#end
+			}
+			else
+			{
+				inst.loadEmbedded(Paths.inst(songData.song));
+			}
 		}
 		catch (e:Dynamic) {}
 		FlxG.sound.list.add(inst);
@@ -3785,6 +3809,8 @@ class PlayState extends MusicBeatState
 		var result:Dynamic = callOnLuas('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus]);
 		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) callOnHScript('goodNoteHit', [note]);
 		spawnHoldSplashOnNote(note);
+		
+		// Guardar nota en el replay (solo si no estamos en modo replay)
 		if(!note.isSustainNote) invalidateNote(note);
 	}
 

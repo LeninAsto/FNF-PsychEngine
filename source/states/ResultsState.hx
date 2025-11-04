@@ -242,7 +242,7 @@ class ResultsState extends MusicBeatState
         #if mobile
         var continueText = new FlxText(50, FlxG.height - 75, 0, Language.getPhrase('results_press_enter_mobile', 'Touch anywhere or press A\nto Continue'), 26);
         #else
-        var continueText = new FlxText(50, FlxG.height - 75, 0, Language.getPhrase('results_press_enter', 'Press Enter\nfor Continue'), 26);
+        var continueText = new FlxText(50, FlxG.height - 75, 0, Language.getPhrase('results_press_enter', 'Press Enter to Continue'), 26);
         #end
         continueText.setFormat(Paths.font("aller.ttf"), 26, FlxColor.WHITE, "center");
         add(continueText);

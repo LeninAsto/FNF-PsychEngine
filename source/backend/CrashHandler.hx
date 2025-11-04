@@ -17,6 +17,9 @@ using flixel.util.FlxArrayUtil;
  */
 class CrashHandler
 {
+	// Link de ayuda/repositorio para mostrar en caso de crash
+	public static final HELP_LINK:String = "https://github.com/LeninAsto/FNF-PlusEngine";
+	
 	public static function init():Void
 	{
 		openfl.Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onUncaughtError);
@@ -71,11 +74,16 @@ class CrashHandler
 		}
 		stackLabel = stackLabelArr.join('\r\n');
 
+		// Mostrar error en la consola/terminal
+		trace('\n\n$m\n\n$stackLabel\n======================\nFor help, visit: $HELP_LINK');
+		
 		#if sys
 		saveErrorMessage('$m\n$stackLabel');
 		#end
 
-		CoolUtil.showPopUp('$m\n$stackLabel', "Error!");
+		// Mensaje con link de ayuda
+		var errorMsg = '$m\n\n$stackLabel\n\n━━━━━━━━━━━━━━━━━━━━━━\nNeed help? Visit:\n$HELP_LINK';
+		CoolUtil.showPopUp(errorMsg, "Error!");
 		#if DISCORD_ALLOWED DiscordClient.shutdown(); #end
 		lime.system.System.exit(1);
 	}
@@ -89,12 +97,22 @@ class CrashHandler
 			log.push(message);
 
 		log.push(haxe.CallStack.toString(haxe.CallStack.exceptionStack(true)));
+		
+		var errorLog = log.join('\n');
+		
+		// Mostrar error en la consola/terminal
+		trace('=== CRITICAL ERROR ===');
+		trace(errorLog);
+		trace('======================');
+		trace('For help, visit: $HELP_LINK');
 
 		#if sys
-		saveErrorMessage(log.join('\n'));
+		saveErrorMessage(errorLog);
 		#end
 
-		CoolUtil.showPopUp(log.join('\n'), "Critical Error!");
+		// Mensaje con link de ayuda
+		var errorMsg = '$errorLog\n\n━━━━━━━━━━━━━━━━━━━━━━\nNeed help? Visit:\n$HELP_LINK';
+		CoolUtil.showPopUp(errorMsg, "Critical Error!");
 		#if DISCORD_ALLOWED DiscordClient.shutdown(); #end
 		lime.system.System.exit(1);
 	}
@@ -110,7 +128,8 @@ class CrashHandler
 			if (!FileSystem.exists(folder))
 				FileSystem.createDirectory(folder);
 
-			File.saveContent(folder + Date.now().toString().replace(' ', '-').replace(':', "'") + '.txt', message);
+			var fullLog = message + '\n\n━━━━━━━━━━━━━━━━━━━━━━\nFor help, visit: $HELP_LINK\n━━━━━━━━━━━━━━━━━━━━━━';
+			File.saveContent(folder + Date.now().toString().replace(' ', '-').replace(':', "'") + '.txt', fullLog);
 		}
 		catch (e:haxe.Exception)
 			trace('Couldn\'t save error message. (${e.message})');
