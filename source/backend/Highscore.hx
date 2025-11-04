@@ -29,13 +29,21 @@ class Highscore
 			if (songScores.get(daSong) < score)
 			{
 				setScore(daSong, score);
-				if(rating >= 0) setRating(daSong, rating);
+				// Wife3 permite ratings negativos y >1.0, solo guardamos si fue especificado (diferente de -1)
+				if(rating != -1) setRating(daSong, rating);
+			}
+			// Si el score es igual pero el rating es mejor, actualiza solo el rating
+			else if (songScores.get(daSong) == score && rating != -1)
+			{
+				var currentRating:Float = getRating(song, diff);
+				if(rating > currentRating) setRating(daSong, rating);
 			}
 		}
 		else
 		{
 			setScore(daSong, score);
-			if(rating >= 0) setRating(daSong, rating);
+			// Wife3 permite ratings negativos y >1.0, solo guardamos si fue especificado
+			if(rating != -1) setRating(daSong, rating);
 		}
 	}
 

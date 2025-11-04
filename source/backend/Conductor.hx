@@ -21,15 +21,38 @@ class Conductor
 
 	//public static var safeFrames:Int = 10;
 	public static var safeZoneOffset:Float = 0; // is calculated in create(), is safeFrames in milliseconds
+	
+	// Judge Difficulty Scales (similar a Etterna)
+	// Escala las ventanas de juicio: números más bajos = ventanas más amplias (fácil)
+	// números más altos = ventanas más ajustadas (difícil)
+	public static var judgeScales:Map<String, Float> = [
+		"J1" => 1.50, // Muy fácil
+		"J2" => 1.33,
+		"J3" => 1.16,
+		"J4" => 1.00, // Normal/Estándar
+		"J5" => 0.84,
+		"J6" => 0.66,
+		"J7" => 0.50,
+		"J8" => 0.33, // Muy difícil
+		"JUSTICE" => 0.20 // Brutal
+	];
 
 	public static var bpmChangeMap:Array<BPMChangeEvent> = [];
 
 	public static function judgeNote(arr:Array<Rating>, diff:Float=0):Rating // die
 	{
 		var data:Array<Rating> = arr;
+		var judgeScale:Float = 1.0; // Default a normal
+		
+		if (judgeScales.exists(ClientPrefs.data.judgeDiff))
+			judgeScale = judgeScales.get(ClientPrefs.data.judgeDiff);
+		
 		for(i in 0...data.length-1) //skips last window (Shit)
-			if (diff <= data[i].hitWindow)
+		{
+			var scaledWindow = data[i].hitWindow * judgeScale;
+			if (diff <= scaledWindow)
 				return data[i];
+		}
 
 		return data[data.length - 1];
 	}

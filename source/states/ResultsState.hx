@@ -322,14 +322,19 @@ class ResultsState extends MusicBeatState
         }
         comboText.text = Language.getPhrase('judgement_max_combo', 'Highest Combo') + ': $animatedCombo';
 
-        // 9. Accuracy
+        // 9. Accuracy (Wife3 permite valores fuera de 0-100%)
         if (animatedAccuracy < params.accuracy) {
             animatedAccuracy += (params.accuracy - animatedAccuracy) * 0.2 + 0.1;
             if (animatedAccuracy > params.accuracy) animatedAccuracy = params.accuracy;
-            accText.text = Language.getPhrase('results_accuracy', 'Accuracy') + ': ' + Std.string(Math.round(animatedAccuracy * 1000) / 10) + '%';
+            
+            // Formateo de accuracy con soporte para negativos y >100%
+            var accPercent:Float = Math.round(animatedAccuracy * 1000) / 10;
+            accText.text = Language.getPhrase('results_accuracy', 'Accuracy') + ': ' + Std.string(accPercent) + '%';
             return;
         }
-        accText.text = Language.getPhrase('results_accuracy', 'Accuracy') + ': ' + Std.string(Math.round(animatedAccuracy * 1000) / 10) + '%';
+        
+        var accPercent:Float = Math.round(animatedAccuracy * 1000) / 10;
+        accText.text = Language.getPhrase('results_accuracy', 'Accuracy') + ': ' + Std.string(accPercent) + '%';
 
         // --- Transición con múltiples controles (teclado, gamepad, móvil) ---
         var shouldContinue:Bool = false;

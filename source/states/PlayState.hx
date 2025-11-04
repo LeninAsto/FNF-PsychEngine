@@ -99,6 +99,13 @@ class PlayState extends MusicBeatState
 	// ← NUEVA FUNCIÓN PARA OBTENER RATINGS TRADUCIDOS
 	public static function getRatingStuff():Array<Dynamic> {
 		return [
+			// Ratings Negativos (Wife3 permite accuracy negativo)
+			[Language.getPhrase('rating_abysmal', 'Abysmal'), -0.5], // < -50%
+			[Language.getPhrase('rating_atrocious', 'Atrocious'), -0.3], // -50% a -30%
+			[Language.getPhrase('rating_awful', 'Awful'), -0.1], // -30% a -10%
+			[Language.getPhrase('rating_terrible', 'Terrible'), 0], // -10% a 0%
+			
+			// Ratings Normales (0% - 100%)
 			[Language.getPhrase('rating_you_suck', 'You Suck!'), 0.2],
 			[Language.getPhrase('rating_shit', 'Shit'), 0.4],
 			[Language.getPhrase('rating_bad', 'Bad'), 0.5],
@@ -110,6 +117,7 @@ class PlayState extends MusicBeatState
 			[Language.getPhrase('rating_sick', 'Sick!'), 0.95],
 			[Language.getPhrase('rating_epic', 'Epic!!'), 1],
 			[Language.getPhrase('rating_perfect', 'Perfect!!!'), 1]
+			// Nota: >100% usa "Perfect!!!" + el porcentaje extra entre paréntesis
 		];
 	}
 
@@ -231,6 +239,9 @@ class PlayState extends MusicBeatState
 	public var instakillOnMiss:Bool = false;
 	public var cpuControlled:Bool = false;
 	public var practiceMode:Bool = false;
+	public var perfectMode:Bool = false; // Perfect Mode - miss on anything below Sick
+	public var playOpponent:Bool = false; // Opponent Mode - play as opponent
+	public var noDropPenalty:Bool = false; // Hold drops don't cause misses
 	public var pressMissDamage:Float = 0.05;
 
 	public var botplaySine:Float = 0;
@@ -398,8 +409,17 @@ class PlayState extends MusicBeatState
 		healthLoss = ClientPrefs.getGameplaySetting('healthloss');
 		instakillOnMiss = ClientPrefs.getGameplaySetting('instakill');
 		practiceMode = ClientPrefs.getGameplaySetting('practice');
+		perfectMode = ClientPrefs.getGameplaySetting('perfect');
+		playOpponent = ClientPrefs.getGameplaySetting('opponentplay');
+		noDropPenalty = ClientPrefs.getGameplaySetting('nodroppenalty');
 		cpuControlled = ClientPrefs.getGameplaySetting('botplay');
 		guitarHeroSustains = ClientPrefs.data.guitarHeroSustains;
+		
+		// Perfect Mode enables Instakill and disables Practice
+		if (perfectMode) {
+			practiceMode = false;
+			instakillOnMiss = true;
+		}
 
 		// var gameCam:FlxCamera = FlxG.camera;
 		camGame = initPsychCamera();
@@ -677,11 +697,22 @@ class PlayState extends MusicBeatState
 		scoreTxt.visible = !ClientPrefs.data.hideHud;
 		uiGroup.add(scoreTxt);
 
-		botplayTxt = new FlxText(400, healthBar.y - 90, FlxG.width - 800, Language.getPhrase("Botplay").toUpperCase(), 32);
+		botplayTxt = new FlxText(400, healthBar.y - 90, FlxG.width - 800, "", 32);
 		botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		botplayTxt.scrollFactor.set();
 		botplayTxt.borderSize = 1.25;
-		botplayTxt.visible = cpuControlled;
+		
+		// Actualiza el texto según el modo activo
+		if (cpuControlled)
+			botplayTxt.text = Language.getPhrase("Botplay").toUpperCase();
+		else if (practiceMode)
+			botplayTxt.text = "PRACTICE MODE";
+		else if (perfectMode)
+			botplayTxt.text = "PERFECT MODE";
+		else if (playOpponent)
+			botplayTxt.text = "OPPONENT MODE";
+		
+		botplayTxt.visible = (cpuControlled || practiceMode || perfectMode || playOpponent);
 		uiGroup.add(botplayTxt);
 		if(ClientPrefs.data.downScroll)
 			botplayTxt.y = healthBar.y + 70;
@@ -1369,8 +1400,17 @@ class PlayState extends MusicBeatState
 
 	public dynamic function updateScoreText()
 		{
+			// Wife3 permite valores fuera del rango 0-100%
 			var percent:Float = CoolUtil.floorDecimal(ratingPercent * 100, 2);
-		var str:String = percent + '% / ' + ratingName + ' [' + ratingFC + ']';
+		
+		// Formateo especial para >100%
+		var ratingNameDisplay:String = ratingName;
+		if(ratingPercent > 1.0) {
+			var extraPercent:Float = CoolUtil.floorDecimal((ratingPercent - 1.0) * 100, 2);
+			ratingNameDisplay = ratingName + ' (+' + extraPercent + '%)';
+		}
+		
+		var str:String = percent + '% / ' + ratingNameDisplay + ' [' + ratingFC + ']';
 	
 		// ← USAR DIRECTAMENTE songScore SIN ANIMACIÓN
 		var scoreStr:String = ClientPrefs.data.abbreviateScore ? abbreviateScore(songScore) : Std.string(songScore);
@@ -1621,7 +1661,10 @@ class PlayState extends MusicBeatState
 				var isAlt: Bool = section.altAnim && !gottaHitNote;
 				swagNote.gfNote = (section.gfSection && gottaHitNote == section.mustHitSection);
 				swagNote.animSuffix = isAlt ? "-alt" : "";
-				swagNote.mustPress = gottaHitNote;
+				
+				// Opponent Mode: Invierte quien debe tocar la nota
+				swagNote.mustPress = playOpponent ? !gottaHitNote : gottaHitNote;
+				
 				swagNote.sustainLength = holdLength;
 				swagNote.noteType = noteType;
 	
@@ -2976,14 +3019,17 @@ class PlayState extends MusicBeatState
 		eventNotes = [];
 	}
 
+	// Sistema de Accuracy
 	public var totalPlayed:Int = 0;
-	public var totalNotesHit:Float = 0.0;
+	public var totalNotesHit:Float = 0.0; // Sistema antiguo (comentado en RecalculateRating)
+
+	// Wife3 Accuracy System
+	public var wife3Scores:Array<Float> = []; // Guarda el score de cada nota individual
+	public var wife3_maxms:Float = 180.0; // Ventana máxima de timing en milisegundos
 
 	public var showCombo:Bool = false;
 	public var showComboNum:Bool = true;
-	public var showRating:Bool = true;
-
-	// Stores Ratings and Combo Sprites in a group
+	public var showRating:Bool = true;	// Stores Ratings and Combo Sprites in a group
 	public var comboGroup:FlxSpriteGroup;
 	// Stores HUD Objects in a Group
 	public var uiGroup:FlxSpriteGroup;
@@ -3026,13 +3072,18 @@ class PlayState extends MusicBeatState
 		var daRating:Rating = Conductor.judgeNote(ratingsData, noteDiff / playbackRate);
 		lastJudName = daRating.name;
 
-		totalNotesHit += daRating.ratingMod;
+		// Sistema antiguo (comentado, ahora usamos Wife3)
+		// totalNotesHit += daRating.ratingMod;
+		
+		// Wife3 Accuracy System - Calcula el score basado en la desviación de timing
+		var normalizedDev:Float = (noteDiff / playbackRate) / wife3_maxms;
+		var noteWifeScore:Float = 2.0 * (1.0 - (normalizedDev * normalizedDev));
+		wife3Scores.push(noteWifeScore);
+		
 		note.ratingMod = daRating.ratingMod;
 		if(!note.ratingDisabled) daRating.hits++;
 		note.rating = daRating.name;
-		score = daRating.score;
-
-		if(daRating.noteSplash && !note.noteSplashData.disabled)
+		score = daRating.score;		if(daRating.noteSplash && !note.noteSplashData.disabled)
 			spawnNoteSplashOnNote(note);
 
 		if (judgementCounter != null) {
@@ -3057,6 +3108,12 @@ class PlayState extends MusicBeatState
 				songHits++;
 				totalPlayed++;
 				RecalculateRating(false);
+				
+				// Perfect Mode: Miss on anything below Sick!
+				if (perfectMode && !practiceMode && daRating.name != 'epic' && daRating.name != 'sick')
+				{
+					doDeathCheck(true);
+				}
 			}
 
 			if (judgementCounter != null) {
@@ -3492,8 +3549,11 @@ class PlayState extends MusicBeatState
 		songScore -= 10;
 		if(!endingSong) songMisses++;
 		totalPlayed++;
-		RecalculateRating(true);
-
+		
+		// Wife3 Accuracy System - Penalización fuerte por miss
+		wife3Scores.push(-8.0); // Miss = -8 puntos (peor que cualquier hit)
+		
+		RecalculateRating(true);		
 		if (judgementCounter != null) {
 			judgementCounter.doMissBump();
 		}
@@ -4181,13 +4241,28 @@ class PlayState extends MusicBeatState
 		if(ret != LuaUtils.Function_Stop)
 		{
 			ratingName = '?';
-			if(totalPlayed != 0) //Prevent divide by 0
+			if(wife3Scores.length > 0) //Prevent divide by 0
 			{
+				// === WIFE3 ACCURACY SYSTEM ===
+				// Calcula el accuracy basado en la desviación de timing de cada nota
+				var totalPoints:Float = 0.0;
+				for(score in wife3Scores)
+				{
+					totalPoints += score;
+				}
+				
+				var maxPossiblePoints:Float = wife3Scores.length * 2.0;
+				
+				// SIN LÍMITES - Permite negativos y teóricamente >100% (aunque imposible en práctica)
+				ratingPercent = totalPoints / maxPossiblePoints;
+				
+				/* === SISTEMA ANTIGUO (COMENTADO) ===
 				// Rating Percent
 				ratingPercent = Math.min(1, Math.max(0, totalNotesHit / totalPlayed));
 				//trace((totalNotesHit / totalPlayed) + ', Total: ' + totalPlayed + ', notes hit: ' + totalNotesHit);
+				*/
 
-				// Rating Name - ← USAR FUNCIÓN TRADUCIDA
+				// Rating Name - Incluye ratings negativos y manejo de >100%
 				var translatedRatingStuff = getRatingStuff();
 				ratingName = translatedRatingStuff[translatedRatingStuff.length-1][0]; //Uses last string
 				if(ratingPercent < 1)
@@ -4205,6 +4280,7 @@ class PlayState extends MusicBeatState
 		setOnScripts('ratingFC', ratingFC);
 		setOnScripts('totalPlayed', totalPlayed);
 		setOnScripts('totalNotesHit', totalNotesHit);
+		setOnScripts('wife3Scores', wife3Scores);
 		updateScore(badHit, scoreBop); // score will only update after rating is calculated, if it's a badHit, it shouldn't bounce
 	}
 
@@ -4213,7 +4289,7 @@ class PlayState extends MusicBeatState
 	{
 		if(chartingMode) return;
 
-		var usedPractice:Bool = (ClientPrefs.getGameplaySetting('practice') || ClientPrefs.getGameplaySetting('botplay'));
+		var usedPractice:Bool = (ClientPrefs.getGameplaySetting('practice') || ClientPrefs.getGameplaySetting('botplay') || ClientPrefs.getGameplaySetting('perfect'));
 		if(cpuControlled) return;
 
 		for (name in achievesToCheck) {

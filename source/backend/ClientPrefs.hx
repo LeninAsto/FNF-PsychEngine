@@ -98,13 +98,16 @@ import states.TitleState;
 		'instakill' => false,
 		'practice' => false,
 		'botplay' => false,
-		'opponentplay' => false
+		'opponentplay' => false,
+		'perfect' => false, // Perfect Mode - insta-kill on any judgement below Sick
+		'nodroppenalty' => false // Hold drops don't cause misses
 	];
 
 	public var comboOffset:Array<Int> = [0, 0, 0, 0];
 	public var keyViewerOffset:Array<Int> = [0, 0]; // X, Y offset for key viewer
 	public var keyViewerColor:String = 'Gray'; // Color name for key viewer
 	public var ratingOffset:Int = 0;
+	public var judgeDiff:String = 'J4'; // Judge Difficulty: J1 (easiest) to JUSTICE (hardest)
 	public var epicWindow:Float = 20.0;
 	public var sickWindow:Float = 45.0;
 	public var goodWindow:Float = 90.0;

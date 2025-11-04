@@ -268,30 +268,34 @@ class FreeplayState extends MusicBeatState
 		if (FlxG.sound.music.volume < 0.7)
 			FlxG.sound.music.volume += 0.5 * elapsed;
 
-		lerpScore = Math.floor(FlxMath.lerp(intendedScore, lerpScore, Math.exp(-elapsed * 24)));
-		lerpRating = FlxMath.lerp(intendedRating, lerpRating, Math.exp(-elapsed * 12));
+	lerpScore = Math.floor(FlxMath.lerp(intendedScore, lerpScore, Math.exp(-elapsed * 24)));
+	lerpRating = FlxMath.lerp(intendedRating, lerpRating, Math.exp(-elapsed * 12));
 
-		if (Math.abs(lerpScore - intendedScore) <= 10)
-			lerpScore = intendedScore;
-		if (Math.abs(lerpRating - intendedRating) <= 0.01)
-			lerpRating = intendedRating;
+	if (Math.abs(lerpScore - intendedScore) <= 10)
+		lerpScore = intendedScore;
+	if (Math.abs(lerpRating - intendedRating) <= 0.01)
+		lerpRating = intendedRating;
 
-		var ratingSplit:Array<String> = Std.string(CoolUtil.floorDecimal(lerpRating * 100, 2)).split('.');
-		if(ratingSplit.length < 2) //No decimals, add an empty space
-			ratingSplit.push('');
-		
-		while(ratingSplit[1].length < 2) //Less than 2 decimals in it, add decimals then
-			ratingSplit[1] += '0';
+	// Wife3 permite valores fuera de 0-100%
+	var ratingPercent:Float = CoolUtil.floorDecimal(lerpRating * 100, 2);
+	var ratingSplit:Array<String> = Std.string(Math.abs(ratingPercent)).split('.');
+	if(ratingSplit.length < 2) //No decimals, add an empty space
+		ratingSplit.push('');
+	
+	while(ratingSplit[1].length < 2) //Less than 2 decimals in it, add decimals then
+		ratingSplit[1] += '0';
+	
+	// Añade signo negativo si es necesario
+	var ratingDisplay:String = ratingSplit.join('.');
+	if(ratingPercent < 0) ratingDisplay = '-' + ratingDisplay;
 
-		var shiftMult:Int = 1;
-		if((FlxG.keys.pressed.SHIFT || touchPad.buttonZ.pressed) && !player.playingMusic) shiftMult = 3;
+	var shiftMult:Int = 1;
+	if((FlxG.keys.pressed.SHIFT || touchPad.buttonZ.pressed) && !player.playingMusic) shiftMult = 3;
 
-		if (!player.playingMusic)
-		{
-			scoreText.text = Language.getPhrase('personal_best', 'PERSONAL BEST:\n{1} ({2}%)', [lerpScore, ratingSplit.join('.')]);
-			positionHighscore();
-			
-			if (!inDifficultySelect)
+	if (!player.playingMusic)
+	{
+		scoreText.text = Language.getPhrase('personal_best', 'PERSONAL BEST:\n{1} ({2}%)', [lerpScore, ratingDisplay]);
+		positionHighscore();			if (!inDifficultySelect)
 			{
 				// Modo normal: navegación de canciones
 				if(songs.length > 1)
