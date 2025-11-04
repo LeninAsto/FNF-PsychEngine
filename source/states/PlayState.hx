@@ -116,8 +116,11 @@ class PlayState extends MusicBeatState
 			[Language.getPhrase('rating_great', 'Great'), 0.9],
 			[Language.getPhrase('rating_sick', 'Sick!'), 0.95],
 			[Language.getPhrase('rating_epic', 'Epic!!'), 1],
-			[Language.getPhrase('rating_perfect', 'Perfect!!!'), 1]
-			// Nota: >100% usa "Perfect!!!" + el porcentaje extra entre paréntesis
+			
+			// Ratings Superiores (>100%) - Alcanzables con sistema de bonus
+			[Language.getPhrase('rating_perfect', 'Perfect!!!'), 1.05], // 100% - 105%
+			[Language.getPhrase('rating_marvelous', 'MARVELOUS!!!!'), 1.10], // 105% - 110%
+			[Language.getPhrase('rating_legendary', '★ LEGENDARY ★'), 1.15] // >110% (máximo teórico ~115%)
 		];
 	}
 
@@ -1403,14 +1406,14 @@ class PlayState extends MusicBeatState
 			// Wife3 permite valores fuera del rango 0-100%
 			var percent:Float = CoolUtil.floorDecimal(ratingPercent * 100, 2);
 		
-		// Formateo especial para >100%
-		var ratingNameDisplay:String = ratingName;
+		// Formateo especial para >100% - El porcentaje base se mantiene en 100%, solo sube el adicional
+		var percentDisplay:String = Std.string(percent) + '%';
 		if(ratingPercent > 1.0) {
 			var extraPercent:Float = CoolUtil.floorDecimal((ratingPercent - 1.0) * 100, 2);
-			ratingNameDisplay = ratingName + ' (+' + extraPercent + '%)';
+			percentDisplay = '100% (+' + extraPercent + '%)';
 		}
 		
-		var str:String = percent + '% / ' + ratingNameDisplay + ' [' + ratingFC + ']';
+		var str:String = percentDisplay + ' / ' + ratingName + ' [' + ratingFC + ']';
 	
 		// ← USAR DIRECTAMENTE songScore SIN ANIMACIÓN
 		var scoreStr:String = ClientPrefs.data.abbreviateScore ? abbreviateScore(songScore) : Std.string(songScore);
@@ -2234,7 +2237,14 @@ class PlayState extends MusicBeatState
 							// Kill extremely late notes and cause misses
 							if (Conductor.songPosition - daNote.strumTime > noteKillOffset)
 							{
-								if (daNote.mustPress && !cpuControlled && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit))
+								// No Drop Penalty: Solo causa miss en sustains si la opción está desactivada
+								var shouldMiss:Bool = daNote.mustPress && !cpuControlled && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit);
+								
+								// Si noDropPenalty está activo, no penalizar sustains soltadas
+								if (shouldMiss && daNote.isSustainNote && noDropPenalty)
+									shouldMiss = false;
+								
+								if (shouldMiss)
 									noteMiss(daNote);
 
 								daNote.active = daNote.visible = false;
@@ -3023,7 +3033,13 @@ class PlayState extends MusicBeatState
 	public var totalPlayed:Int = 0;
 	public var totalNotesHit:Float = 0.0; // Sistema antiguo (comentado en RecalculateRating)
 
-	// Wife3 Accuracy System
+	// Wife3 Accuracy System MEJORADO
+	// Ahora soporta >100% accuracy con sistema de bonus para hits perfectos
+	// - Epic hits (<5ms): hasta 2.3 puntos (bonus máximo)
+	// - Sick hits (<10ms): hasta 2.15 puntos (bonus moderado)
+	// - Good hits (<20ms): hasta 2.05 puntos (bonus pequeño)
+	// - Otros hits: 2.0 puntos máximo (formula Wife3 estándar)
+	// - Miss: -8.0 puntos (penalización)
 	public var wife3Scores:Array<Float> = []; // Guarda el score de cada nota individual
 	public var wife3_maxms:Float = 180.0; // Ventana máxima de timing en milisegundos
 
@@ -3072,12 +3088,34 @@ class PlayState extends MusicBeatState
 		var daRating:Rating = Conductor.judgeNote(ratingsData, noteDiff / playbackRate);
 		lastJudName = daRating.name;
 
+
 		// Sistema antiguo (comentado, ahora usamos Wife3)
 		// totalNotesHit += daRating.ratingMod;
 		
-		// Wife3 Accuracy System - Calcula el score basado en la desviación de timing
-		var normalizedDev:Float = (noteDiff / playbackRate) / wife3_maxms;
-		var noteWifeScore:Float = 2.0 * (1.0 - (normalizedDev * normalizedDev));
+		// Wife3 Accuracy System MEJORADO - Permite >100% con hits perfectos
+		var normalizedDev:Float = Math.abs((noteDiff / playbackRate) / wife3_maxms);
+		var noteWifeScore:Float;
+		
+		// Sistema de bonus para hits extremadamente precisos
+		// Hits dentro de diferentes ventanas reciben diferentes bonificaciones
+		if (normalizedDev < 0.028) { // Epic window (~5ms) - Bonus máximo
+			// Formula: 2.0 + bonus exponencial basado en precisión
+			var epicBonus:Float = Math.pow(1.0 - (normalizedDev / 0.028), 2.5) * 0.3;
+			noteWifeScore = 2.0 + epicBonus; // Rango: 2.0 a 2.3 puntos
+		}
+		else if (normalizedDev < 0.056) { // Sick window (~10ms) - Bonus moderado
+			var sickBonus:Float = Math.pow(1.0 - (normalizedDev / 0.056), 2.0) * 0.15;
+			noteWifeScore = 2.0 + sickBonus; // Rango: 2.0 a 2.15 puntos
+		}
+		else if (normalizedDev < 0.111) { // Good window (~20ms) - Bonus pequeño
+			var goodBonus:Float = Math.pow(1.0 - (normalizedDev / 0.111), 1.5) * 0.05;
+			noteWifeScore = 2.0 + goodBonus; // Rango: 2.0 a 2.05 puntos
+		}
+		else {
+			// Formula Wife3 estándar para hits menos precisos
+			noteWifeScore = 2.0 * (1.0 - (normalizedDev * normalizedDev));
+		}
+
 		wife3Scores.push(noteWifeScore);
 		
 		note.ratingMod = daRating.ratingMod;
@@ -4243,8 +4281,9 @@ class PlayState extends MusicBeatState
 			ratingName = '?';
 			if(wife3Scores.length > 0) //Prevent divide by 0
 			{
-				// === WIFE3 ACCURACY SYSTEM ===
+				// === WIFE3 ACCURACY SYSTEM MEJORADO ===
 				// Calcula el accuracy basado en la desviación de timing de cada nota
+				// AHORA PERMITE >100% gracias al sistema de bonus para hits perfectos
 				var totalPoints:Float = 0.0;
 				for(score in wife3Scores)
 				{
@@ -4253,7 +4292,8 @@ class PlayState extends MusicBeatState
 				
 				var maxPossiblePoints:Float = wife3Scores.length * 2.0;
 				
-				// SIN LÍMITES - Permite negativos y teóricamente >100% (aunque imposible en práctica)
+				// SIN LÍMITES - Permite negativos y >100% (posible con hits extremadamente precisos)
+				// Un jugador perfecto con todos Epics puede alcanzar hasta ~115% accuracy
 				ratingPercent = totalPoints / maxPossiblePoints;
 				
 				/* === SISTEMA ANTIGUO (COMENTADO) ===
