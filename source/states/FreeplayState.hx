@@ -58,6 +58,10 @@ class FreeplayState extends MusicBeatState
 	var cardArray:Array<FlxSprite> = [];
 	var modTextArray:Array<FlxText> = [];
 	var freeplayText:FlxText;
+	
+	// Opponent Mode toggle
+	public static var viewingOpponentScores:Bool = false;
+	var opponentModeText:FlxText;
 
 	override function create()
 	{
@@ -189,6 +193,13 @@ class FreeplayState extends MusicBeatState
 		freeplayText.x = FlxG.width * 0.41;
 		freeplayText.y = 15;
 		add(freeplayText);
+		
+		// Opponent Mode indicator
+		opponentModeText = new FlxText(FlxG.width * 0.68, 5, 0, "", 20);
+		opponentModeText.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.YELLOW, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		opponentModeText.borderSize = 1.5;
+		opponentModeText.visible = false;
+		add(opponentModeText);
 
 		missingTextBG = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
 		missingTextBG.alpha = 0.6;
@@ -350,6 +361,30 @@ class FreeplayState extends MusicBeatState
 				{
 					changeDifficultySelection(1);
 				}
+			}
+		}
+		
+		// Toggle between normal and opponent mode scores
+		if (FlxG.keys.justPressed.TAB && !player.playingMusic)
+		{
+			viewingOpponentScores = !viewingOpponentScores;
+			FlxG.sound.play(Paths.sound('scrollMenu'));
+			
+			// Update scores with new mode
+			#if !switch
+			intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty, viewingOpponentScores);
+			intendedRating = Highscore.getRating(songs[curSelected].songName, curDifficulty, viewingOpponentScores);
+			#end
+			
+			// Update UI
+			if (viewingOpponentScores)
+			{
+				opponentModeText.text = "[OPPONENT MODE]";
+				opponentModeText.visible = true;
+			}
+			else
+			{
+				opponentModeText.visible = false;
 			}
 		}
 
@@ -560,8 +595,8 @@ class FreeplayState extends MusicBeatState
 
 		curDifficulty = FlxMath.wrap(curDifficulty + change, 0, Difficulty.list.length-1);
 		#if !switch
-		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
-		intendedRating = Highscore.getRating(songs[curSelected].songName, curDifficulty);
+		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty, viewingOpponentScores);
+		intendedRating = Highscore.getRating(songs[curSelected].songName, curDifficulty, viewingOpponentScores);
 		#end
 
 		lastDifficultyName = Difficulty.getString(curDifficulty, false);
@@ -612,8 +647,8 @@ class FreeplayState extends MusicBeatState
 		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
 		
 		#if !switch
-		intendedScore = Highscore.getScore(songs[curSelected].songName, difficultySelector.curSelected);
-		intendedRating = Highscore.getRating(songs[curSelected].songName, difficultySelector.curSelected);
+		intendedScore = Highscore.getScore(songs[curSelected].songName, difficultySelector.curSelected, viewingOpponentScores);
+		intendedRating = Highscore.getRating(songs[curSelected].songName, difficultySelector.curSelected, viewingOpponentScores);
 		#end
 	}
 

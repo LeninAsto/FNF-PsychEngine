@@ -1845,7 +1845,12 @@ class PlayState extends MusicBeatState
 			}
 			else babyArrow.alpha = targetAlpha;
 
-			if (player == 1)
+			// Opponent Mode: Invertir las strums
+			// player=1 normalmente va a playerStrums (boyfriend), pero en modo opponent debe ir a opponentStrums (porque ahora boyfriend es IA)
+			// player=0 normalmente va a opponentStrums (dad), pero en modo opponent debe ir a playerStrums (porque ahora dad es el jugador)
+			var isPlayerStrum:Bool = playOpponent ? (player == 0) : (player == 1);
+			
+			if (isPlayerStrum)
 				playerStrums.add(babyArrow);
 			else
 			{
@@ -2866,7 +2871,7 @@ class PlayState extends MusicBeatState
 			#if !switch
 			var percent:Float = ratingPercent;
 			if(Math.isNaN(percent)) percent = 0;
-			Highscore.saveScore(Song.loadedSongName, songScore, storyDifficulty, percent);
+			Highscore.saveScore(Song.loadedSongName, songScore, storyDifficulty, percent, playOpponent);
 			#end
 			playbackRate = 1;
 
@@ -3627,15 +3632,18 @@ class PlayState extends MusicBeatState
 		if (songName != 'tutorial')
 			camZooming = true;
 
-		if(note.noteType == 'Hey!' && dad.hasAnimation('hey'))
+		// Opponent Mode: Invertir personajes (boyfriend es controlado por IA)
+		var characterToAnimate:Character = playOpponent ? boyfriend : dad;
+		
+		if(note.noteType == 'Hey!' && characterToAnimate.hasAnimation('hey'))
 		{
-			dad.playAnim('hey', true);
-			dad.specialAnim = true;
-			dad.heyTimer = 0.6;
+			characterToAnimate.playAnim('hey', true);
+			characterToAnimate.specialAnim = true;
+			characterToAnimate.heyTimer = 0.6;
 		}
 		else if(!note.noAnimation)
 		{
-			var char:Character = dad;
+			var char:Character = playOpponent ? boyfriend : dad;
 			var animToPlay:String = singAnimations[Std.int(Math.abs(Math.min(singAnimations.length-1, note.noteData)))] + note.animSuffix;
 			if(note.gfNote) char = gf;
 
@@ -3692,7 +3700,8 @@ class PlayState extends MusicBeatState
 			{
 				var animToPlay:String = singAnimations[Std.int(Math.abs(Math.min(singAnimations.length-1, note.noteData)))] + note.animSuffix;
 
-				var char:Character = boyfriend;
+				// Opponent Mode: Invertir personajes (dad es controlado por el jugador)
+				var char:Character = playOpponent ? dad : boyfriend;
 				var animCheck:String = 'hey';
 				if(note.gfNote)
 				{
@@ -4033,9 +4042,13 @@ class PlayState extends MusicBeatState
 
 	public function playerDance():Void
 	{
-		var anim:String = boyfriend.getAnimationName();
-		if(boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 #if FLX_PITCH / FlxG.sound.music.pitch #end) * boyfriend.singDuration && anim.startsWith('sing') && !anim.endsWith('miss'))
-			boyfriend.dance();
+		// Opponent Mode: El jugador controla a dad, así que dad debe bailar cuando no canta
+		var playerChar:Character = playOpponent ? dad : boyfriend;
+		if(playerChar == null) return;
+		
+		var anim:String = playerChar.getAnimationName();
+		if(playerChar.holdTimer > Conductor.stepCrochet * (0.0011 #if FLX_PITCH / FlxG.sound.music.pitch #end) * playerChar.singDuration && anim.startsWith('sing') && !anim.endsWith('miss'))
+			playerChar.dance();
 	}
 
 	override function sectionHit()
