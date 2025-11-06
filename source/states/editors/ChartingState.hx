@@ -217,6 +217,11 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var waveformEnabled:Bool = false;
 	var waveformTarget:WaveformTarget = INST;
 
+	// Drag & Drop
+	var dragDropOverlay:FlxSprite;
+	var dragDropText:FlxText;
+	var droppedFilePath:String = null;
+
 	override function create()
 	{
 		if(Difficulty.list.length < 1) Difficulty.resetList();
@@ -396,6 +401,32 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		autoSaveIcon.scrollFactor.set();
 		autoSaveIcon.alpha = 0;
 		add(autoSaveIcon);
+
+		// Drag & Drop overlay
+		dragDropOverlay = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+		dragDropOverlay.alpha = 0.8;
+		dragDropOverlay.scrollFactor.set();
+		dragDropOverlay.visible = false;
+		dragDropOverlay.cameras = [camUI];
+		add(dragDropOverlay);
+
+		dragDropText = new FlxText(0, 0, FlxG.width - 40, 'Drop JSON file here\nto load chart or events', 36);
+		dragDropText.setFormat(Paths.font('vcr.ttf'), 36, FlxColor.WHITE, CENTER);
+		dragDropText.setBorderStyle(OUTLINE, FlxColor.BLACK, 3);
+		dragDropText.scrollFactor.set();
+		dragDropText.screenCenter();
+		dragDropText.visible = false;
+		dragDropText.cameras = [camUI];
+		add(dragDropText);
+
+		// Configurar eventos de drag & drop
+		#if desktop
+		@:privateAccess
+		if(FlxG.stage != null && FlxG.stage.window != null)
+		{
+			FlxG.stage.window.onDropFile.add(onDropFile);
+		}
+		#end
 
 		// save data positions for the UI boxes
 		if(chartEditorSave.data.mainBoxPosition != null && chartEditorSave.data.mainBoxPosition.length > 1)
@@ -690,6 +721,29 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var lastBeatHit:Int = 0;
 	override function update(elapsed:Float)
 	{
+		// Mostrar overlay cuando hay un archivo siendo arrastrado
+		#if desktop
+		if(droppedFilePath != null || (FlxG.stage != null && FlxG.stage.window != null))
+		{
+			// El overlay se muestra automáticamente cuando se abre el substate
+			// Aquí solo manejamos la visibilidad durante el drag
+			var isDragging:Bool = FlxG.mouse.pressed && 
+								  (FlxG.mouse.screenY < 20 || FlxG.mouse.screenY > FlxG.height - 20 ||
+								   FlxG.mouse.screenX < 20 || FlxG.mouse.screenX > FlxG.width - 20);
+			
+			if(isDragging && !dragDropOverlay.visible && subState == null)
+			{
+				dragDropOverlay.visible = true;
+				dragDropText.visible = true;
+			}
+			else if(!isDragging && dragDropOverlay.visible && droppedFilePath == null)
+			{
+				dragDropOverlay.visible = false;
+				dragDropText.visible = false;
+			}
+		}
+		#end
+
 		if(!fileDialog.completed)
 		{
 			lastFocus = PsychUIInputText.focusOn;
@@ -5125,6 +5179,14 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	override function destroy()
 	{
+		#if desktop
+		@:privateAccess
+		if(FlxG.stage != null && FlxG.stage.window != null)
+		{
+			FlxG.stage.window.onDropFile.remove(onDropFile);
+		}
+		#end
+
 		Note.globalRgbShaders = [];
 		backend.NoteTypesConfig.clearNoteTypesData();
 
@@ -5135,6 +5197,197 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		fileDialog.destroy();
 		super.destroy();
 	}
+
+	#if desktop
+	function onDropFile(path:String):Void
+	{
+		if(path == null || path.length < 1) return;
+		
+		path = path.replace('\\', '/');
+		if(!path.toLowerCase().endsWith('.json'))
+		{
+			showOutput('Error: Only JSON files are supported!', true);
+			return;
+		}
+
+		droppedFilePath = path;
+		
+		// Mostrar diálogo de selección
+		openSubState(new BasePrompt('What type of file is this?',
+			function(state:BasePrompt)
+			{
+				var btnY = 390;
+				
+				// Botón: Chart
+				var btn:PsychUIButton = new PsychUIButton(0, btnY, 'Chart', function()
+				{
+					loadDroppedChart();
+					state.close();
+				});
+				btn.screenCenter(X);
+				btn.x -= 100;
+				btn.cameras = state.cameras;
+				state.add(btn);
+				
+				// Botón: Events
+				var btn:PsychUIButton = new PsychUIButton(0, btnY, 'Events', function()
+				{
+					loadDroppedEvents();
+					state.close();
+				});
+				btn.screenCenter(X);
+				btn.x += 100;
+				btn.cameras = state.cameras;
+				state.add(btn);
+			}
+		));
+	}
+
+	function loadDroppedChart():Void
+	{
+		if(droppedFilePath == null) return;
+
+		try
+		{
+			var fileName:String = droppedFilePath.substring(droppedFilePath.lastIndexOf('/') + 1);
+			var fileContent:String = sys.io.File.getContent(droppedFilePath);
+			var jsonData:Dynamic = Json.parse(fileContent);
+			
+			if(jsonData == null || !Reflect.hasField(jsonData, 'song'))
+			{
+				showOutput('Error: Invalid chart format!', true);
+				droppedFilePath = null;
+				return;
+			}
+
+			var loadedChart:SwagSong = Song.parseJSON(Json.stringify(jsonData), fileName);
+			if(loadedChart == null)
+			{
+				showOutput('Error: Failed to parse chart!', true);
+				droppedFilePath = null;
+				return;
+			}
+
+			var func:Void->Void = function()
+			{
+				loadChart(loadedChart);
+				Song.chartPath = droppedFilePath;
+				reloadNotesDropdowns();
+				prepareReload();
+				showOutput('Chart loaded: $fileName');
+				droppedFilePath = null;
+			}
+			
+			if(!ignoreProgressCheckBox.checked)
+				openSubState(new Prompt('Warning: Any unsaved progress\nwill be lost.', func));
+			else
+				func();
+		}
+		catch(e:haxe.Exception)
+		{
+			showOutput('Error loading chart: ${e.message}', true);
+			trace(e.stack);
+			droppedFilePath = null;
+		}
+	}
+
+	function loadDroppedEvents():Void
+	{
+		if(droppedFilePath == null) return;
+
+		try
+		{
+			var fileName:String = droppedFilePath.substring(droppedFilePath.lastIndexOf('/') + 1);
+			var fileContent:String = sys.io.File.getContent(droppedFilePath);
+			var jsonData:Dynamic = Json.parse(fileContent);
+			
+			if(jsonData == null || !Reflect.hasField(jsonData, 'events'))
+			{
+				showOutput('Error: No events found in file!', true);
+				droppedFilePath = null;
+				return;
+			}
+
+			var eventsChart:SwagSong = Song.parseJSON(Json.stringify(jsonData), fileName);
+			if(eventsChart == null || eventsChart.events == null || eventsChart.events.length < 1)
+			{
+				showOutput('Error: Invalid events format!', true);
+				droppedFilePath = null;
+				return;
+			}
+
+			var loadedEvents:Array<Dynamic> = eventsChart.events;
+			
+			openSubState(new BasePrompt('${loadedEvents.length} Events found!\nChoose an action:',
+				function(state:BasePrompt)
+				{
+					var btnY = 390;
+					
+					// Botón: Replace All
+					var btn:PsychUIButton = new PsychUIButton(0, btnY, 'Replace All', function()
+					{
+						for (event in events)
+						{
+							if(event != null)
+							{
+								event.destroy();
+								selectedNotes.remove(event);
+							}
+						}
+						undoActions = [];
+						events = [];
+
+						for (event in loadedEvents)
+							events.push(createEvent(event));
+
+						softReloadNotes();
+						state.close();
+						showOutput('Events replaced: $fileName');
+						droppedFilePath = null;
+					});
+					btn.normalStyle.bgColor = FlxColor.RED;
+					btn.normalStyle.textColor = FlxColor.WHITE;
+					btn.screenCenter(X);
+					btn.x -= 125;
+					btn.cameras = state.cameras;
+					state.add(btn);
+					
+					// Botón: Add
+					var btn:PsychUIButton = new PsychUIButton(0, btnY, 'Add', function()
+					{
+						for (event in loadedEvents)
+							events.push(createEvent(event));
+
+						softReloadNotes();
+						state.close();
+						showOutput('Events added: $fileName');
+						droppedFilePath = null;
+					});
+					btn.screenCenter(X);
+					btn.cameras = state.cameras;
+					state.add(btn);
+			
+					// Botón: Cancel
+					var btn:PsychUIButton = new PsychUIButton(0, btnY, 'Cancel', function()
+					{
+						droppedFilePath = null;
+						state.close();
+					});
+					btn.screenCenter(X);
+					btn.x += 125;
+					btn.cameras = state.cameras;
+					state.add(btn);
+				}
+			));
+		}
+		catch(e:haxe.Exception)
+		{
+			showOutput('Error loading events: ${e.message}', true);
+			trace(e.stack);
+			droppedFilePath = null;
+		}
+	}
+	#end
 
 	function loadFileList(mainFolder:String, ?optionalList:String = null, ?fileTypes:Array<String> = null)
 	{

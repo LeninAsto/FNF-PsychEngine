@@ -322,12 +322,12 @@ class ResultsState extends MusicBeatState
         }
         comboText.text = Language.getPhrase('judgement_max_combo', 'Highest Combo') + ': $animatedCombo';
 
-        // 9. Accuracy (Wife3 permite valores fuera de 0-100%)
+        // 9. Accuracy (Wife3 estándar: 0-100%)
         if (animatedAccuracy < params.accuracy) {
             animatedAccuracy += (params.accuracy - animatedAccuracy) * 0.2 + 0.1;
             if (animatedAccuracy > params.accuracy) animatedAccuracy = params.accuracy;
             
-            // Formateo de accuracy con soporte para negativos y >100%
+            // Formateo de accuracy estándar (0-100%)
             var accPercent:Float = Math.round(animatedAccuracy * 1000) / 10;
             accText.text = Language.getPhrase('results_accuracy', 'Accuracy') + ': ' + Std.string(accPercent) + '%';
             return;
