@@ -269,6 +269,14 @@ class PlayState extends MusicBeatState
 	var timeTxtTween:FlxTween;
 	var versionTextTween:FlxTween;
 	var judgementCounter:JudCounter;
+	
+	// StepMania UI
+	var smScoreTxt:FlxText;
+	var smAccuracyTxt:FlxText;
+	var smRatingTxt:FlxText;
+	var smScoreTween:FlxTween;
+	var smDisplayedScore:Float = 0; // Score mostrado (animado)
+	var isStepManiaChart:Bool = false;
 
 	// TPS/NPS System
 	var notesHitArray:Array<Date> = [];
@@ -777,6 +785,42 @@ class PlayState extends MusicBeatState
 		scoreTxt.borderSize = 1.25;
 		scoreTxt.visible = !ClientPrefs.data.hideHud;
 		uiGroup.add(scoreTxt);
+		
+		// Detectar si es un chart de StepMania
+		isStepManiaChart = (customAudioPath != null && customAudioPath.contains('/sm/'));
+		
+		// Crear UI de StepMania si es necesario
+		if (isStepManiaChart) {
+			// Ocultar scoreTxt normal
+			scoreTxt.visible = false;
+			
+			// Calcular posición vertical centrada
+			var centerY:Float = FlxG.height / 2;
+			
+			// Score grande en el medio derecho (centrado verticalmente)
+			smScoreTxt = new FlxText(FlxG.width - 320, centerY - 60, 300, "00000000", 48);
+			smScoreTxt.setFormat(Paths.font("vcr.ttf"), 48, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			smScoreTxt.scrollFactor.set();
+			smScoreTxt.borderSize = 2;
+			smScoreTxt.visible = !ClientPrefs.data.hideHud;
+			uiGroup.add(smScoreTxt);
+			
+			// Accuracy debajo del score
+			smAccuracyTxt = new FlxText(FlxG.width - 320, centerY, 300, "0.00%", 28);
+			smAccuracyTxt.setFormat(Paths.font("vcr.ttf"), 28, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			smAccuracyTxt.scrollFactor.set();
+			smAccuracyTxt.borderSize = 1.5;
+			smAccuracyTxt.visible = !ClientPrefs.data.hideHud;
+			uiGroup.add(smAccuracyTxt);
+			
+			// Rating name debajo del accuracy
+			smRatingTxt = new FlxText(FlxG.width - 320, centerY + 35, 300, "?", 24);
+			smRatingTxt.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			smRatingTxt.scrollFactor.set();
+			smRatingTxt.borderSize = 1.5;
+			smRatingTxt.visible = !ClientPrefs.data.hideHud;
+			uiGroup.add(smRatingTxt);
+		}
 
 		botplayTxt = new FlxText(400, healthBar.y - 90, FlxG.width - 800, "", 32);
 		botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -1484,6 +1528,12 @@ class PlayState extends MusicBeatState
 
 	public dynamic function updateScoreText()
 	{
+		// Si es un chart de StepMania, actualizar UI personalizado
+		if (isStepManiaChart) {
+			updateStepManiaUI();
+			return;
+		}
+		
 		// Wife3 estándar: rango 0-100%
 		var percent:Float = CoolUtil.floorDecimal(ratingPercent * 100, 2);
 		
@@ -1506,6 +1556,58 @@ class PlayState extends MusicBeatState
 		else
 			tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2} | TPS: {3}/{4}', [scoreStr, str, nps, maxNPS]);
 		scoreTxt.text = tempScore;
+	}
+	
+	function updateStepManiaUI()
+	{
+		if (smScoreTxt == null || smAccuracyTxt == null || smRatingTxt == null)
+			return;
+		
+		// Animar el score contador 1 a 1 de forma dinámica
+		var targetScore:Float = songScore;
+		var scoreDiff:Float = targetScore - smDisplayedScore;
+		
+		if (Math.abs(scoreDiff) >= 1) {
+			// Incrementar/decrementar de 1 en 1 de forma rápida
+			if (scoreDiff > 0) {
+				// Velocidad dinámica: más rápido cuando hay más diferencia
+				var increment:Int = Math.ceil(Math.abs(scoreDiff) / 10);
+				if (increment < 1) increment = 1;
+				smDisplayedScore += increment;
+				
+				// No sobrepasar el objetivo
+				if (smDisplayedScore > targetScore) {
+					smDisplayedScore = targetScore;
+				}
+			} else {
+				// Decrementar (por si acaso)
+				var decrement:Int = Math.ceil(Math.abs(scoreDiff) / 10);
+				if (decrement < 1) decrement = 1;
+				smDisplayedScore -= decrement;
+				
+				if (smDisplayedScore < targetScore) {
+					smDisplayedScore = targetScore;
+				}
+			}
+		} else {
+			// Cuando la diferencia es menor a 1, igualar
+			smDisplayedScore = targetScore;
+		}
+		
+		// Formatear score con 8 dígitos y ceros a la izquierda
+		var scoreInt:Int = Math.floor(smDisplayedScore);
+		var scoreStr:String = Std.string(scoreInt);
+		while (scoreStr.length < 8) {
+			scoreStr = '0' + scoreStr;
+		}
+		smScoreTxt.text = scoreStr;
+		
+		// Formatear accuracy con 2 decimales
+		var percent:Float = CoolUtil.floorDecimal(ratingPercent * 100, 2);
+		smAccuracyTxt.text = Std.string(percent) + '%';
+		
+		// Mostrar rating name
+		smRatingTxt.text = ratingName + ' [' + ratingFC + ']';
 	}
 
 	public dynamic function fullComboFunction()
@@ -1536,6 +1638,21 @@ class PlayState extends MusicBeatState
 	public function doScoreBop():Void {
 		if(!ClientPrefs.data.scoreZoom)
 			return;
+		
+		// Si es StepMania, animar el score de StepMania
+		if (isStepManiaChart && smScoreTxt != null) {
+			if(smScoreTween != null)
+				smScoreTween.cancel();
+
+			smScoreTxt.scale.x = 1.1;
+			smScoreTxt.scale.y = 1.1;
+			smScoreTween = FlxTween.tween(smScoreTxt.scale, {x: 1, y: 1}, 0.2, {
+				onComplete: function(twn:FlxTween) {
+					smScoreTween = null;
+				}
+			});
+			return;
+		}
 
 		if(scoreTxtTween != null)
 			scoreTxtTween.cancel();
@@ -1961,15 +2078,26 @@ class PlayState extends MusicBeatState
 	public var skipArrowStartTween:Bool = false; //for lua
 	private function generateStaticArrows(player:Int):Void
 	{
+		// Para charts de StepMania, centrar strums del jugador y ocultar del oponente
 		var strumLineX:Float = ClientPrefs.data.middleScroll ? STRUM_X_MIDDLESCROLL : STRUM_X;
 		var strumLineY:Float = ClientPrefs.data.downScroll ? (FlxG.height - 150) : 50;
+		
+		// En StepMania, siempre centrar los strums del jugador
+		if (isStepManiaChart) {
+			strumLineX = STRUM_X_MIDDLESCROLL;
+		}
+		
 		for (i in 0...4)
 		{
 			// FlxG.log.add(i);
 			var targetAlpha:Float = 1;
 			if (player < 1)
 			{
-				if(!ClientPrefs.data.opponentStrums) targetAlpha = 0;
+				// En StepMania, ocultar completamente las strums del oponente
+				if (isStepManiaChart) {
+					targetAlpha = 0;
+				}
+				else if(!ClientPrefs.data.opponentStrums) targetAlpha = 0;
 				else if(ClientPrefs.data.middleScroll) targetAlpha = 0.35;
 			}
 
@@ -1992,7 +2120,8 @@ class PlayState extends MusicBeatState
 				playerStrums.add(babyArrow);
 			else
 			{
-				if(ClientPrefs.data.middleScroll)
+				// En StepMania, no ajustar posición de strums del oponente (ya están ocultas)
+				if(!isStepManiaChart && ClientPrefs.data.middleScroll)
 				{
 					babyArrow.x += 310;
 					if(i > 1) { //Up and Right

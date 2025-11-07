@@ -213,6 +213,15 @@ class SMFile {
 		}
 		
 		trace('Initialized TimingStruct with ${TimingStruct.allTimings.length} timing segments');
+		
+		// Obtener el offset del header (en segundos)
+		var offsetValue:Float = Std.parseFloat(header.OFFSET);
+		if (Math.isNaN(offsetValue)) offsetValue = 0;
+		
+		// En StepMania, OFFSET positivo significa que la música empieza DESPUÉS
+		// En FNF, offset negativo hace que las notas empiecen ANTES
+		// Entonces necesitamos invertir el signo: FNF offset = -SM offset
+		var fnfOffset:Float = -offsetValue * 1000; // Convertir a milisegundos e invertir
 
 		var song:SwagSong = {
 			song: songName,
@@ -226,7 +235,7 @@ class SMFile {
 			speed: 2.0,
 			stage: 'notitg', // Usar stage NotITG para canciones de StepMania
 			format: 'psych_v1',
-			offset: 0
+			offset: fnfOffset
 		};		var heldNotes:Array<Array<Dynamic>> = isDouble ? [[], [], [], [], [], [], [], []] : [[], [], [], []];
 		var currentBeat:Float = 0;
 		var measureIndex:Int = 0;
@@ -271,11 +280,18 @@ class SMFile {
 					continue;
 				}
 				
-				var timeInSec = (seg.startTime + ((currentBeat - seg.startBeat) / (seg.bpm / 60)));
+				// Calcular tiempo: startTime + (beats desde inicio × segundos por beat)
+				var beatsSinceStart = currentBeat - seg.startBeat;
+				var secondsPerBeat = 60.0 / seg.bpm;
+				var timeInSec = seg.startTime + (beatsSinceStart * secondsPerBeat);
+				
+				// Ajustar para que los tiempos sean positivos (restar el offset negativo)
+				timeInSec -= (-offsetValue);
+				
 				var rowTime = timeInSec * 1000;
 				
 				if (Math.isNaN(rowTime) || rowTime < 0) {
-					trace('Invalid time calculated: $rowTime');
+					trace('Invalid time calculated: $rowTime (beat: $currentBeat, seg.startBeat: ${seg.startBeat}, seg.startTime: ${seg.startTime}, seg.bpm: ${seg.bpm})');
 					rowIndex++;
 					continue;
 				}
