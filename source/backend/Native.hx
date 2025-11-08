@@ -120,22 +120,21 @@ class Native
 	}
 
 	/**
-	 * Builds a comprehensive system information report.
-	 * Shows GPU, OpenGL version, platform info, and memory usage.
+	 * Builds a simplified system information report.
+	 * Shows only GPU name and OpenGL version.
 	 */
 	public static function buildSystemInfo():String
 	{
-		var fullContents = '=== SYSTEM INFORMATION ===\n';
+		var info = '';
 		
-		// GPU and Driver Info
+		// GPU Detection
 		var driverInfo = FlxG?.stage?.context3D?.driverInfo ?? 'N/A';
-		fullContents += '\nGPU & Graphics:\n';
-		fullContents += '- Driver Info: ${driverInfo}\n';
-		
-		// Parse GPU name for better display
 		var gpuName = parseGPUName(driverInfo);
-		if (gpuName != null && gpuName != driverInfo) {
-			fullContents += '- GPU Detected: ${gpuName}\n';
+		
+		if (gpuName != null && gpuName != 'N/A') {
+			info += 'GPU: ${gpuName}\n';
+		} else {
+			info += 'GPU: Unknown\n';
 		}
 		
 		// OpenGL Version Detection
@@ -144,44 +143,23 @@ class Native
 			@:privateAccess
 			var gl = FlxG.stage.context3D.gl;
 			if (gl != null) {
-				var glVersion = gl.getParameter(gl.VERSION);
 				var glslVersion = gl.getParameter(gl.SHADING_LANGUAGE_VERSION);
-				fullContents += '- OpenGL Version: ${glVersion}\n';
-				fullContents += '- GLSL Version: ${glslVersion}\n';
 				
 				// Check for modern rendering support
-				var supportsModernGL = checkModernGLSupport(glslVersion);
-				fullContents += '- Modern Shaders: ${supportsModernGL ? "Supported (GLSL 3.3+)" : "Legacy Mode (GLSL 1.2)"}\n';
+				var supportsModern = checkModernGLSupport(glslVersion);
+				
+				if (supportsModern) {
+					info += 'OpenGL: Modern (GLSL 3.3+)\n';
+				} else {
+					info += 'OpenGL: Legacy (GLSL 1.2) - Limited shader support\n';
+				}
 			}
 		} catch (e:Dynamic) {
-			fullContents += '- OpenGL Info: Unable to retrieve\n';
+			info += 'OpenGL: Unable to detect\n';
 		}
 		#end
 		
-		// Platform Info
-		fullContents += '\nPlatform:\n';
-		#if sys
-		fullContents += '- OS: ${Sys.systemName()}\n';
-		#end
-		fullContents += '- Lime Platform: ${lime.system.System.platformLabel}\n';
-		
-		// Memory Info
-		#if cpp
-		fullContents += '\nMemory (HXCPP-Immix):\n';
-		fullContents += '- Memory Used: ${FlxStringUtil.formatBytes(Gc.memInfo64(Gc.MEM_INFO_USAGE))}\n';
-		fullContents += '- Memory Reserved: ${FlxStringUtil.formatBytes(Gc.memInfo64(Gc.MEM_INFO_RESERVED))}\n';
-		#end
-		
-		// Graphics Settings
-		fullContents += '\nGraphics Settings:\n';
-		fullContents += '- Anti-Aliasing: ${ClientPrefs.data.antialiasing ? "Enabled" : "Disabled"}\n';
-		fullContents += '- Shaders: ${ClientPrefs.data.shaders ? "Enabled" : "Disabled"}\n';
-		fullContents += '- Low Quality: ${ClientPrefs.data.lowQuality ? "Yes" : "No"}\n';
-		fullContents += '- GPU Caching: ${ClientPrefs.data.cacheOnGPU ? "Enabled" : "Disabled"}\n';
-		
-		fullContents += '\n=========================\n';
-		
-		return fullContents;
+		return info;
 	}
 
 	/**

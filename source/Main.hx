@@ -325,14 +325,8 @@ class Main extends Sprite
 		// Initialize shader compatibility system
 		shaders.ShaderCompatibility.init();
 		
-		// Display system information at startup
-		trace('\n' + backend.Native.buildSystemInfo());
-		
-		// Display shader compatibility info
-		trace('\n' + shaders.ShaderCompatibility.getCompatibilityReport());
-		
-		var enhancements = backend.Native.getGPUEnhancements();
-		trace('GPU Enhancements: ${enhancements}\n');
+		// Display simplified system information
+		trace('\n\n' + backend.Native.buildSystemInfo());
 		
 		// --- Marca de agua global ---
 		var flxGraphic = backend.Paths.image("marca");

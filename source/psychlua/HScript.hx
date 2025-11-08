@@ -318,12 +318,6 @@ class HScript extends Iris
 		set('centerWindow', function() {
 			psychlua.WindowTweens.centerWindow();
 		});
-		set('shakeWindow', function(intensity:Float = 5.0, duration:Float = 0.5) {
-			psychlua.WindowTweens.shakeWindow(intensity, duration);
-		});
-		set('bounceWindow', function(bounces:Int = 3, height:Float = 50.0, duration:Float = 1.0) {
-			psychlua.WindowTweens.bounceWindow(bounces, height, duration);
-		});
 		set('setWindowTitle', function(title:String) {
 			psychlua.WindowTweens.setWindowTitle(title);
 		});

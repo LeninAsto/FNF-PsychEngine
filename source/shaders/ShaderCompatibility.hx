@@ -42,9 +42,6 @@ class ShaderCompatibility
 				glVersion = gl.getParameter(gl.VERSION);
 				glslVersion = gl.getParameter(gl.SHADING_LANGUAGE_VERSION);
 				
-				trace("Detected OpenGL version: " + glVersion);
-				trace("Detected GLSL version: " + glslVersion);
-				
 				// Determine if modern rendering is supported
 				useNewerRendering = false;
 				
@@ -58,15 +55,6 @@ class ShaderCompatibility
 				var versionNum = Std.parseInt(glslVersion.split(" ")[0].replace(".", ""));
 				useNewerRendering = (versionNum != null && versionNum >= 330);
 				#end
-				
-				if (useNewerRendering) {
-					trace("Using modern rendering for OpenGL 3.3+ / OpenGL ES 3.0+");
-					trace("Shaders will use modern GLSL syntax (in/out/texture)");
-				} else {
-					trace("Using legacy rendering mode");
-					trace("Shaders will use legacy GLSL syntax (attribute/varying/texture2D)");
-					trace("Some advanced shaders may not work on this device!");
-				}
 			} else {
 				trace("Warning: Could not access OpenGL context");
 				useNewerRendering = false;

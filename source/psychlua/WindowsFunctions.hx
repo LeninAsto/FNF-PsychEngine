@@ -75,27 +75,6 @@ class WindowsFunctions
 			WindowTweens.setWindowResizable(enable);
 		});
 		
-		// Window Effects Functions
-		Lua_helper.add_callback(lua, "shakeWindow", function(?intensity:Float = 5.0, ?duration:Float = 0.5) {
-			WindowTweens.shakeWindow(intensity, duration);
-		});
-		
-		Lua_helper.add_callback(lua, "bounceWindow", function(?bounces:Int = 3, ?height:Float = 50.0, ?duration:Float = 1.0) {
-			WindowTweens.bounceWindow(bounces, height, duration);
-		});
-		
-		Lua_helper.add_callback(lua, "orbitWindow", function(centerX:Int, centerY:Int, ?radius:Float = 100.0, ?speed:Float = 1.0, ?duration:Float = 5.0) {
-			WindowTweens.orbitWindow(centerX, centerY, radius, speed, duration);
-		});
-		
-		Lua_helper.add_callback(lua, "pulseWindow", function(?minScale:Float = 0.8, ?maxScale:Float = 1.2, ?pulseSpeed:Float = 2.0, ?duration:Float = 3.0) {
-			WindowTweens.pulseWindow(minScale, maxScale, pulseSpeed, duration);
-		});
-		
-		Lua_helper.add_callback(lua, "spinWindow", function(?rotations:Int = 1, ?duration:Float = 2.0) {
-			WindowTweens.spinWindow(rotations, duration);
-		});
-		
 		Lua_helper.add_callback(lua, "randomizeWindowPosition", function(?minX:Int = 0, ?maxX:Int = -1, ?minY:Int = 0, ?maxY:Int = -1) {
 			WindowTweens.randomizeWindowPosition(minX, maxX, minY, maxY);
 		});
@@ -137,35 +116,6 @@ class WindowsFunctions
 		Lua_helper.add_callback(lua, "getWindowState", function() {
 			return WindowTweens.getWindowState();
 		});
-		
-		// Window Animation Functions
-		Lua_helper.add_callback(lua, "slideInWindow", function(direction:String, ?duration:Int = 500) {
-			WindowTweens.slideInWindow(direction, duration);
-		});
-		
-		Lua_helper.add_callback(lua, "fadeInWindow", function(?duration:Int = 500) {
-			WindowTweens.fadeInWindow(duration);
-		});
-		
-		Lua_helper.add_callback(lua, "expandWindow", function(?duration:Int = 500) {
-			WindowTweens.expandWindow(duration);
-		});
-		
-		// System Audio Control Functions
-		Lua_helper.add_callback(lua, "setSystemVolume", function(volume:Float) {
-			WindowTweens.setSystemVolume(volume);
-		});
-		
-		Lua_helper.add_callback(lua, "muteSystem", function(mute:Bool) {
-			WindowTweens.muteSystem(mute);
-		});
-		
-		// System Utilities Functions
-		Lua_helper.add_callback(lua, "createDesktopShortcut", function(name:String, targetPath:String, ?iconPath:String = "") {
-			WindowTweens.createDesktopShortcut(name, targetPath, iconPath);
-		});
-		
-		// === FUNCIONES DISPONIBLES CON SL-WINDOWS-API ===
 		
 		// Desktop/System Control Functions
 		Lua_helper.add_callback(lua, "setDesktopWallpaper", function(path:String) {
@@ -209,85 +159,6 @@ class WindowsFunctions
 		// System Reset Functions
 		Lua_helper.add_callback(lua, "resetSystemChanges", function() {
 			WindowTweens.resetSystemChanges();
-		});
-		
-		// === ANIMACIONES AVANZADAS Y ESPECTACULARES ===
-		
-		// Animaciones de Deformación
-		Lua_helper.add_callback(lua, "elasticWindow", function(intensity:Float = 1.5, cycles:Int = 3, duration:Float = 2.0) {
-			WindowTweens.elasticWindow(intensity, cycles, duration);
-		});
-		
-		Lua_helper.add_callback(lua, "waveWindow", function(amplitude:Float = 50.0, frequency:Float = 2.0, duration:Float = 3.0) {
-			WindowTweens.waveWindow(amplitude, frequency, duration);
-		});
-		
-		Lua_helper.add_callback(lua, "liquidWindow", function(viscosity:Float = 0.8, amplitude:Float = 20.0, duration:Float = 3.0) {
-			WindowTweens.liquidWindow(viscosity, amplitude, duration);
-		});
-		
-		Lua_helper.add_callback(lua, "breathingWindow", function(breathRate:Float = 1.0, intensity:Float = 0.1, duration:Float = 5.0) {
-			WindowTweens.breathingWindow(breathRate, intensity, duration);
-		});
-		
-		// Animaciones de Movimiento Complejo
-		Lua_helper.add_callback(lua, "spiralWindow", function(spirals:Float = 2.0, radius:Float = 100.0, duration:Float = 3.0) {
-			WindowTweens.spiralWindow(spirals, radius, duration);
-		});
-		
-		Lua_helper.add_callback(lua, "zigzagWindow", function(zigzags:Int = 5, amplitude:Float = 100.0, duration:Float = 2.0) {
-			WindowTweens.zigzagWindow(zigzags, amplitude, duration);
-		});
-		
-		Lua_helper.add_callback(lua, "teleportWindow", function(targetX:Int, targetY:Int, glitchIntensity:Float = 20.0, teleportDuration:Float = 0.5) {
-			WindowTweens.teleportWindow(targetX, targetY, glitchIntensity, teleportDuration);
-		});
-		
-		// Animaciones de Efectos Especiales
-		Lua_helper.add_callback(lua, "earthquakeWindow", function(intensity:Float = 10.0, frequency:Float = 15.0, duration:Float = 1.5) {
-			WindowTweens.earthquakeWindow(intensity, frequency, duration);
-		});
-		
-		Lua_helper.add_callback(lua, "magnetWindow", function(magnetX:Int, magnetY:Int, strength:Float = 1.0, duration:Float = 2.0) {
-			WindowTweens.magnetWindow(magnetX, magnetY, strength, duration);
-		});
-		
-		Lua_helper.add_callback(lua, "windWindow", function(windDirection:Float = 0, windStrength:Float = 5.0, turbulence:Float = 2.0, duration:Float = 3.0) {
-			WindowTweens.windWindow(windDirection, windStrength, turbulence, duration);
-		});
-		
-		// Animaciones de Transformación
-		Lua_helper.add_callback(lua, "morphWindow", function(targetWidth:Int, targetHeight:Int, morphStyle:String = "smooth", duration:Float = 2.0) {
-			WindowTweens.morphWindow(targetWidth, targetHeight, morphStyle, duration);
-		});
-		
-		// === ANIMACIONES COMBINADAS Y ESPECIALES ===
-		
-		// Animaciones Combinadas
-		Lua_helper.add_callback(lua, "comboAnimation", function(animations:Array<String>, duration:Float = 1.0) {
-			WindowTweens.comboAnimation(animations, duration);
-		});
-		
-		Lua_helper.add_callback(lua, "rhythmWindow", function(bpm:Float = 120.0, pattern:String = "pulse", intensity:Float = 1.0, duration:Float = 8.0) {
-			WindowTweens.rhythmWindow(bpm, pattern, intensity, duration);
-		});
-		
-		// Animaciones de Danza y Movimiento
-		Lua_helper.add_callback(lua, "danceWindow", function(danceType:String = "sway", tempo:Float = 1.0, amplitude:Float = 30.0, duration:Float = 5.0) {
-			WindowTweens.danceWindow(danceType, tempo, amplitude, duration);
-		});
-		
-		// Efectos Especiales Avanzados
-		Lua_helper.add_callback(lua, "glitchWindow", function(glitchIntensity:Float = 50.0, glitchFrequency:Float = 0.1, duration:Float = 2.0) {
-			WindowTweens.glitchWindow(glitchIntensity, glitchFrequency, duration);
-		});
-		
-		Lua_helper.add_callback(lua, "matrixWindow", function(fallSpeed:Float = 2.0, duration:Float = 3.0) {
-			WindowTweens.matrixWindow(fallSpeed, duration);
-		});
-		
-		Lua_helper.add_callback(lua, "gravityWindow", function(gravityStrength:Float = 0.5, bounce:Float = 0.7, duration:Float = 4.0) {
-			WindowTweens.gravityWindow(gravityStrength, bounce, duration);
 		});
 		
 		// Legacy/Compatibility Functions (mantener al final)
