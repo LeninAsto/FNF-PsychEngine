@@ -140,6 +140,13 @@ jobs:
           chmod +x ./setup/unish-lib.sh
           sh ./setup/unish-lib.sh
       
+      - name: Setup Lime for Android
+        run: |
+          haxelib run lime setup android
+          haxelib run lime config ANDROID_SDK $ANDROID_SDK_ROOT
+          haxelib run lime config ANDROID_NDK_ROOT $ANDROID_SDK_ROOT/ndk/27.2.12479018
+          haxelib run lime config JAVA_HOME $JAVA_HOME
+      
       - name: Skip SScript setup mode
         run: echo 'oy9:showMacroty8:loopCosti25y10:includeAllfg' >> ~/settings.cocoa
       
