@@ -181,7 +181,9 @@ class HScript extends Iris
 		set('Language', backend.Language);
 		set('Difficulty', backend.Difficulty);
 		set('WeekData', backend.WeekData);
+		#if DISCORD_ALLOWED
 		set('Discord', backend.DiscordClient);
+		#end
 		set('PlayState', PlayState);
 		set('ModState', states.ModState);
 		set('TitleState', states.TitleState);

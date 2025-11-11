@@ -156,11 +156,13 @@ class AchievementsMenuState extends MusicBeatState
 
 	var goingBack:Bool = false;
 	override function update(elapsed:Float) {
+		super.update(elapsed);
+		
 		if(!goingBack && options.length > 1)
 		{
 			var add:Int = 0;
-			if (controls.UI_LEFT_P) add = -1;
-			else if (controls.UI_RIGHT_P) add = 1;
+			if (controls.UI_LEFT_P || (touchPad != null && touchPad.buttonLeft.justPressed)) add = -1;
+			else if (controls.UI_RIGHT_P || (touchPad != null && touchPad.buttonRight.justPressed)) add = 1;
 
 			if(add != 0)
 			{
@@ -182,8 +184,8 @@ class AchievementsMenuState extends MusicBeatState
 			if(options.length > MAX_PER_ROW)
 			{
 				var add:Int = 0;
-				if (controls.UI_UP_P) add = -1;
-				else if (controls.UI_DOWN_P) add = 1;
+				if (controls.UI_UP_P || (touchPad != null && touchPad.buttonUp.justPressed)) add = -1;
+				else if (controls.UI_DOWN_P || (touchPad != null && touchPad.buttonDown.justPressed)) add = 1;
 
 				if(add != 0)
 				{
@@ -213,7 +215,7 @@ class AchievementsMenuState extends MusicBeatState
 			}
 		}
 
-		if (controls.BACK) {
+		if (controls.BACK || (touchPad != null && touchPad.buttonB.justPressed)) {
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			
 			// Verificar si venimos de un ModState personalizado
@@ -234,7 +236,6 @@ class AchievementsMenuState extends MusicBeatState
 			}
 			goingBack = true;
 		}
-		super.update(elapsed);
 	}
 
 	public var barTween:FlxTween = null;

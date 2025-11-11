@@ -373,6 +373,7 @@ class PlayState extends MusicBeatState
 	public static var nextReloadAll:Bool = false;
 
 	public var luaTouchPad:TouchPad;
+	public var pauseButton:TouchButton;
 
 	/**
 	 * Detecta si la canción actual es de StepMania basándose en varias pistas
@@ -907,6 +908,16 @@ class PlayState extends MusicBeatState
 		mobileControls.instance.visible = true;
 		mobileControls.onButtonDown.add(onButtonPress);
 		mobileControls.onButtonUp.add(onButtonRelease);
+		
+		// Crear botón de pausa en la esquina superior derecha (color amarillo y semi-transparente)
+		pauseButton = TouchPad.createStandaloneButton(FlxG.width - 132, 10, "PAUSE", 0xFFFF00, [MobileInputID.PAUSE]);
+		pauseButton.alpha = ClientPrefs.data.controlsAlpha * 0.6; // Un poco más transparente
+		pauseButton.onDown.callback = function() {
+			if(startedCountdown && canPause && !paused && !inCutscene && !transitioning)
+				openPauseMenu();
+		};
+		pauseButton.cameras = [camOther];
+		add(pauseButton);
 
 		if(eventNotes.length > 0)
 		{
@@ -4389,7 +4400,14 @@ class PlayState extends MusicBeatState
 			Main.fpsVar.luaScriptsFailed = 0;
 			Main.fpsVar.hscriptsLoaded = 0;
 			Main.fpsVar.hscriptsFailed = 0;
-		}		
+		}
+		
+		// Limpiar botón de pausa
+		if (pauseButton != null) {
+			remove(pauseButton);
+			pauseButton.destroy();
+			pauseButton = null;
+		}
 		
 		instance = null;
 		shutdownThread = true;

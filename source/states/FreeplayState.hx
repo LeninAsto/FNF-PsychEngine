@@ -321,8 +321,14 @@ class FreeplayState extends MusicBeatState
 		changeSelection();
 		updateTexts();
 
-		addTouchPad('LEFT_FULL', 'A_B_C_X_Y_Z');
 		super.create();
+		
+		addTouchPad('UP_DOWN', 'A_B_C_X_Y_Z');
+		addTouchPadCamera();
+		if(touchPad != null) {
+			touchPad.visible = true;
+			touchPad.updateTrackedButtons();
+		}
 	}
 
 	override function closeSubState()
@@ -331,7 +337,12 @@ class FreeplayState extends MusicBeatState
 		persistentUpdate = true;
 		super.closeSubState();
 		removeTouchPad();
-		addTouchPad('LEFT_FULL', 'A_B_C_X_Y_Z');
+		addTouchPad('UP_DOWN', 'A_B_C_X_Y_Z');
+		addTouchPadCamera();
+		if(touchPad != null) {
+			touchPad.visible = true;
+			touchPad.updateTrackedButtons();
+		}
 	}
 
 	public function addSong(songName:String, weekNum:Int, songCharacter:String, color:Int)
@@ -353,6 +364,8 @@ class FreeplayState extends MusicBeatState
 	var stopMusicPlay:Bool = false;
 	override function update(elapsed:Float)
 	{
+		super.update(elapsed);
+		
 		if(WeekData.weeksList.length < 1)
 			return;
 
@@ -390,7 +403,7 @@ class FreeplayState extends MusicBeatState
 	if(ratingPercent < 0) ratingDisplay = '-' + ratingDisplay;
 
 	var shiftMult:Int = 1;
-	if((FlxG.keys.pressed.SHIFT || touchPad.buttonZ.pressed) && !player.playingMusic) shiftMult = 3;
+	if((FlxG.keys.pressed.SHIFT || (touchPad != null && touchPad.buttonZ.pressed)) && !player.playingMusic) shiftMult = 3;
 
 	if (!player.playingMusic)
 	{
@@ -409,31 +422,32 @@ class FreeplayState extends MusicBeatState
 					else if(FlxG.keys.justPressed.END)
 					{
 						curSelected = songs.length - 1;
-						changeSelection();
-						holdTime = 0;	
-					}
-					if (controls.UI_UP_P)
-					{
-						changeSelection(-shiftMult);
-						holdTime = 0;
-					}
-					if (controls.UI_DOWN_P)
-					{
-						changeSelection(shiftMult);
-						holdTime = 0;
-					}
+					changeSelection();
+					holdTime = 0;	
+				}
+				if (controls.UI_UP_P || (touchPad != null && touchPad.buttonUp.justPressed))
+				{
+					changeSelection(-shiftMult);
+					holdTime = 0;
+				}
+				if (controls.UI_DOWN_P || (touchPad != null && touchPad.buttonDown.justPressed))
+				{
+					changeSelection(shiftMult);
+					holdTime = 0;
+				}
 
-					if(controls.UI_DOWN || controls.UI_UP)
+				if(controls.UI_DOWN || controls.UI_UP || (touchPad != null && (touchPad.buttonDown.pressed || touchPad.buttonUp.pressed)))
+				{
+					var checkLastHold:Int = Math.floor((holdTime - 0.5) * 10);
+					holdTime += elapsed;
+					var checkNewHold:Int = Math.floor((holdTime - 0.5) * 10);
+
+					if(holdTime > 0.5 && checkNewHold - checkLastHold > 0)
 					{
-						var checkLastHold:Int = Math.floor((holdTime - 0.5) * 10);
-						holdTime += elapsed;
-						var checkNewHold:Int = Math.floor((holdTime - 0.5) * 10);
-
-						if(holdTime > 0.5 && checkNewHold - checkLastHold > 0)
-							changeSelection((checkNewHold - checkLastHold) * (controls.UI_UP ? -shiftMult : shiftMult));
+						var isUp:Bool = controls.UI_UP || (touchPad != null && touchPad.buttonUp.pressed);
+						changeSelection((checkNewHold - checkLastHold) * (isUp ? -shiftMult : shiftMult));
 					}
-
-					if(FlxG.mouse.wheel != 0)
+				}					if(FlxG.mouse.wheel != 0)
 					{
 						FlxG.sound.play(Paths.sound('scrollMenu'), 0.2);
 						changeSelection(-shiftMult * FlxG.mouse.wheel, false);
@@ -442,11 +456,11 @@ class FreeplayState extends MusicBeatState
 			}
 			else
 			{
-				if (controls.UI_UP_P)
+				if (controls.UI_UP_P || (touchPad != null && touchPad.buttonUp.justPressed))
 				{
 					changeDifficultySelection(-1);
 				}
-				if (controls.UI_DOWN_P)
+				if (controls.UI_DOWN_P || (touchPad != null && touchPad.buttonDown.justPressed))
 				{
 					changeDifficultySelection(1);
 				}
@@ -477,7 +491,7 @@ class FreeplayState extends MusicBeatState
 			}
 		}
 
-		if (controls.BACK)
+		if (controls.BACK || (touchPad != null && touchPad.buttonB.justPressed))
 		{
 			if (player.playingMusic)
 			{
@@ -504,13 +518,13 @@ class FreeplayState extends MusicBeatState
 			}
 		}
 
-		if((FlxG.keys.justPressed.CONTROL || touchPad.buttonC.justPressed) && !player.playingMusic)
+		if((FlxG.keys.justPressed.CONTROL || (touchPad != null && touchPad.buttonC.justPressed)) && !player.playingMusic)
 		{
 			persistentUpdate = false;
-			openSubState(new GameplayChangersSubstate());
 			removeTouchPad();
+			openSubState(new GameplayChangersSubstate());
 		}
-		else if(FlxG.keys.justPressed.SPACE || touchPad.buttonX.justPressed)
+		if(FlxG.keys.justPressed.SPACE || (touchPad != null && touchPad.buttonX.justPressed))
 		{
 			if(instPlaying != curSelected && !player.playingMusic)
 			{
@@ -594,7 +608,7 @@ class FreeplayState extends MusicBeatState
 				player.pauseOrResume(!player.playing);
 			}
 		}
-		else if (controls.ACCEPT && !player.playingMusic)
+			else if ((controls.ACCEPT || (touchPad != null && touchPad.buttonA.justPressed)) && !player.playingMusic)
 		{
 			if (!inDifficultySelect)
 			{
@@ -663,18 +677,16 @@ class FreeplayState extends MusicBeatState
 					if(errorStr.contains('There is no TEXT asset with an ID of')) errorStr = 'Missing file: ' + errorStr.substring(errorStr.indexOf(songLowercase), errorStr.length-1); //Missing chart
 					else errorStr += '\n\n' + e.stack;
 
-					missingText.text = 'ERROR WHILE LOADING CHART:\n$errorStr';
-					missingText.screenCenter(Y);
-					missingText.visible = true;
-					missingTextBG.visible = true;
-					FlxG.sound.play(Paths.sound('cancelMenu'));
 
-					updateTexts(elapsed);
-					super.update(elapsed);
-					return;
-			}
+				missingText.text = 'ERROR WHILE LOADING CHART:\n$errorStr';
+				missingText.screenCenter(Y);
+				missingText.visible = true;
+				missingTextBG.visible = true;
+				FlxG.sound.play(Paths.sound('cancelMenu'));
 
-			@:privateAccess
+				updateTexts(elapsed);
+				return;
+		}			@:privateAccess
 			if(PlayState._lastLoadedModDirectory != Mods.currentModDirectory)
 			{
 				trace('CHANGED MOD DIRECTORY, RELOADING STUFF');
@@ -690,18 +702,16 @@ class FreeplayState extends MusicBeatState
 				#end
 			}
 		}
-		else if((controls.RESET || touchPad.buttonY.justPressed) && !player.playingMusic)
+		else if((controls.RESET || (touchPad != null && touchPad.buttonY.justPressed)) && !player.playingMusic)
 		{
-			persistentUpdate = false;
-			openSubState(new ResetScoreSubState(songs[curSelected].songName, curDifficulty, songs[curSelected].songCharacter));
-			removeTouchPad();
-			FlxG.sound.play(Paths.sound('scrollMenu'));
-		}
+		persistentUpdate = false;
+		removeTouchPad();
+		openSubState(new ResetScoreSubState(songs[curSelected].songName, curDifficulty, songs[curSelected].songCharacter));
+		FlxG.sound.play(Paths.sound('scrollMenu'));
+	}
 
 		updateTexts(elapsed);
-		super.update(elapsed);
 	}
-	
 	function getVocalFromCharacter(char:String)
 	{
 		try

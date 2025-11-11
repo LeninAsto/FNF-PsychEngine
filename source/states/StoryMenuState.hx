@@ -203,18 +203,18 @@ class StoryMenuState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
+		super.update(elapsed);
+
 		if(WeekData.weeksList.length < 1)
 		{
-			if (controls.BACK && !movedBack && !selectedWeek)
+			if (controls.BACK || (touchPad != null && touchPad.buttonB.justPressed) && !movedBack && !selectedWeek)
 			{
 				FlxG.sound.play(Paths.sound('cancelMenu'));
 				movedBack = true;
 				MusicBeatState.switchState(new MainMenuState());
 			}
-			super.update(elapsed);
 			return;
-		}
-
+		}		
 		// scoreText.setFormat(Paths.font("vcr.ttf"), 32);
 		if(intendedScore != lerpScore)
 		{
@@ -229,14 +229,14 @@ class StoryMenuState extends MusicBeatState
 		if (!movedBack && !selectedWeek)
 		{
 			var changeDiff = false;
-			if (controls.UI_UP_P)
+			if (controls.UI_UP_P || (touchPad != null && touchPad.buttonUp.justPressed))
 			{
 				changeWeek(-1);
 				FlxG.sound.play(Paths.sound('scrollMenu'));
 				changeDiff = true;
 			}
 
-			if (controls.UI_DOWN_P)
+			if (controls.UI_DOWN_P || (touchPad != null && touchPad.buttonDown.justPressed))
 			{
 				changeWeek(1);
 				FlxG.sound.play(Paths.sound('scrollMenu'));
@@ -248,24 +248,24 @@ class StoryMenuState extends MusicBeatState
 				FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
 				changeWeek(-FlxG.mouse.wheel);
 				changeDifficulty();
-			}
+		}
 
-			if (controls.UI_RIGHT)
-				rightArrow.animation.play('press')
-			else
-				rightArrow.animation.play('idle');
+		if (controls.UI_RIGHT || (touchPad != null && touchPad.buttonRight.pressed))
+			rightArrow.animation.play('press')
+		else
+			rightArrow.animation.play('idle');
 
-			if (controls.UI_LEFT)
-				leftArrow.animation.play('press');
-			else
-				leftArrow.animation.play('idle');
+		if (controls.UI_LEFT || (touchPad != null && touchPad.buttonLeft.pressed))
+			leftArrow.animation.play('press');
+		else
+			leftArrow.animation.play('idle');
 
-			if (controls.UI_RIGHT_P)
-				changeDifficulty(1);
-			else if (controls.UI_LEFT_P)
-				changeDifficulty(-1);
-			else if (changeDiff)
-				changeDifficulty();
+		if (controls.UI_RIGHT_P || (touchPad != null && touchPad.buttonRight.justPressed))
+			changeDifficulty(1);
+		else if (controls.UI_LEFT_P || (touchPad != null && touchPad.buttonLeft.justPressed))
+			changeDifficulty(-1);
+		else if (changeDiff)
+			changeDifficulty();
 
 			if(FlxG.keys.justPressed.CONTROL || touchPad.buttonX.justPressed)
 			{
@@ -278,22 +278,20 @@ class StoryMenuState extends MusicBeatState
 				persistentUpdate = false;
 				openSubState(new ResetScoreSubState('', curDifficulty, '', curWeek));
 				removeTouchPad();
-				//FlxG.sound.play(Paths.sound('scrollMenu'));
-			}
-			else if (controls.ACCEPT)
-				selectWeek();
+			//FlxG.sound.play(Paths.sound('scrollMenu'));
 		}
+		else if (controls.ACCEPT || (touchPad != null && touchPad.buttonA.justPressed))
+			selectWeek();
+	}
 
-		if (controls.BACK && !movedBack && !selectedWeek)
-		{
-			FlxG.sound.play(Paths.sound('cancelMenu'));
-			movedBack = true;
-			MusicBeatState.switchState(new MainMenuState());
-		}
+	if ((controls.BACK || (touchPad != null && touchPad.buttonB.justPressed)) && !movedBack && !selectedWeek)
+	{
+		FlxG.sound.play(Paths.sound('cancelMenu'));
+		movedBack = true;
+		MusicBeatState.switchState(new MainMenuState());
+	}
 
-		super.update(elapsed);
-		
-		var offY:Float = grpWeekText.members[curWeek].targetY;
+	var offY:Float = grpWeekText.members[curWeek].targetY;
 		for (num => item in grpWeekText.members)
 			item.y = FlxMath.lerp(item.targetY - offY + 480, item.y, Math.exp(-elapsed * 10.2));
 

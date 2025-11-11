@@ -154,6 +154,8 @@ class CreditsState extends MusicBeatState
 	var holdTime:Float = 0;
 	override function update(elapsed:Float)
 	{
+		super.update(elapsed);
+		
 		if (FlxG.sound.music.volume < 0.7)
 		{
 			FlxG.sound.music.volume += 0.5 * elapsed;
@@ -166,8 +168,8 @@ class CreditsState extends MusicBeatState
 				var shiftMult:Int = 1;
 				if(FlxG.keys.pressed.SHIFT) shiftMult = 3;
 
-				var upP = controls.UI_UP_P;
-				var downP = controls.UI_DOWN_P;
+				var upP = controls.UI_UP_P || (touchPad != null && touchPad.buttonUp.justPressed);
+				var downP = controls.UI_DOWN_P || (touchPad != null && touchPad.buttonDown.justPressed);
 
 				if (upP)
 				{
@@ -180,7 +182,7 @@ class CreditsState extends MusicBeatState
 					holdTime = 0;
 				}
 
-				if(controls.UI_DOWN || controls.UI_UP)
+				if(controls.UI_DOWN || controls.UI_UP || (touchPad != null && (touchPad.buttonDown.pressed || touchPad.buttonUp.pressed)))
 				{
 					var checkLastHold:Int = Math.floor((holdTime - 0.5) * 10);
 					holdTime += elapsed;
@@ -188,15 +190,16 @@ class CreditsState extends MusicBeatState
 
 					if(holdTime > 0.5 && checkNewHold - checkLastHold > 0)
 					{
-						changeSelection((checkNewHold - checkLastHold) * (controls.UI_UP ? -shiftMult : shiftMult));
+						var isUp = controls.UI_UP || (touchPad != null && touchPad.buttonUp.pressed);
+						changeSelection((checkNewHold - checkLastHold) * (isUp ? -shiftMult : shiftMult));
 					}
 				}
 			}
 
-			if(controls.ACCEPT && (creditsStuff[curSelected][3] == null || creditsStuff[curSelected][3].length > 4)) {
+			if((controls.ACCEPT || (touchPad != null && touchPad.buttonA.justPressed)) && (creditsStuff[curSelected][3] == null || creditsStuff[curSelected][3].length > 4)) {
 				CoolUtil.browserLoad(creditsStuff[curSelected][3]);
 			}
-			if (controls.BACK)
+			if (controls.BACK || (touchPad != null && touchPad.buttonB.justPressed))
 			{
 				FlxG.sound.play(Paths.sound('cancelMenu'));
 				
@@ -243,11 +246,10 @@ class CreditsState extends MusicBeatState
 				}
 				else
 				{
-					item.x = FlxMath.lerp(200 + -40 * Math.abs(item.targetY), item.x, lerpVal);
+				item.x = FlxMath.lerp(200 + -40 * Math.abs(item.targetY), item.x, lerpVal);
 				}
 			}
 		}
-		super.update(elapsed);
 	}
 
 	var moveTween:FlxTween = null;

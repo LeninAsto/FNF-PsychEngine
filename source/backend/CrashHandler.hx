@@ -82,7 +82,7 @@ class CrashHandler
 		#end
 
 		// Mensaje con link de ayuda
-		var errorMsg = '$m\n\n$stackLabel\n\n━━━━━━━━━━━━━━━━━━━━━━\nNeed help? Visit:\n$HELP_LINK';
+		var errorMsg = '$m\n\n$stackLabel\n\n========================\nNeed help? Visit:\n$HELP_LINK';
 		CoolUtil.showPopUp(errorMsg, "Error!");
 		#if DISCORD_ALLOWED DiscordClient.shutdown(); #end
 		lime.system.System.exit(1);
@@ -111,7 +111,7 @@ class CrashHandler
 		#end
 
 		// Mensaje con link de ayuda
-		var errorMsg = '$errorLog\n\n━━━━━━━━━━━━━━━━━━━━━━\nNeed help? Visit:\n$HELP_LINK';
+		var errorMsg = '$errorLog\n\n========================\nNeed help? Visit:\n$HELP_LINK';
 		CoolUtil.showPopUp(errorMsg, "Critical Error!");
 		#if DISCORD_ALLOWED DiscordClient.shutdown(); #end
 		lime.system.System.exit(1);
@@ -128,7 +128,7 @@ class CrashHandler
 			if (!FileSystem.exists(folder))
 				FileSystem.createDirectory(folder);
 
-			var fullLog = message + '\n\n━━━━━━━━━━━━━━━━━━━━━━\nFor help, visit: $HELP_LINK\n━━━━━━━━━━━━━━━━━━━━━━';
+			var fullLog = message + '\n\n========================\nFor help, visit: $HELP_LINK\n========================';
 			File.saveContent(folder + Date.now().toString().replace(' ', '-').replace(':', "'") + '.txt', fullLog);
 		}
 		catch (e:haxe.Exception)

@@ -337,7 +337,9 @@ class ModsMenuState extends MusicBeatState
 	var exiting:Bool = false;
 	override function update(elapsed:Float)
 	{
-		if(controls.BACK && hoveringOnMods && !exiting)
+		super.update(elapsed);
+		
+		if((controls.BACK || (touchPad != null && touchPad.buttonB.justPressed)) && hoveringOnMods && !exiting)
 		{
 			exiting = true;
 			saveTxt();
@@ -376,7 +378,8 @@ class ModsMenuState extends MusicBeatState
 			_lastControllerMode = controls.controllerMode;
 		}
 
-		if(controls.UI_DOWN_R || controls.UI_UP_R) holdTime = 0;
+		if(controls.UI_DOWN_R || controls.UI_UP_R || (touchPad != null && (touchPad.buttonDown.justReleased || touchPad.buttonUp.justReleased))) 
+			holdTime = 0;
 
 		if(modsList.all.length > 0)
 		{
@@ -416,9 +419,9 @@ class ModsMenuState extends MusicBeatState
 				if(hoveringOnMods)
 				{
 					var shiftMult:Int = (FlxG.keys.pressed.SHIFT || FlxG.gamepads.anyPressed(LEFT_SHOULDER) || FlxG.gamepads.anyPressed(RIGHT_SHOULDER)) ? 4 : 1;
-					if(controls.UI_DOWN_P)
+					if(controls.UI_DOWN_P || (touchPad != null && touchPad.buttonDown.justPressed))
 						changeSelectedMod(shiftMult);
-					else if(controls.UI_UP_P)
+					else if(controls.UI_UP_P || (touchPad != null && touchPad.buttonUp.justPressed))
 						changeSelectedMod(-shiftMult);
 					else if(FlxG.mouse.wheel != 0)
 						changeSelectedMod(-FlxG.mouse.wheel * shiftMult, true);
@@ -427,16 +430,18 @@ class ModsMenuState extends MusicBeatState
 					{
 						if(FlxG.keys.justPressed.END || FlxG.gamepads.anyJustPressed(RIGHT_TRIGGER)) curSelectedMod = modsList.all.length-1;
 						else curSelectedMod = 0;
-						changeSelectedMod();
-					}
-					else if(controls.UI_UP || controls.UI_DOWN)
+					changeSelectedMod();
+				}
+				else if(controls.UI_UP || controls.UI_DOWN || (touchPad != null && (touchPad.buttonUp.pressed || touchPad.buttonDown.pressed)))
+				{
+					var lastHoldTime:Float = holdTime;
+					holdTime += elapsed;
+					if(holdTime > 0.5 && Math.floor(lastHoldTime * 8) != Math.floor(holdTime * 8))
 					{
-						var lastHoldTime:Float = holdTime;
-						holdTime += elapsed;
-						if(holdTime > 0.5 && Math.floor(lastHoldTime * 8) != Math.floor(holdTime * 8)) changeSelectedMod(shiftMult * (controls.UI_UP ? -1 : 1));
+						var isUp = controls.UI_UP || (touchPad != null && touchPad.buttonUp.pressed);
+						changeSelectedMod(shiftMult * (isUp ? -1 : 1));
 					}
-
-					else if(FlxG.mouse.pressed && !controls.mobileC && !gottaClickAgain)
+				}					else if(FlxG.mouse.pressed && !controls.mobileC && !gottaClickAgain)
 					{
 						var curMod:ModItem = modsGroup.members[curSelectedMod];
 						if(curMod != null)
@@ -497,7 +502,7 @@ class ModsMenuState extends MusicBeatState
 			{
 				if(hoveringOnMods)
 				{
-					if(controls.UI_RIGHT_P)
+					if(controls.UI_RIGHT_P || controls.ACCEPT || (touchPad != null && touchPad.buttonB.justPressed))
 					{
 						hoveringOnMods = false;
 						var button = getButton();
@@ -508,7 +513,7 @@ class ModsMenuState extends MusicBeatState
 				}
 				else 
 				{
-					if(controls.BACK)
+					if(controls.BACK || (touchPad != null && touchPad.buttonB.pressed && hoveringOnMods == false))
 					{
 						hoveringOnMods = true;
 						var button = getButton();
@@ -522,7 +527,7 @@ class ModsMenuState extends MusicBeatState
 					}
 					else if(curSelectedButton < 0)
 					{
-						if(controls.UI_UP_P)
+						if(controls.UI_UP_P || (touchPad != null && touchPad.buttonUp.justPressed))
 						{
 							switch(curSelectedButton)
 							{
@@ -536,7 +541,7 @@ class ModsMenuState extends MusicBeatState
 									changeSelectedButton(-1);
 							}
 						}
-						else if(controls.UI_DOWN_P)
+						else if(controls.UI_DOWN_P || (touchPad != null && touchPad.buttonDown.justPressed))
 						{
 							switch(curSelectedButton)
 							{
@@ -578,17 +583,14 @@ class ModsMenuState extends MusicBeatState
 				@:privateAccess
 				Mods.updateModList();
 				modsList = Mods.parseList();
-				if(modsList.all.length > 0)
-				{
-					trace('mod(s) found! reloading');
-					reload();
-				}
+			if(modsList.all.length > 0)
+			{
+				trace('mod(s) found! reloading');
+				reload();
 			}
 		}
-		super.update(elapsed);
 	}
-
-	function changeSelectedButton(add:Int = 0)
+}	function changeSelectedButton(add:Int = 0)
 	{
 		var max = buttons.length - 1;
 		
