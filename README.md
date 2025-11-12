@@ -1,6 +1,20 @@
 ![Logo Off](docs/img/PlusEngineLogo.png)
 
-# 🎮 FNF-PlusEngine
+[![Windows Build](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/windows.yml/badge.svg)](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/windows.yml)
+[![Linux Build](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/linux.yml/badge.svg)](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/linux.yml)
+[![macOS Build](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/macos.yml/badge.svg)](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/macos.yml)
+[![Android Build](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/android.yml/badge.svg)](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/android.yml)
+
+[![GitHub stars](https://img.shields.io/github/stars/LeninAsto/FNF-PlusEngine?style=social)](https://github.com/LeninAsto/FNF-PlusEngine/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/LeninAsto/FNF-PlusEngine?style=social)](https://github.com/LeninAsto/FNF-PlusEngine/network/members)
+[![GitHub watchers](https://img.shields.io/github/watchers/LeninAsto/FNF-PlusEngine?style=social)](https://github.com/LeninAsto/FNF-PlusEngine/watchers)
+
+[![License](https://img.shields.io/github/license/LeninAsto/FNF-PlusEngine)](LICENSE)
+[![GitHub release](https://img.shields.io/github/v/release/LeninAsto/FNF-PlusEngine)](https://github.com/LeninAsto/FNF-PlusEngine/releases)
+[![GitHub issues](https://img.shields.io/github/issues/LeninAsto/FNF-PlusEngine)](https://github.com/LeninAsto/FNF-PlusEngine/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/LeninAsto/FNF-PlusEngine)](https://github.com/LeninAsto/FNF-PlusEngine/pulls)
+[![GitHub contributors](https://img.shields.io/github/contributors/LeninAsto/FNF-PlusEngine)](https://github.com/LeninAsto/FNF-PlusEngine/graphs/contributors)
+
 Engine based on Psych Engine 1.0.4, with modcharts like NotITG, ModStates and compatible with hxcodec videos from Psych mods 0.6.3 and 0.7.3.
 
 
