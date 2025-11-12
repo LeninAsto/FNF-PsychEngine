@@ -149,7 +149,7 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		addOption(option);
 
 		var option:Option = new Option('Accuracy System:',
-			"Choose the accuracy calculation system:\nWife3 - StepMania precision timing\nPsych - Rating mod based\nSimple - Basic hits/total\nosu!mania - Weighted judgement system\nDJMAX - Combo bonus system\nITG - Dance Points system",
+			"Choose the accuracy calculation system:\nWife3 - StepMania precision timing\nPsych - Rating mod based\nSimple - Basic hits/total\nosu!mania - Weighted judgement system\nDJMAX - Combo bonus system\nITG - Dance Points system\n\n",
 			'accuracySystem',
 			STRING,
 			['Wife3', 'Psych', 'Simple', 'osu!mania', 'DJMAX', 'ITG']);

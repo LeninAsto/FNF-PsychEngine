@@ -134,9 +134,11 @@ class EsLA
         "graphics_menu" => "Ajustes de gráficos",
         "visuals_menu" => "Ajustes visuales",
         "gameplay_menu" => "Ajustes de jugabilidad",
+        "modchart_menu" => "Ajustes de modcharts",
         "language_menu" => "Ajustes de idioma",
 
         // Note Colors Menu
+        "note_colors_notitg" => "Shaders RGB Desactivados - La skin NotITG preserva los colores originales",
         "note_colors_tip" => "Presione RESET para restablecer la parte de nota seleccionada.",
         "note_colors_hold_tip" => "Manten presionado {1} y luego presione la tecla RESET para restablecer completamente la nota seleccionada.",
         "note_colors_shift" => "Shift",
@@ -152,8 +154,7 @@ class EsLA
         "keyviewer_position_offset" => "Posición del Visor de Teclas:",
         "keyviewer_color_setting" => "Color del Visor de Teclas:",
         "note_delay" => "Retardo de notas",
-        "switch_on_accept" => "(Presione ACEPTAR para cambiar)",
-        "switch_on_start" => "(Presione ACEPTAR para cambiar)",
+        "switch_on_button" => "(Presione {1} para cambiar)",
 
         // Controls Menu
         "keygroup_notes" => "NOTAS",
@@ -177,7 +178,8 @@ class EsLA
         "key_volume_down" => "Menos",
         "key_debug_1" => "Botón 1",
         "key_debug_2" => "Botón 2",
-        "controls_rebinding" => "Cambiando {1}",
+        "key_fullscreen" => "P. Completa",
+        "controls_rebinding" => "Cambiar {1}",
         "controls_rebinding2" => "Presione ESC para cancelar\nAtras para eliminar",
         "reset_to_default_keys" => "Restablecer a\nvalores predeterminados",
 
@@ -273,6 +275,7 @@ class EsLA
         "description_opponent_notes" => "Si no esta marcado, las notas del oponente se ocultan",
         "setting_ghost_tapping" => "Notas fantasma",
         "description_ghost_tapping" => "Si está marcado, no fallará al presionar teclas mientras no haya notas que se puedan tocar.",
+        "setting_bad/shit_break_combo" => "Si está marcado, el combo se romperá al obtener un Bad o Shit.",
         "setting_auto_pause" => "Pausa Automática",
         "description_auto_pause" => "Si está marcado, el juego se detiene automáticamente si la pantalla no está enfocada.",
         "setting_pop_up_score" => "Sprite de Combo y Rating",
@@ -303,6 +306,25 @@ class EsLA
         "description_show_end_countdown" => "Si está marcado, muestra una cuenta regresiva al final de la canción.",
         "setting_end_countdown_seconds" => "Seg. de cuenta regresiva:",
         "description_end_countdown_seconds" => "Cuántos segundos debe durar la cuenta regresiva al final de la canción.\n(10 - 30)",
+        "setting_accuracy_system" => "Sistema de precisión:",
+        "description_accuracy_system" => "¿Qué sistema de cálculo de precisión prefieres?\nWife3 - Precisión en ms de StepMania\nPsych - Basado en Rating Mod\nSimple - Aciertos básicos/total\nosu!mania - Sistema de juicio ponderado\nDJMAX - Sistema de bonificación de combo\nITG - Sistema de puntos de baile\n\n",
+
+        // Modchart Options
+        "setting_hold_subdivisions" => "Subdivisiones de notas largas",
+        "description_hold_subdivisions" => "Subdivide las notas largas para buenos detalles visuales.\nValores altos pueden afectar el rendimiento.",
+        "setting_enable_3d_cameras" => "Cámaras 3D",
+        "description_enable_3d_cameras" => "Activa o desactiva las funciones de cámaras 3D\nDesactiva esto si tienes problemas de rendimiento.",
+        "setting_optimize_hold_rendering" => "Optimizar las notas largas",
+        "description_optimize_hold_rendering" => "Optimiza el renderizado de las notas largas para mejorar el rendimiento.\nPuede afectar las visuales de las notas largas.",
+        "setting_z-axis_scale" => "Escala del eje Z:",
+        "description_z-axis_scale" => "Ajusta los valores del eje Z para controlar la profundidad percibida.\nLos valores más altos aumentan la profundidad, los valores más bajos la reducen.",
+        "setting_render_arrow_paths" => "Crear ruta de las notas",
+        "description_render_arrow_paths" => "Genera líneas de trayectoria de las notas.\nADVERTENCIA: Esto afecta al rendimiento debido al cálculo de la ruta.",
+        "setting_styled_arrow_paths" => "Estilo de ruta de las notas",
+        "description_styled_arrow_paths" => "Aplica estilos visuales a las rutas de las notas.\nRequiere que 'Crear ruta de las notas' esté activado.",
+        "setting_hold_end_scale" => "Tamaño del fin de notas largas",
+        "description_hold_end_scale" => "Ajusta el tamaño del fin de las notas largas.\nAjusta según tus preferencias visuales.",
+
 
         // Loading Screen
         "now_loading" => "Cargando{1}",

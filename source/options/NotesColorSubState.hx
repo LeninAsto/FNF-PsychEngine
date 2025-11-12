@@ -724,7 +724,7 @@ class NotesColorSubState extends MusicBeatSubstate
 		
 		if(isNotITG)
 		{
-			notITGWarningText.text = "RGB SHADERS DISABLED - NotITG skin preserves original colors";
+			notITGWarningText.text = Language.getPhrase("note_colors_notitg", "RGB SHADERS DISABLED - NotITG skin preserves original colors");
 			notITGWarningText.visible = true;
 			// Hacer que el texto parpadee
 			FlxTween.cancelTweensOf(notITGWarningText);
