@@ -20,6 +20,10 @@ import openfl.utils.Assets;
 import sys.FileSystem;
 #end
 
+#if mobile
+import mobile.backend.StorageUtil;
+#end
+
 import haxe.Json;
 
 class FreeplayState extends MusicBeatState
@@ -632,23 +636,32 @@ class FreeplayState extends MusicBeatState
 							throw 'Invalid difficulty index: $smDiffIndex';
 						}
 						
-						var smDiffName:String = Paths.formatToSongPath(songs[curSelected].smDifficulties[smDiffIndex]);
+					var smDiffName:String = Paths.formatToSongPath(songs[curSelected].smDifficulties[smDiffIndex]);
+					
+					// Buscar el archivo JSON en la carpeta sm usando el nombre de dificultad del .sm
+					#if mobile
+					var smDir = StorageUtil.getSMDirectory();
+					#else
+					var smDir = './sm/';
+					#end
+					var smPath:String = smDir + songs[curSelected].smFolder + '/' + smDiffName + '.json';
+					trace('Loading SM chart from: $smPath');
+					
+					if (sys.FileSystem.exists(smPath))
+					{
+						var rawJson:String = sys.io.File.getContent(smPath);
+						PlayState.SONG = Song.parseJSON(rawJson, songLowercase);
+						Song.loadedSongName = songLowercase;
+						Song.chartPath = smPath;
 						
-						// Buscar el archivo JSON en la carpeta sm usando el nombre de dificultad del .sm
-						var smPath:String = './sm/' + songs[curSelected].smFolder + '/' + smDiffName + '.json';
-						trace('Loading SM chart from: $smPath');
+						// Establecer la ruta de audio personalizada para StepMania
+						#if mobile
+						PlayState.customAudioPath = StorageUtil.getSMDirectory() + songs[curSelected].smFolder + '/';
+						#else
+						PlayState.customAudioPath = './sm/' + songs[curSelected].smFolder + '/';
+						#end
 						
-						if (sys.FileSystem.exists(smPath))
-						{
-							var rawJson:String = sys.io.File.getContent(smPath);
-							PlayState.SONG = Song.parseJSON(rawJson, songLowercase);
-							Song.loadedSongName = songLowercase;
-							Song.chartPath = smPath;
-							
-							// Establecer la ruta de audio personalizada para StepMania
-							PlayState.customAudioPath = './sm/' + songs[curSelected].smFolder + '/';
-							
-							StageData.loadDirectory(PlayState.SONG);
+						StageData.loadDirectory(PlayState.SONG);
 						}
 						else
 						{
@@ -1005,7 +1018,11 @@ class FreeplayState extends MusicBeatState
 	 */
 	function loadStepManiaFiles():Void {
 		#if sys
+		#if mobile
+		var smDir = StorageUtil.getSMDirectory();
+		#else
 		var smDir = './sm/';
+		#end
 		
 		// Verificar si la carpeta sm existe
 		if (!sys.FileSystem.exists(smDir)) {

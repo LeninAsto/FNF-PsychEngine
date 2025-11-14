@@ -50,6 +50,10 @@ import psychlua.LuaUtils;
 import psychlua.HScript;
 #end
 
+#if mobile
+import mobile.backend.StorageUtil;
+#end
+
 #if LUA_ALLOWED
 import modchart.Manager;
 #end
@@ -381,7 +385,7 @@ class PlayState extends MusicBeatState
 	function isStepManiaLevel():Bool
 	{
 		// Verificar si el directorio de audio personalizado está configurado (indicador de StepMania)
-		if (customAudioPath != null && customAudioPath.contains('/sm/'))
+		if (customAudioPath != null && (customAudioPath.contains('/sm/') || customAudioPath.contains('sm/')))
 			return true;
 		
 		// Verificar si el nombre de la canción tiene formato StepMania (con guión)
@@ -417,13 +421,6 @@ class PlayState extends MusicBeatState
 		#if LUA_ALLOWED
 		FunkinLua.lua_Errors = 0;
 		#end
-		
-		// Guardar el estado original de la ventana al entrar a PlayState
-		var window = openfl.Lib.application.window;
-		originalWinWidth = window.width;
-		originalWinHeight = window.height;
-		originalWinX = window.x;
-		originalWinY = window.y;
 		
 		//trace('Playback Rate: ' + playbackRate);
 		_lastLoadedModDirectory = Mods.currentModDirectory;
@@ -790,16 +787,12 @@ class PlayState extends MusicBeatState
 		scoreTxt.borderSize = 1.25;
 		scoreTxt.visible = !ClientPrefs.data.hideHud;
 		uiGroup.add(scoreTxt);
-		
-		// Detectar si es un chart de StepMania
-		isStepManiaChart = (customAudioPath != null && customAudioPath.contains('/sm/'));
-		
-		// Crear UI de StepMania si es necesario
+	
+		// Detectar si es un chart de StepMania o si usa el stage notitg
+		isStepManiaChart = (customAudioPath != null && (customAudioPath.contains('/sm/') || customAudioPath.contains('sm/'))) || (curStage == 'notitg');		// Crear UI de StepMania si es necesario
 		if (isStepManiaChart) {
-			// Ocultar scoreTxt normal
-			scoreTxt.visible = false;
-			
-			// Calcular posición vertical centrada
+		// Ocultar scoreTxt normal
+			scoreTxt.visible = false;			// Calcular posición vertical centrada
 			var centerY:Float = FlxG.height / 2;
 			
 			// Score grande en el medio derecho (centrado verticalmente)
@@ -885,23 +878,64 @@ class PlayState extends MusicBeatState
 
 		// SONG SPECIFIC SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-		for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), 'data/$songName/'))
-			#if linux
-			for (file in CoolUtil.sortAlphabetically(Paths.readDirectory(folder)))
-			#else
-			for (file in Paths.readDirectory(folder))
-			#end
+		// Para canciones de StepMania/NotITG, buscar scripts en la carpeta songs/
+		if (isStepManiaLevel() && customAudioPath != null)
+		{
+			#if sys
+			// Extraer la ruta de la carpeta de la canción de StepMania
+			var smFolder:String = haxe.io.Path.directory(customAudioPath);
+			trace('Looking for StepMania scripts in: $smFolder');
+			
+			if (sys.FileSystem.exists(smFolder))
 			{
-				#if LUA_ALLOWED
-				if(file.toLowerCase().endsWith('.lua'))
-					new FunkinLua(folder + file);
-				#end
+				var files:Array<String> = sys.FileSystem.readDirectory(smFolder);
+				trace('Files found in SM folder: $files');
+				
+				for (file in files)
+				{
+					#if LUA_ALLOWED
+					if(file.toLowerCase().endsWith('.lua'))
+					{
+						trace('Loading SM Lua script: $file');
+						new FunkinLua(smFolder + '/' + file);
+					}
+					#end
 
-				#if HSCRIPT_ALLOWED
-				if(file.toLowerCase().endsWith('.hx'))
-					initHScript(folder + file);
-				#end
+					#if HSCRIPT_ALLOWED
+					if(file.toLowerCase().endsWith('.hx'))
+					{
+						trace('Loading SM HScript: $file');
+						initHScript(smFolder + '/' + file);
+					}
+					#end
+				}
 			}
+			else
+			{
+				trace('SM folder not found: $smFolder');
+			}
+			#end
+		}
+		else // Para canciones normales, buscar en data/
+		{
+			for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), 'data/$songName/'))
+				#if linux
+				for (file in CoolUtil.sortAlphabetically(Paths.readDirectory(folder)))
+				#else
+				for (file in Paths.readDirectory(folder))
+				#end
+				{
+					#if LUA_ALLOWED
+					if(file.toLowerCase().endsWith('.lua'))
+						new FunkinLua(folder + file);
+					#end
+
+					#if HSCRIPT_ALLOWED
+					if(file.toLowerCase().endsWith('.hx'))
+						initHScript(folder + file);
+					#end
+				}
+		}
 		#end
 		
 		addMobileControls();

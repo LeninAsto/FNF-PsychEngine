@@ -5,6 +5,10 @@ import flixel.FlxSprite;
 import sys.FileSystem;
 import openfl.display.BitmapData;
 
+#if mobile
+import mobile.backend.StorageUtil;
+#end
+
 class NotITG extends BaseStage
 {
 	var bgSprite:FlxSprite;
@@ -25,7 +29,7 @@ class NotITG extends BaseStage
 	{
 		#if sys
 		var customPath = states.PlayState.customAudioPath;
-		if (customPath == null || !customPath.contains('/sm/'))
+		if (customPath == null || (!customPath.contains('/sm/') && !customPath.contains('sm/')))
 			return;
 			
 		// customPath tiene formato: ./sm/nombredelmod/

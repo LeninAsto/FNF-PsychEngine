@@ -32,6 +32,9 @@ class StorageUtil
 	public static function getStorageDirectory():String
 		return #if android haxe.io.Path.addTrailingSlash(AndroidContext.getExternalFilesDir()) #elseif ios lime.system.System.documentsDirectory #else Sys.getCwd() #end;
 
+	public static function getSMDirectory():String
+		return #if android '/sdcard/.PlusEngine/sm/' #else './sm/' #end;
+
 	public static function saveContent(fileName:String, fileData:String, ?alert:Bool = true):Void
 	{
 		final folder:String = #if android StorageUtil.getExternalStorageDirectory() + #else Sys.getCwd() + #end 'saves/';
@@ -92,6 +95,17 @@ class StorageUtil
 		catch (e:Dynamic)
 		{
 			CoolUtil.showPopUp(Language.getPhrase('create_directory_error', 'Please create directory to\n{1}\nPress OK to close the game', [StorageUtil.getExternalStorageDirectory()]), Language.getPhrase('mobile_error', "Error!"));
+			lime.system.System.exit(1);
+		}
+
+		try
+		{
+			if (!FileSystem.exists(StorageUtil.getSMDirectory()))
+				FileSystem.createDirectory(StorageUtil.getSMDirectory());
+		}
+		catch (e:Dynamic)
+		{
+			CoolUtil.showPopUp(Language.getPhrase('create_directory_error', 'Please create directory to\n{1}\nPress OK to close the game', [StorageUtil.getSMDirectory()]), Language.getPhrase('mobile_error', "Error!"));
 			lime.system.System.exit(1);
 		}
 	}
