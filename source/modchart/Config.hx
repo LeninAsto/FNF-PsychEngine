@@ -118,4 +118,53 @@ class Config {
 		return ClientPrefs.holdEndScale;
 		#end
 	}
+
+	/**
+	 * Boundary margin for arrow path rendering (pixels outside screen).
+	 * Paths outside this boundary won't be rendered for better performance.
+	 */
+	public static var ARROW_PATH_BOUNDARY(get, never):Int;
+	static inline function get_ARROW_PATH_BOUNDARY():Int {
+		#if (FM_ENGINE_VERSION >= "0.7")
+		return ClientPrefs.data.arrowPathBoundary;
+		#else
+		return 300;
+		#end
+	}
+
+	/**
+	 * Enables hold graphics caching for better performance.
+	 */
+	public static var HOLD_CACHE_ENABLED(get, never):Bool;
+	static inline function get_HOLD_CACHE_ENABLED():Bool {
+		#if (FM_ENGINE_VERSION >= "0.7")
+		return ClientPrefs.data.holdCacheEnabled;
+		#else
+		return true;
+		#end
+	}
+
+	/**
+	 * Number of pre-calculated alpha variants for hold cache (10-30).
+	 */
+	public static var HOLD_ALPHA_DIVISIONS(get, never):Int;
+	static inline function get_HOLD_ALPHA_DIVISIONS():Int {
+		#if (FM_ENGINE_VERSION >= "0.7")
+		return ClientPrefs.data.holdAlphaDivisions;
+		#else
+		return 20;
+		#end
+	}
+
+	/**
+	 * Extension for hold segments to prevent visual gaps.
+	 */
+	public static var SEAMLESS_HOLD_EXTENSION(get, never):Float;
+	static inline function get_SEAMLESS_HOLD_EXTENSION():Float {
+		#if (FM_ENGINE_VERSION >= "0.7")
+		return ClientPrefs.data.seamlessHoldExtension;
+		#else
+		return 2.0;
+		#end
+	}
 }

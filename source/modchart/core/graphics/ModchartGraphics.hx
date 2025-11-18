@@ -83,10 +83,68 @@ class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 
 	var _indices:Null<Vector<Int>> = new Vector<Int>();
 
+	// Hold Graphics Cache (Schmovin optimization)
+	var _cachedHoldGraphics:Map<String, Map<Int, openfl.display.BitmapData>> = new Map();
+	var _cachedHoldEndGraphics:Map<String, Map<Int, openfl.display.BitmapData>> = new Map();
+
 	public function new(instance:PlayField) {
 		super(instance);
 
 		instance.setPercent('dizzyHolds', 1, -1);
+	}
+
+	/**
+	 * Updates frame pixels with alpha applied.
+	 * This is costly, so we cache multiple alpha variants.
+	 */
+	inline private function updateFramePixels(frame:flixel.graphics.frames.FlxFrame, alpha:Float):openfl.display.BitmapData {
+		var data = frame.paint();
+		if (alpha < 1) {
+			data.colorTransform(new openfl.geom.Rectangle(0, 0, frame.frame.width, frame.frame.height), 
+				new openfl.geom.ColorTransform(1, 1, 1, alpha));
+		}
+		return data;
+	}
+
+	/**
+	 * Initializes cache for a specific hold column with pre-calculated alpha variants.
+	 * Based on Schmovin's optimization (hours_wasted = 27).
+	 */
+	inline private function initializeHoldCache(cache:Map<String, Map<Int, openfl.display.BitmapData>>, 
+		frame:flixel.graphics.frames.FlxFrame, cacheKey:String) {
+		var map = new Map<Int, openfl.display.BitmapData>();
+		cache.set(cacheKey, map);
+		
+		var divisions = Config.HOLD_ALPHA_DIVISIONS;
+		for (i in 0...divisions) {
+			var alpha = i / (divisions - 1);
+			map.set(i, updateFramePixels(frame, alpha).clone());
+		}
+	}
+
+	/**
+	 * Grabs cached frame based on alpha value.
+	 * Avoids costly updateFramePixels() calls every frame.
+	 */
+	inline private function grabCachedFrame(arrow:FlxSprite, alpha:Float, isEnd:Bool):openfl.display.BitmapData {
+		if (!Config.HOLD_CACHE_ENABLED) {
+			// Fallback to non-cached rendering
+			return updateFramePixels(arrow.frame, alpha);
+		}
+
+		var divisions = Config.HOLD_ALPHA_DIVISIONS;
+		var snapAlpha = Math.floor((divisions - 1) * alpha);
+		
+		// Create unique cache key based on frame name and dimensions
+		var cacheKey = '${arrow.frame.name}_${Std.int(arrow.frame.frame.width)}_${Std.int(arrow.frame.frame.height)}';
+		
+		var cache = isEnd ? _cachedHoldEndGraphics : _cachedHoldGraphics;
+		
+		if (cache.get(cacheKey) == null) {
+			initializeHoldCache(cache, arrow.frame, cacheKey);
+		}
+		
+		return cache[cacheKey][snapAlpha];
 	}
 
 	inline private function __rotateTail(pos:Vector3D) {
@@ -329,16 +387,21 @@ class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 
 		var vertPointer = 0;
 
+		// Seamless extension from Schmovin: slightly extend segments to prevent gaps
+		var seamlessExtension = Config.SEAMLESS_HOLD_EXTENSION;
 		var subCr = ((Adapter.instance.getStaticCrochet() * .25) * ((Adapter.instance.isHoldEnd(item)) ? 0.6 * Config.HOLD_END_SCALE : 1)) / HOLD_SUBDIVISIONS;
+		
 		for (sub in 0...HOLD_SUBDIVISIONS) {
+			// Apply seamless extension to segment length
 			var subOff = subCr * sub;
+			var extendedSubCr = subCr + (seamlessExtension * (sub < HOLD_SUBDIVISIONS - 1 ? 1 : 0));
 
 			var out1 = lastSegment;
 
 			if (out1 == null)
 				out1 = getSegmentFunc(item, basePos, lastData != null ? lastData : getArrowParams(arrow, subOff));
 
-			var out2 = getSegmentFunc(item, basePos, (lastData = getArrowParams(arrow, subOff + subCr)));
+			var out2 = getSegmentFunc(item, basePos, (lastData = getArrowParams(arrow, subOff + extendedSubCr)));
 
 			lastSegment = out2;
 
@@ -376,6 +439,35 @@ class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 		count++;
 
 		__lastHoldSubs = Adapter.instance.getHoldSubdivisions();
+	}
+
+	/**
+	 * Clears the hold graphics cache to free memory.
+	 * Called automatically on dispose.
+	 */
+	private function clearCache():Void {
+		for (key in _cachedHoldGraphics.keys()) {
+			var map = _cachedHoldGraphics.get(key);
+			for (bmd in map) {
+				if (bmd != null) bmd.dispose();
+			}
+			map.clear();
+		}
+		_cachedHoldGraphics.clear();
+		
+		for (key in _cachedHoldEndGraphics.keys()) {
+			var map = _cachedHoldEndGraphics.get(key);
+			for (bmd in map) {
+				if (bmd != null) bmd.dispose();
+			}
+			map.clear();
+		}
+		_cachedHoldEndGraphics.clear();
+	}
+
+	override function dispose() {
+		clearCache();
+		super.dispose();
 	}
 
 	inline static final drawMargin = 50;
@@ -674,28 +766,30 @@ class ModchartArrowPath extends ModchartRenderer<FlxSprite> {
 
 		var pID = 0;
 
-		var songPos = Adapter.instance.getSongPosition();
+	var songPos = Adapter.instance.getSongPosition();
 
-		for (sub in 0...divisions) {
-			var hitTime = -500 + interval * sub;
+	for (sub in 0...divisions) {
+		var hitTime = interval * sub;
 
-			var output = instance.modifiers.getPath(pathVector.clone(), {
-				hitTime: songPos + hitTime,
-				distance: hitTime,
-				lane: lane,
-				player: fn,
-				isTapArrow: true
-			}, 0, true);
+		var output = instance.modifiers.getPath(pathVector.clone(), {
+			hitTime: songPos + hitTime,
+			distance: hitTime,
+			lane: lane,
+			player: fn,
+			isTapArrow: true
+		}, 0, true);
 			final position = output.pos;
 
 			/*
-			 * So it seems that if the lines are too far from the screen
-			 * causes HORRIBLE memory leaks (from 60mb to 3gb-5gb in 2 seconds WHAT THE FUCK)
+			 * Boundary checking optimization (from Schmovin):
+			 * If lines are too far from the screen, it causes HORRIBLE memory leaks
+			 * (from 60mb to 3gb-5gb in 2 seconds!)
 			 */
-			if ((position.x <= 0 - thickness - ARROW_PATH_BOUNDARY_OFFSET)
-				|| (position.x >= __display.pixels.rect.width + ARROW_PATH_BOUNDARY_OFFSET)
-				|| (position.y <= 0 - thickness - ARROW_PATH_BOUNDARY_OFFSET)
-				|| (position.y >= __display.pixels.rect.height + ARROW_PATH_BOUNDARY_OFFSET))
+			final boundary = Config.ARROW_PATH_BOUNDARY;
+			if ((position.x <= 0 - thickness - boundary)
+				|| (position.x >= __display.pixels.rect.width + boundary)
+				|| (position.y <= 0 - thickness - boundary)
+				|| (position.y >= __display.pixels.rect.height + boundary))
 				continue;
 
 			final vis:PathVisuals = {
@@ -762,11 +856,22 @@ class ModchartArrowPath extends ModchartRenderer<FlxSprite> {
 
 		__shape.graphics.drawPath(__pathCommands, __pathPoints);
 
-		// then drawing the path pixels into the sprite pixels
+		/*
+		 * Platform-conditional rendering (Schmovin optimization):
+		 * HTML5: Direct graphics copy (faster, 100-190 FPS)
+		 * Desktop/Mobile: BitmapData method (prevents shader loss, 35-50 FPS boost)
+		 */
+		#if html5
+		// HTML5: Direct copy is faster
+		for (camera in __display.cameras) {
+			camera.canvas.graphics.copyFrom(__shape.graphics);
+		}
+		#else
+		// Desktop/Mobile: BitmapData method preserves quality
 		__display.pixels.fillRect(__display.pixels.rect, 0x00FFFFFF);
 		__display.pixels.draw(__shape);
-		// draw the sprite to the cam
 		__display.draw();
+		#end
 	}
 
 	override function dispose() {
@@ -775,8 +880,6 @@ class ModchartArrowPath extends ModchartRenderer<FlxSprite> {
 		__pathPoints.splice(0, __pathPoints.length);
 		__pathCommands.splice(0, __pathCommands.length);
 	}
-
-	inline static final ARROW_PATH_BOUNDARY_OFFSET:Float = 300;
 }
 
 // TODO: fix this, i have this class in private cuz it sucks and doesnt even draw anything

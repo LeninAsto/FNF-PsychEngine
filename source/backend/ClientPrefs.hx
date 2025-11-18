@@ -63,6 +63,10 @@ import states.TitleState;
 	public var renderArrowPaths:Bool = false; // Renderiza las líneas de trayectoria de las flechas
 	public var styledArrowPaths:Bool = false; // Aplica estilos visuales a las trayectorias
 	public var arrowPathFrameSkip:Int = 2; // Frameskip para paths (1=60fps, 2=30fps, 3=20fps, etc.)
+	public var arrowPathBoundary:Int = 300; // Margen de boundary checking para paths (pixeles fuera de pantalla)
+	public var holdCacheEnabled:Bool = true; // Cache de hold graphics para mejor performance
+	public var holdAlphaDivisions:Int = 20; // Variantes de alpha pre-calculadas (10-30)
+	public var seamlessHoldExtension:Float = 2.0; // Extensión de holds para evitar gaps (0-5)
 	public var holdEndScale:Float = 1.0; // Escala del final de los holds
 	public var showTimeAndDate:Bool = true; // Mostrar hora, fecha y versión en PlayState
 	public var noteOffset:Int = 0;

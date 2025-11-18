@@ -76,6 +76,49 @@ class ModchartOptionsSubState extends BaseOptionsMenu
 		option.decimals = 0;
 		addOption(option);
 
+		// Arrow Path Boundary option
+		var option:Option = new Option('Arrow Path Boundary',
+			'Pixels outside screen to still render paths.\nLower = Better FPS, Higher = Less pop-in\n(Recommended: 300)',
+			'arrowPathBoundary',
+			INT);
+		option.scrollSpeed = 10;
+		option.minValue = 0;
+		option.maxValue = 1000;
+		option.changeValue = 50;
+		option.decimals = 0;
+		addOption(option);
+
+		// Hold Cache option
+		var option:Option = new Option('Enable Hold Cache',
+			'Caches hold graphics for better performance.\nRecommended: ON (huge FPS boost)',
+			'holdCacheEnabled',
+			BOOL);
+		addOption(option);
+
+		// Hold Alpha Divisions option
+		var option:Option = new Option('Hold Cache Quality',
+			'Pre-calculated alpha variants for holds.\nHigher = Smoother fades but more memory\n(Recommended: 20)',
+			'holdAlphaDivisions',
+			INT);
+		option.scrollSpeed = 1;
+		option.minValue = 10;
+		option.maxValue = 30;
+		option.changeValue = 5;
+		option.decimals = 0;
+		addOption(option);
+
+		// Seamless Hold Extension option
+		var option:Option = new Option('Seamless Hold Extension',
+			'Extends hold segments to prevent visual gaps.\n0 = No extension, Higher = Less gaps\n(Recommended: 2)',
+			'seamlessHoldExtension',
+			FLOAT);
+		option.scrollSpeed = 10;
+		option.minValue = 0;
+		option.maxValue = 5.0;
+		option.changeValue = 0.5;
+		option.decimals = 1;
+		addOption(option);
+
 		// Hold End Scale option
 		var option:Option = new Option('Hold End Scale',
 			'Scales the size of hold note endings.\nAdjust for visual preference.',

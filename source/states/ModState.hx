@@ -72,6 +72,14 @@ class ModState extends MusicBeatState
         // Permitir que los scripts individuales controlen persistentUpdate
         // Solo establecer persistentDraw en true por defecto
         persistentDraw = true;
+
+        // Crear texto de error (inicialmente oculto)
+        var ohnou = new FlxText(0, 0, FlxG.width, "It appears the ModState did not load, due to an error or a previous incorrect configuration between States. Just press 1 and choose NONE.", 16);
+        ohnou.color = 0xFF6C6C;
+        ohnou.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
+        ohnou.screenCenter();
+        ohnou.visible = true;
+        add(ohnou);
         
         // Crear texto de error (inicialmente oculto)
         errorText = new FlxText(10, 50, FlxG.width - 20, "", 16);

@@ -210,7 +210,7 @@ class PlayField extends FlxBasic {
 
 	override public function destroy() {
 		arrowRenderer.dispose();
-		holdRenderer.dispose();
+		holdRenderer.dispose(); // Hold cache cleared automatically in dispose()
 		receptorRenderer.dispose();
 		attachmentRenderer.dispose();
 		pathRenderer.dispose();
