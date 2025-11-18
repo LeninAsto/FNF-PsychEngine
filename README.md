@@ -14,6 +14,7 @@
 
 Engine based on Psych Engine 1.0.4, with modcharts like NotITG, ModStates and compatible with hxcodec videos from Psych mods 0.6.3 and 0.7.3.
 
+Follow the [Plus Engine channel on WhatsApp](https://whatsapp.com/channel/0029Vb6hfI9LdQeeQhhm5L1U) for updates, tips, and more.
 
 ### Features
 - Variables for window and system management in Lua: Many variables were added, whether to hide the taskbar or window borders, etc.
