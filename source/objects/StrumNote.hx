@@ -40,11 +40,7 @@ class StrumNote extends FlxSprite
 		if(PlayState.SONG != null && PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1) skin = PlayState.SONG.arrowSkin;
 		else 
 		{
-			// Forzar skin NotITG para niveles de StepMania
-			if(PlayState.SONG != null && PlayState.SONG.stage == 'notitg')
-				skin = 'noteSkins/NOTE_assets-notitg';
-			else
-				skin = Note.defaultNoteSkin;
+			skin = Note.defaultNoteSkin;
 		}
 
 		var customSkin:String = skin + Note.getNoteSkinPostfix();

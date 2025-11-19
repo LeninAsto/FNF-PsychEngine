@@ -368,11 +368,7 @@ class Note extends FlxSprite
 			skin = PlayState.SONG != null ? PlayState.SONG.arrowSkin : null;
 			if(skin == null || skin.length < 1)
 			{
-				// Forzar skin NotITG para niveles de StepMania
-				if(PlayState.SONG != null && PlayState.SONG.stage == 'notitg')
-					skin = 'noteSkins/NOTE_assets-notitg';
-				else
-					skin = defaultNoteSkin + postfix;
+				skin = defaultNoteSkin + postfix;
 			}
 		}
 		else rgbShader.enabled = false;
