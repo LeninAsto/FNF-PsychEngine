@@ -896,12 +896,10 @@ class PlayState extends MusicBeatState
 			#if sys
 			// Extraer la ruta de la carpeta de la canción de StepMania
 			var smFolder:String = haxe.io.Path.directory(customAudioPath);
-			trace('Looking for StepMania scripts in: $smFolder');
 			
 			if (sys.FileSystem.exists(smFolder))
 			{
 				var files:Array<String> = sys.FileSystem.readDirectory(smFolder);
-				trace('Files found in SM folder: $files');
 				
 				for (file in files)
 				{
@@ -2064,7 +2062,6 @@ class PlayState extends MusicBeatState
 				if (oggFile != null)
 				{
 					var instPath = customAudioPath + oggFile;
-					trace('Loading StepMania audio: $instPath');
 					inst.loadEmbedded(openfl.media.Sound.fromFile(instPath));
 				}
 				else

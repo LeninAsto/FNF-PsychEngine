@@ -1,170 +1,162 @@
 package modchart;
 
-#if (FM_ENGINE_VERSION == "1.0" || FM_ENGINE_VERSION == "0.7")
 import backend.ClientPrefs;
-#else
-import ClientPrefs;
-#end
 
 /**
  * Configuration settings for modchart behavior.
- * 
+ *
  * This class contains various static variables that control rendering,
  * performance optimizations, and visual settings for modcharts.
- * Adjust these settings to customize how elements behave and render.
+ * These values are now synchronized with ClientPrefs for user customization.
  */
 class Config {
 	/**
 	 * Enables or disables 3D cameras.
-	 * 
+	 *
 	 * Setting this to `false` will disable 3D camera functionality, which may improve performance.
 	 * When disabled, all 3D-related transformations and rendering will be skipped.
-	 * 
-	 * Default: `true` (3D cameras enabled).
+	 *
+	 * Synced with: `ClientPrefs.data.camera3dEnabled`
 	 */
 	public static var CAMERA3D_ENABLED(get, never):Bool;
-	static inline function get_CAMERA3D_ENABLED():Bool {
-		#if (FM_ENGINE_VERSION >= "0.7")
-		return ClientPrefs.data.camera3dEnabled;
-		#else
-		return ClientPrefs.camera3dEnabled;
-		#end
-	}
+	private static inline function get_CAMERA3D_ENABLED():Bool return ClientPrefs.data.camera3dEnabled;
 
 	/**
 	 * Defines the order of rotation axes.
-	 * 
+	 *
 	 * Determines the sequence in which rotations are applied around the X, Y, and Z axes.
 	 * Different orders can produce different final orientations due to rotational dependency.
-	 * 
+	 *
 	 * Default: `Z_Y_X` (Rotates around the X-axis last).
 	 */
 	public static var ROTATION_ORDER:RotationOrder = Z_Y_X;
 
 	/**
 	 * Optimizes the rendering of hold arrows.
-	 * 
+	 *
 	 * Theoretically, this makes calculations twice as fast by reducing redundant computations.
-	 * However, it is not recommended for complex modcharts, as it may cause holds to look incorrect,
-	 * especially when rotation or complex paths are applied.
-	 * 
-	  	 * Default: `false` (Regular hold rendering using the unit circle).
+	 * However, it is not recommended for complex modcharts, as it may cause holds to look waggy,
+	 * especially when using modifiers that use rotation or complex path operations.
+	 *
+	 * Synced with: `ClientPrefs.data.optimizeHolds`
 	 */
 	public static var OPTIMIZE_HOLDS(get, never):Bool;
-	static inline function get_OPTIMIZE_HOLDS():Bool {
-		#if (FM_ENGINE_VERSION >= "0.7")
-		return ClientPrefs.data.optimizeHolds;
-		#else
-		return ClientPrefs.optimizeHolds;
-		#end
-	}
+	private static inline function get_OPTIMIZE_HOLDS():Bool return ClientPrefs.data.optimizeHolds;
 
 	/**
 	 * Scales the Z-axis values.
-	 * 
+	 *
 	 * This value is used to multiply the Z coordinate, effectively scaling depth.
 	 * A higher value increases the perceived depth, while a lower value flattens it.
-	 * 
-	 * Default: `1` (No scaling applied).
+	 *
+	 * Synced with: `ClientPrefs.data.zScale`
 	 */
 	public static var Z_SCALE(get, never):Float;
-	static inline function get_Z_SCALE():Float {
-		#if (FM_ENGINE_VERSION >= "0.7")
-		return ClientPrefs.data.zScale;
-		#else
-		return ClientPrefs.zScale;
-		#end
-	}
+	private static inline function get_Z_SCALE():Float return ClientPrefs.data.zScale;
 
 	/**
 	 * Ignores or renders the arrow path lines.
-	 * 
+	 *
 	 * When enabled, performance will be affected
-	 * due to path computation. (and Cairo graphics :sob::sob::sob:)
+	 * due to path computation.
+	 * 
+	 * Synced with: `ClientPrefs.data.renderArrowPaths`
 	 */
 	public static var RENDER_ARROW_PATHS(get, never):Bool;
-	static inline function get_RENDER_ARROW_PATHS():Bool {
-		#if (FM_ENGINE_VERSION >= "0.7")
-		return ClientPrefs.data.renderArrowPaths;
-		#else
-		return ClientPrefs.renderArrowPaths;
-		#end
-	}
+	private static inline function get_RENDER_ARROW_PATHS():Bool return ClientPrefs.data.renderArrowPaths;
 
 	/**
-	 * Applies the `visuals` function from modifiers to
-	 * give the arrow path more style by changing its color,
-	 * scale, and alpha.
-	 * NOTE: Arrow paths also have thickness and color properties,
-	 * but they are not affected by the arrow's alpha and color.
+	 * Extra configurations for the Arrow Paths.
+	 * Synced with various ClientPrefs settings.
 	 */
-	public static var STYLED_ARROW_PATHS(get, never):Bool;
-	static inline function get_STYLED_ARROW_PATHS():Bool {
-		#if (FM_ENGINE_VERSION >= "0.7")
-		return ClientPrefs.data.styledArrowPaths;
-		#else
-		return ClientPrefs.styledArrowPaths;
-		#end
+	public static var ARROW_PATHS_CONFIG(get, never):ArrowPathConfig;
+	private static function get_ARROW_PATHS_CONFIG():ArrowPathConfig {
+		return {
+			APPLY_COLOR: ClientPrefs.data.styledArrowPaths,
+			APPLY_ALPHA: ClientPrefs.data.styledArrowPaths,
+			APPLY_DEPTH: true,
+			APPLY_SCALE: ClientPrefs.data.styledArrowPaths,
+			RESOLUTION: 1.0 / ClientPrefs.data.arrowPathFrameSkip,
+			LENGTH: ClientPrefs.data.arrowPathBoundary
+		};
 	}
 
 	/**
 	 * Scales the hold end size.
+	 * 
+	 * Synced with: `ClientPrefs.data.holdEndScale`
 	 */
 	public static var HOLD_END_SCALE(get, never):Float;
-	static inline function get_HOLD_END_SCALE():Float {
-		#if (FM_ENGINE_VERSION >= "0.7")
-		return ClientPrefs.data.holdEndScale;
-		#else
-		return ClientPrefs.holdEndScale;
-		#end
-	}
+	private static inline function get_HOLD_END_SCALE():Float return ClientPrefs.data.holdEndScale;
 
 	/**
-	 * Boundary margin for arrow path rendering (pixels outside screen).
-	 * Paths outside this boundary won't be rendered for better performance.
+	 * Prevents scaling the hold ends. (Some people doens't like that lol)
+	 * 
+	 * **WARNING**: Performance may be affected if there's too much
+	 * hold arrows at screen. (it basicly uses one extra `getPath()` call)
+	 * 
+	 * Synced with: `ClientPrefs.data.preventScaledHoldEnd`
 	 */
-	public static var ARROW_PATH_BOUNDARY(get, never):Int;
-	static inline function get_ARROW_PATH_BOUNDARY():Int {
-		#if (FM_ENGINE_VERSION >= "0.7")
-		return ClientPrefs.data.arrowPathBoundary;
-		#else
-		return 300;
-		#end
-	}
+	public static var PREVENT_SCALED_HOLD_END(get, never):Bool;
+	private static inline function get_PREVENT_SCALED_HOLD_END():Bool return ClientPrefs.data.preventScaledHoldEnd;
 
 	/**
-	 * Enables hold graphics caching for better performance.
+	 * Enables or disables column-specific modifiers.
+	 *
+	 * Disabling this may improve performance by
+	 * reducing the number of `getPercent()` calls.
+	 *
+	 * **WARNING**: This does **not** directly affect any modifier.
+	 * It only applies to *built-in modifiers*.
+	 * Custom modifiers must manually check
+	 * this config value for compatibility.
+	 *
+	 * Synced with: `ClientPrefs.data.columnSpecificModifiers`
 	 */
-	public static var HOLD_CACHE_ENABLED(get, never):Bool;
-	static inline function get_HOLD_CACHE_ENABLED():Bool {
-		#if (FM_ENGINE_VERSION >= "0.7")
-		return ClientPrefs.data.holdCacheEnabled;
-		#else
-		return true;
-		#end
-	}
+	public static var COLUMN_SPECIFIC_MODIFIERS(get, never):Bool;
+	private static inline function get_COLUMN_SPECIFIC_MODIFIERS():Bool return ClientPrefs.data.columnSpecificModifiers;
 
 	/**
-	 * Number of pre-calculated alpha variants for hold cache (10-30).
+	 * Shows the sustains behind the strums
+	 * 
+	 * Synced with: `ClientPrefs.data.holdsBehindStrum`
 	 */
-	public static var HOLD_ALPHA_DIVISIONS(get, never):Int;
-	static inline function get_HOLD_ALPHA_DIVISIONS():Int {
-		#if (FM_ENGINE_VERSION >= "0.7")
-		return ClientPrefs.data.holdAlphaDivisions;
-		#else
-		return 20;
-		#end
-	}
+	public static var HOLDS_BEHIND_STRUM(get, never):Bool;
+	private static inline function get_HOLDS_BEHIND_STRUM():Bool return ClientPrefs.data.holdsBehindStrum;
+}
+
+typedef ArrowPathConfig = {
+	/**
+	 * Line alpha gets affected
+	 * by color/glow modifiers.
+	 */
+	APPLY_COLOR:Bool,
 
 	/**
-	 * Extension for hold segments to prevent visual gaps.
+	 * Line alpha gets affected
+	 * by alpha modifiers.
 	 */
-	public static var SEAMLESS_HOLD_EXTENSION(get, never):Float;
-	static inline function get_SEAMLESS_HOLD_EXTENSION():Float {
-		#if (FM_ENGINE_VERSION >= "0.7")
-		return ClientPrefs.data.seamlessHoldExtension;
-		#else
-		return 2.0;
-		#end
-	}
+	APPLY_ALPHA:Bool,
+
+	/**
+	 * Thickness gets affected by Z.
+	 */
+	APPLY_DEPTH:Bool,
+
+	/**
+	 * Thickness gets affected by arrow scale.
+	 */
+	APPLY_SCALE:Bool,
+
+	/**
+	 * "Resolution" multiplier of arrow paths.
+	 * Higher value = More divisions = Smoother path.
+	 * **WARNING**: Can't be zero or it will CRASH.
+	 */
+	RESOLUTION:Float,
+
+	/**
+	 * Path lines length addition.
+	 */
+	LENGTH:Int
 }

@@ -12,18 +12,6 @@ class ModchartOptionsSubState extends BaseOptionsMenu
 		title = 'Modchart Settings';
 		rpcTitle = 'Modchart Options Menu'; // for Discord Rich Presence
 
-		// Hold Subdivisions option
-		var option:Option = new Option('Hold Subdivisions',
-			'Subdivides hold/sustain tails for smoother visuals.\nHigher values improve quality but can hurt performance.\n(Recommended: 4-8)',
-			'holdSubdivisions',
-			INT);
-		option.scrollSpeed = 1;
-		option.minValue = 1;
-		option.maxValue = 32;
-		option.changeValue = 1;
-		option.decimals = 0;
-		addOption(option);
-
 		// 3D Camera option
 		var option:Option = new Option('Enable 3D Cameras',
 			'Enables or disables 3D camera functionality.\nDisabling this may improve performance by skipping 3D transformations.',
@@ -66,7 +54,7 @@ class ModchartOptionsSubState extends BaseOptionsMenu
 
 		// Arrow Path Quality option
 		var option:Option = new Option('Arrow Path Quality',
-			'Controls path rendering frequency.\nLower = Better FPS (paths update slower)\nHigher = Smoother paths (worse FPS)\n(Recommended: 2-3 for 60fps gameplay)',
+			'Controls path rendering frequency.\nLower = Smoother paths (better quality, worse FPS)\nHigher = Faster rendering (lower quality, better FPS)\n(Recommended: 2-3)',
 			'arrowPathFrameSkip',
 			INT);
 		option.scrollSpeed = 1;
@@ -88,37 +76,6 @@ class ModchartOptionsSubState extends BaseOptionsMenu
 		option.decimals = 0;
 		addOption(option);
 
-		// Hold Cache option
-		var option:Option = new Option('Enable Hold Cache',
-			'Caches hold graphics for better performance.\nRecommended: ON (huge FPS boost)',
-			'holdCacheEnabled',
-			BOOL);
-		addOption(option);
-
-		// Hold Alpha Divisions option
-		var option:Option = new Option('Hold Cache Quality',
-			'Pre-calculated alpha variants for holds.\nHigher = Smoother fades but more memory\n(Recommended: 20)',
-			'holdAlphaDivisions',
-			INT);
-		option.scrollSpeed = 1;
-		option.minValue = 10;
-		option.maxValue = 30;
-		option.changeValue = 5;
-		option.decimals = 0;
-		addOption(option);
-
-		// Seamless Hold Extension option
-		var option:Option = new Option('Seamless Hold Extension',
-			'Extends hold segments to prevent visual gaps.\n0 = No extension, Higher = Less gaps\n(Recommended: 2)',
-			'seamlessHoldExtension',
-			FLOAT);
-		option.scrollSpeed = 10;
-		option.minValue = 0;
-		option.maxValue = 5.0;
-		option.changeValue = 0.5;
-		option.decimals = 1;
-		addOption(option);
-
 		// Hold End Scale option
 		var option:Option = new Option('Hold End Scale',
 			'Scales the size of hold note endings.\nAdjust for visual preference.',
@@ -129,6 +86,27 @@ class ModchartOptionsSubState extends BaseOptionsMenu
 		option.maxValue = 3.0;
 		option.changeValue = 0.1;
 		option.decimals = 1;
+		addOption(option);
+
+		// Prevent Scaled Hold End option
+		var option:Option = new Option('Prevent Scaled Hold Ends',
+			'Prevents scaling the hold note endings.\nWARNING: May affect performance with many holds on screen.',
+			'preventScaledHoldEnd',
+			BOOL);
+		addOption(option);
+
+		// Column Specific Modifiers option
+		var option:Option = new Option('Column Specific Modifiers',
+			'Enables column-specific modifiers.\nDisabling may improve performance by reducing calculations.',
+			'columnSpecificModifiers',
+			BOOL);
+		addOption(option);
+
+		// Holds Behind Strum option
+		var option:Option = new Option('Holds Behind Strums',
+			'Shows sustain notes behind the strum line.\nVisual preference option.',
+			'holdsBehindStrum',
+			BOOL);
 		addOption(option);
 
 		super();
