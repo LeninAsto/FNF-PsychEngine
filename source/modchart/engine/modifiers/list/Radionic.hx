@@ -38,6 +38,10 @@ class Radionic extends Modifier {
 
 	override public function visuals(data:VisualParameters, params:ModifierParameters):VisualParameters {
 		final perc = getPercent('radionic', params.player);
+		
+		if (perc == 0)
+			return data;
+			
 		final amount = 0.6;
 
 		data.scaleX = perc * (data.scaleY = 1 + amount - FlxEase.cubeOut((params.curBeat - Math.floor(params.curBeat))) * amount);

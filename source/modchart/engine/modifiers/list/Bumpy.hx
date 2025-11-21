@@ -29,9 +29,12 @@ class Bumpy extends Modifier {
 
 		var shift = 0.;
 
-		var angle = 40 * sin(distance + (100 * offset)) / ((period * 24) + 24);
+		var scrollSpeed = getScrollSpeed();
 
-		shift += (getPercent('bumpy' + axis, player) + getPercent('bumpy' + axis + receptorName, player)) * angle;
+		var bumpyMath = 40 * sin(((distance * 0.01) + (100.0 * offset) / ((period * (mult * 24.0)) +
+			24.0)) / ((scrollSpeed * mult) / 2)) * (getKeyCount() / 2.0);
+
+		shift += (getPercent('bumpy' + axis, player) + getPercent('bumpy' + axis + receptorName, player)) * bumpyMath;
 
 		switch (realAxis) {
 			case 'x':
