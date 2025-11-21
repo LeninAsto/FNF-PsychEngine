@@ -44,7 +44,30 @@ Follow the [Plus Engine channel on WhatsApp](https://whatsapp.com/channel/0029Vb
 - Rework the FreeplayState.hx
 - More things will continue to be added in the future...
 
+## Contributors
 
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/LeninAsto">
+        <img src="https://github.com/LeninAsto.png" width="100px;" alt="LeninAsto"/>
+        <br />
+        <sub><b>Lenin Asto</b></sub>
+      </a>
+      <br />
+      <sub>Main Developer</sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/sirthegamercoder">
+        <img src="https://github.com/sirthegamercoder.png" width="100px;" alt="Username2"/>
+        <br />
+        <sub><b>MTGC</b></sub>
+      </a>
+      <br />
+      <sub>Translate</sub>
+    </td>
+  </tr>
+</table>
 
 Contributions are welcome! If you have ideas, improvements, or fixes, feel free to fork the repo and open a pull request.
 
