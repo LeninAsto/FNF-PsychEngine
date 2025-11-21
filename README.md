@@ -44,8 +44,7 @@ Follow the [Plus Engine channel on WhatsApp](https://whatsapp.com/channel/0029Vb
 - Rework the FreeplayState.hx
 - More things will continue to be added in the future...
 
-### 🤝 Contributions
-* sirthegamercoder - Indonesian translation
+
 
 Contributions are welcome! If you have ideas, improvements, or fixes, feel free to fork the repo and open a pull request.
 
