@@ -151,11 +151,14 @@ class Psych implements IAdapter {
 	}
 
 	public function getDefaultReceptorX(lane:Int, player:Int):Float {
-		return getStrumFromInfo(lane, player).x;
+		var strum = getStrumFromInfo(lane, player);
+		return strum != null ? strum.x : 0;
 	}
 
 	public function getDefaultReceptorY(lane:Int, player:Int):Float {
-		return getDownscroll() ? FlxG.height - getStrumFromInfo(lane, player).y - Note.swagWidth : getStrumFromInfo(lane, player).y;
+		var strum = getStrumFromInfo(lane, player);
+		if (strum == null) return 0;
+		return getDownscroll() ? FlxG.height - strum.y - Note.swagWidth : strum.y;
 	}
 
 	public function getArrowCamera():Array<FlxCamera>
