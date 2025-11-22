@@ -770,13 +770,10 @@ class PlayState extends MusicBeatState
 
 		healthBar = new Bar(0, FlxG.height * (!ClientPrefs.data.downScroll ? 0.89 : 0.11), 'healthBar', function() return health, 0, 2);
 		healthBar.screenCenter(X);
-		// Opponent Mode: Invertir dirección de llenado (izquierda a derecha)
 		healthBar.leftToRight = playOpponent ? true : false;
 		healthBar.scrollFactor.set();
-		// Ocultar barra de vida en niveles NotITG (StepMania)
 		healthBar.visible = !ClientPrefs.data.hideHud && !isNotITG;
 		healthBar.alpha = ClientPrefs.data.healthBarAlpha;
-		healthBar.scale.x = 0;
 		reloadHealthBarColors();
 		if (!isNotITG) uiGroup.add(healthBar);
 
@@ -1528,8 +1525,6 @@ class PlayState extends MusicBeatState
 			callOnScripts('onStartCountdown');
 			return false;
 		}
-
-		FlxTween.tween(healthBar.scale, {x: 1}, 0.5, {ease: FlxEase.circOut});
 
 		seenCutscene = true;
 		inCutscene = false;

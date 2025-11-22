@@ -379,7 +379,7 @@ class Main extends Sprite
 			// Posicionamiento inicial
 			positionWatermark();
 			watermarkSprite.alpha = 0.5;
-			watermarkSprite.visible = true;
+			watermarkSprite.visible = ClientPrefs.data.showWatermark;
 			openfl.Lib.current.stage.addChild(watermarkSprite);
 		} else {
 			trace('No se pudo cargar la marca de agua con backend.Paths.image("marca").');
@@ -403,7 +403,7 @@ class Main extends Sprite
 			Lib.current.stage.addEventListener(openfl.events.Event.RESIZE, function(_) positionWatermark());
 		}
 		if (watermark != null) {
-		    watermark.visible = true;
+		    watermark.visible = ClientPrefs.data.showWatermark;
 		}
 		// --- Fin marca de agua ---
 	}

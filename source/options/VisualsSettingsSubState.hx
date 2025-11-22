@@ -149,6 +149,13 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		addOption(option);
 		option.onChange = onChangeFPSCounter;
 
+		var option:Option = new Option('Show Watermark',
+			'If checked, shows the watermark on screen.',
+			'showWatermark',
+			BOOL);
+		addOption(option);
+		option.onChange = onChangeWatermark;
+
 		/*#if native
 		var option:Option = new Option('VSync',
 			'If checked, Enables VSync fixing any screen tearing at the cost of capping the FPS to screen refresh rate.\n(Must restart the game to have an effect)',
@@ -367,6 +374,14 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 	{
 		if(Main.fpsVar != null)
 			Main.fpsVar.visible = ClientPrefs.data.showFPS;
+	}
+
+	function onChangeWatermark()
+	{
+		if(Main.watermarkSprite != null)
+			Main.watermarkSprite.visible = ClientPrefs.data.showWatermark;
+		if(Main.watermark != null)
+			Main.watermark.visible = ClientPrefs.data.showWatermark;
 	}
 
 	function onChangeKeyViewerColor()

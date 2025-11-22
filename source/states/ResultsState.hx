@@ -233,7 +233,7 @@ class ResultsState extends MusicBeatState
         }
 
         // --- Versiones arriba del texto de continuar ---
-        var engineInfo = Language.getPhrase('plus_engine_version', 'Plus Engine v') + MainMenuState.plusEngineVersion + "\n" + Language.getPhrase('psych_engine_version', 'Psych Engine v') + MainMenuState.psychEngineVersion + "\n" + Language.getPhrase('fnf_version', 'Friday Night Funkin\' v') + "0.2.8";
+        var engineInfo = Language.getPhrase('psych_engine_version', 'Psych Engine v') + MainMenuState.psychEngineVersion + "\n" + Language.getPhrase('fnf_version', 'Friday Night Funkin\' v') + "0.2.8";
         var engineText = new FlxText(0, FlxG.height - 115, FlxG.width, engineInfo, 25);
         engineText.setFormat(Paths.font("aller.ttf"), 25, FlxColor.CYAN, "center");
         add(engineText);

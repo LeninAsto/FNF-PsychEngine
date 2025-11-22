@@ -239,12 +239,17 @@ class HScript extends Iris
 		set('getVar', function(name:String) {
 			var result:Dynamic = null;
 			
-			// Primero buscar en videoHandlers
-			if(MusicBeatState.getVideoHandlers().exists(name)) {
+			// Primero buscar en el intérprete local (para compatibilidad con código inline)
+			if(exists(name)) {
+				result = get(name);
+			}
+			// Luego buscar en videoHandlers
+			else if(MusicBeatState.getVideoHandlers().exists(name)) {
 				result = MusicBeatState.getVideoHandlers().get(name);
-			} else if(MusicBeatState.getVariables().exists(name)) {
+			} 
+			// Finalmente en variables globales
+			else if(MusicBeatState.getVariables().exists(name)) {
 				result = MusicBeatState.getVariables().get(name);
-				// No hacer trace para variables normales para evitar spam
 			}
 			return result;
 		});
@@ -908,9 +913,99 @@ class CustomInterp extends crowplexus.hscript.Interp
 			return v;
 		}
 
+		// Compatibilidad: buscar en variables globales antes de dar error
+		if(MusicBeatState.getVariables().exists(id)) {
+			return MusicBeatState.getVariables().get(id);
+		}
+		
+		if(MusicBeatState.getVideoHandlers().exists(id)) {
+			return MusicBeatState.getVideoHandlers().get(id);
+		}
+
 		error(EUnknownVariable(id));
 
 		return null;
+	}
+	
+	override function get(o:Dynamic, field:String):Dynamic {
+		// Si el objeto es null, intentar buscar en variables globales
+		if (o == null) {
+			if(MusicBeatState.getVariables().exists(field)) {
+				return MusicBeatState.getVariables().get(field);
+			}
+			if(MusicBeatState.getVideoHandlers().exists(field)) {
+				return MusicBeatState.getVideoHandlers().get(field);
+			}
+			return null;
+		}
+		
+		// Intentar acceso normal primero con Reflect.getProperty (respeta getters/setters)
+		try {
+			// Primero intentar con getProperty para respetar propiedades y getters
+			if (Reflect.hasField(o, field) || Type.getInstanceFields(Type.getClass(o)).contains(field)) {
+				var value = Reflect.getProperty(o, field);
+				return value;
+			}
+		} catch(e:Dynamic) {
+			// Si falla, intentar con field directo
+			try {
+				if (Reflect.hasField(o, field)) {
+					return Reflect.field(o, field);
+				}
+			} catch(e2:Dynamic) {
+				// Ignorar y continuar
+			}
+		}
+		
+		// Wrapper de compatibilidad: si falla el acceso, buscar en variables globales
+		if(MusicBeatState.getVariables().exists(field)) {
+			return MusicBeatState.getVariables().get(field);
+		}
+		
+		if(MusicBeatState.getVideoHandlers().exists(field)) {
+			return MusicBeatState.getVideoHandlers().get(field);
+		}
+		
+		// Si no se encuentra, devolver null en lugar de error para mayor compatibilidad
+		return null;
+	}
+	
+	override function set(o:Dynamic, field:String, value:Dynamic):Dynamic {
+		// Si el objeto es null, guardar en variables globales
+		if (o == null) {
+			var className = try Type.getClassName(Type.getClass(value)) catch(e:Dynamic) null;
+			if (className == "objects.VideoHandler" || className == "objects.MP4Handler") {
+				MusicBeatState.getVideoHandlers().set(field, value);
+			} else {
+				MusicBeatState.getVariables().set(field, value);
+			}
+			return value;
+		}
+		
+		// Intentar asignación normal con setProperty (respeta setters)
+		try {
+			if (Reflect.hasField(o, field) || Type.getInstanceFields(Type.getClass(o)).contains(field)) {
+				Reflect.setProperty(o, field, value);
+				return value;
+			}
+		} catch(e:Dynamic) {
+			// Si falla con setProperty, intentar con setField
+			try {
+				Reflect.setField(o, field, value);
+				return value;
+			} catch(e2:Dynamic) {
+				// Si también falla, guardar en variables globales
+			}
+		}
+		
+		// Si no se pudo asignar, guardar en variables globales como fallback
+		var className = try Type.getClassName(Type.getClass(value)) catch(e:Dynamic) null;
+		if (className == "objects.VideoHandler" || className == "objects.MP4Handler") {
+			MusicBeatState.getVideoHandlers().set(field, value);
+		} else {
+			MusicBeatState.getVariables().set(field, value);
+		}
+		return value;
 	}
 }
 #else
