@@ -202,7 +202,7 @@ class CustomFadeTransition extends MusicBeatSubstate {
         
         // Tweens de apertura
         topDoorTween = addTween(FlxTween.tween(topDoor, {y: -height}, duration, {
-            ease: FlxEase.linear,
+            ease: FlxEase.expoOut,
             startDelay: 0,
             onStart: function(tween:FlxTween) {
                 if(isValidTransition() && eventText != null) 
@@ -211,7 +211,7 @@ class CustomFadeTransition extends MusicBeatSubstate {
         }));
         
         bottomDoorTween = addTween(FlxTween.tween(bottomDoor, {y: height}, duration, {
-            ease: FlxEase.linear,
+            ease: FlxEase.expoOut,
             startDelay: 0,
             onComplete: function(tween:FlxTween) {
                 if(isValidTransition()) {
@@ -221,12 +221,12 @@ class CustomFadeTransition extends MusicBeatSubstate {
         }));
         
         textTween = addTween(FlxTween.tween(waterMark, {y: waterMark.y + 100, alpha: 0}, duration * 0.8, {
-            ease: FlxEase.linear,
+            ease: FlxEase.cubeOut,
             startDelay: 0
         }));
         
         addTween(FlxTween.tween(eventText, {y: eventText.y + 100, alpha: 0}, duration * 0.8, {
-            ease: FlxEase.linear,
+            ease: FlxEase.cubeOut,
             startDelay: 0
         }));
         
@@ -262,22 +262,22 @@ class CustomFadeTransition extends MusicBeatSubstate {
         
         // Tweens de cierre
         textTween = addTween(FlxTween.tween(waterMark, {y: originalWaterMarkY, alpha: 1}, duration * 0.6, {
-            ease: FlxEase.linear,
+            ease: FlxEase.cubeIn,
             startDelay: 0
         }));
         
         addTween(FlxTween.tween(eventText, {y: originalEventTextY, alpha: 1}, duration * 0.6, {
-            ease: FlxEase.linear,
+            ease: FlxEase.cubeIn,
             startDelay: 0
         }));
         
         topDoorTween = addTween(FlxTween.tween(topDoor, {y: 0}, duration, {
-            ease: FlxEase.linear,
+            ease: FlxEase.expoIn,
             startDelay: 0
         }));
         
         bottomDoorTween = addTween(FlxTween.tween(bottomDoor, {y: 0}, duration, {
-            ease: FlxEase.linear,
+            ease: FlxEase.expoIn,
             startDelay: 0,
             onComplete: function(tween:FlxTween) {
                 if(!isValidTransition()) return;
