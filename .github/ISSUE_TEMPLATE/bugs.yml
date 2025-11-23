@@ -46,18 +46,12 @@ body:
   - type: dropdown
     id: psychver
     attributes:
-      label: "Which psych engine version you're on?"
+      label: "Which plus engine version you're on?"
       options:
         - "DevBuild"
-        - "1.0.4"
-        - "1.0.3"
-        - "1.0.2h"
-        - "1.0.2"
-        - "1.0.1"
+        - "1.0.5"
         - "1.0"
-        - "1.0 (Prerelease)"
-        - "0.7.x"
-        - "0.6.x or older"
+        - "0.8.5 / older"
     validations:
       required: true
 

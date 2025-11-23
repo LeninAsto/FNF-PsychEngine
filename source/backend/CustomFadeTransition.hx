@@ -30,17 +30,12 @@ class CustomFadeTransition extends MusicBeatSubstate {
     static final DOOR_COLOR_DARKER:FlxColor = 0xFF2D1B69;  // Morado muy oscuro
 
 	var duration:Float;
-    var holdTime:Float = 0.5;
     
     // Tweens para mejor control
     var topDoorTween:FlxTween;
     var bottomDoorTween:FlxTween;
     var textTween:FlxTween;
-    var holdTween:FlxTween;
     var iconTween:FlxTween;
-    
-    // Objeto dummy para el hold tween
-    var holdDummy:FlxSprite;
     
     var isDestroyed:Bool = false;
     var isClosing:Bool = false;
@@ -77,11 +72,10 @@ class CustomFadeTransition extends MusicBeatSubstate {
         return tween;
     }
 
-    public function new(duration:Float = 0.3, isTransIn:Bool, ?holdTime:Float = 0.2)
+    public function new(duration:Float = 0.5, isTransIn:Bool)
 	{
 		this.duration = duration;
 		this.isTransIn = isTransIn;
-        this.holdTime = holdTime;
         this.activeTweens = [];
         this.transitionId = generateId();
         
@@ -109,12 +103,6 @@ class CustomFadeTransition extends MusicBeatSubstate {
             return;
         }
         try {
-            // Crear objeto dummy para el hold tween
-            holdDummy = new FlxSprite();
-            holdDummy.makeGraphic(1, 1, 0x00FFFFFF);
-            holdDummy.alpha = 0;
-            add(holdDummy);
-            
             // Crear cámara dedicada con configuración móvil mejorada
             var cam:FlxCamera = new FlxCamera();
             cam.bgColor = 0x00;
@@ -202,7 +190,7 @@ class CustomFadeTransition extends MusicBeatSubstate {
         
         // Tweens de apertura
         topDoorTween = addTween(FlxTween.tween(topDoor, {y: -height}, duration, {
-            ease: FlxEase.expoOut,
+            ease: FlxEase.expoInOut,
             startDelay: 0,
             onStart: function(tween:FlxTween) {
                 if(isValidTransition() && eventText != null) 
@@ -211,7 +199,7 @@ class CustomFadeTransition extends MusicBeatSubstate {
         }));
         
         bottomDoorTween = addTween(FlxTween.tween(bottomDoor, {y: height}, duration, {
-            ease: FlxEase.expoOut,
+            ease: FlxEase.expoInOut,
             startDelay: 0,
             onComplete: function(tween:FlxTween) {
                 if(isValidTransition()) {
@@ -220,18 +208,18 @@ class CustomFadeTransition extends MusicBeatSubstate {
             }
         }));
         
-        textTween = addTween(FlxTween.tween(waterMark, {y: waterMark.y + 100, alpha: 0}, duration * 0.8, {
-            ease: FlxEase.cubeOut,
+        textTween = addTween(FlxTween.tween(waterMark, {y: waterMark.y + 100, alpha: 0}, duration, {
+            ease: FlxEase.expoInOut,
             startDelay: 0
         }));
         
-        addTween(FlxTween.tween(eventText, {y: eventText.y + 100, alpha: 0}, duration * 0.8, {
-            ease: FlxEase.cubeOut,
+        addTween(FlxTween.tween(eventText, {y: eventText.y + 100, alpha: 0}, duration, {
+            ease: FlxEase.expoInOut,
             startDelay: 0
         }));
         
-        iconTween = addTween(FlxTween.tween(iconSprite, {alpha: 0}, duration * 0.6, {
-            ease: FlxEase.sineOut,
+        iconTween = addTween(FlxTween.tween(iconSprite, {alpha: 0}, duration, {
+            ease: FlxEase.expoInOut,
             startDelay: 0
         }));
     }
@@ -255,54 +243,37 @@ class CustomFadeTransition extends MusicBeatSubstate {
         add(waterMark);
         add(eventText);
         
-        // Sonido de cierre
-        try {
-            FlxG.sound.play(Paths.sound('cancelMenu'), 0.4);
-        } catch(e:Dynamic) {}
-        
         // Tweens de cierre
-        textTween = addTween(FlxTween.tween(waterMark, {y: originalWaterMarkY, alpha: 1}, duration * 0.6, {
-            ease: FlxEase.cubeIn,
+        textTween = addTween(FlxTween.tween(waterMark, {y: originalWaterMarkY, alpha: 1}, duration, {
+            ease: FlxEase.expoInOut,
             startDelay: 0
         }));
         
-        addTween(FlxTween.tween(eventText, {y: originalEventTextY, alpha: 1}, duration * 0.6, {
-            ease: FlxEase.cubeIn,
+        addTween(FlxTween.tween(eventText, {y: originalEventTextY, alpha: 1}, duration, {
+            ease: FlxEase.expoInOut,
             startDelay: 0
         }));
         
         topDoorTween = addTween(FlxTween.tween(topDoor, {y: 0}, duration, {
-            ease: FlxEase.expoIn,
+            ease: FlxEase.expoInOut,
             startDelay: 0
         }));
         
         bottomDoorTween = addTween(FlxTween.tween(bottomDoor, {y: 0}, duration, {
-            ease: FlxEase.expoIn,
+            ease: FlxEase.expoInOut,
             startDelay: 0,
             onComplete: function(tween:FlxTween) {
                 if(!isValidTransition()) return;
                 
-                iconTween = addTween(FlxTween.tween(iconSprite, {alpha: 1}, 0.2, {
+                iconTween = addTween(FlxTween.tween(iconSprite, {alpha: 1}, 0.3, {
                     ease: FlxEase.sineIn,
-                    startDelay: 0
-                }));
-                
-                // Esperar cerrado, luego callback
-                if (holdTime > 0) {
-                    try {
-                        holdTween = addTween(FlxTween.tween(holdDummy, {alpha: 0}, holdTime, {
-                            onComplete: function(tween:FlxTween) {
-                                if(isValidTransition()) {
-                                    safeFinishCallback();
-                                }
-                            }
-                        }));
-                    } catch(e:Dynamic) {
-                        safeFinishCallback();
+                    startDelay: 0,
+                    onComplete: function(tween:FlxTween) {
+                        if(isValidTransition()) {
+                            safeFinishCallback();
+                        }
                     }
-                } else {
-                    safeFinishCallback();
-                }
+                }));
             }
         }));
     }
@@ -419,10 +390,6 @@ class CustomFadeTransition extends MusicBeatSubstate {
                 textTween.cancel();
                 textTween = null;
             }
-            if(holdTween != null) {
-                holdTween.cancel();
-                holdTween = null;
-            }
             if(iconTween != null) {
                 iconTween.cancel();
                 iconTween = null;
@@ -494,10 +461,6 @@ class CustomFadeTransition extends MusicBeatSubstate {
             if(iconSprite != null) {
                 iconSprite.destroy();
                 iconSprite = null;
-            }
-            if(holdDummy != null) {
-                holdDummy.destroy();
-                holdDummy = null;
             }
             
             super.destroy();
