@@ -96,6 +96,24 @@ class OptionsState extends MusicBeatState
 		lerpSelected = curSelected;
 		changeSelection();
 		ClientPrefs.saveSettings();
+		
+		// Posicionar elementos sin animación inicial
+		for (num => item in grpOptions.members)
+		{
+			var targetY:Float = item.targetY - lerpSelected;
+			item.screenCenter(X);
+			item.y = (FlxG.height * 0.2) + (targetY * 50);
+			
+			item.alpha = 0.6;
+			if (item.targetY == curSelected)
+			{
+				item.alpha = 1;
+				selectorLeft.x = item.x - 63;
+				selectorLeft.y = item.y;
+				selectorRight.x = item.x + item.width + 15;
+				selectorRight.y = item.y;
+			}
+		}
 
 		addTouchPad('UP_DOWN', 'A_B_C');
 

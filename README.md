@@ -1,6 +1,8 @@
 ![Logo Off](docs/img/PlusEngineLogo.png)
 
 [![Build](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/main.yml/badge.svg)](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/main.yml)
+[![VirusTotal Scan](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/virustotal.yml/badge.svg)](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/virustotal.yml)
+![Security](https://img.shields.io/badge/security-scanned-brightgreen?logo=virustotal)
 
 [![GitHub stars](https://img.shields.io/github/stars/LeninAsto/FNF-PlusEngine?style=social)](https://github.com/LeninAsto/FNF-PlusEngine/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/LeninAsto/FNF-PlusEngine?style=social)](https://github.com/LeninAsto/FNF-PlusEngine/network/members)
