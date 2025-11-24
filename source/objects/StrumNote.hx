@@ -199,11 +199,12 @@ class StrumNote extends FlxSprite
 		checkNotITGSkin();
 	}
 
-	public function playerPosition()
+	public function playerPosition(?overridePlayer:Null<Int> = null)
 	{
+		var playerValue:Int = overridePlayer != null ? overridePlayer : player;
 		x += Note.swagWidth * noteData;
 		x += 50;
-		x += ((FlxG.width / 2) * player);
+		x += ((FlxG.width / 2) * playerValue);
 	}
 
 	override function update(elapsed:Float) {

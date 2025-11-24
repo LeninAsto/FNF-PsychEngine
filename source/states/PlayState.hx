@@ -2285,8 +2285,11 @@ class PlayState extends MusicBeatState
 		for (i in 0...4)
 		{
 			// FlxG.log.add(i);
+			// Determinar si esta strum es del jugador considerando opponent mode
+			var isPlayerStrum:Bool = playOpponent ? (player == 0) : (player == 1);
+			
 			var targetAlpha:Float = 1;
-			if (player < 1)
+			if (!isPlayerStrum) // Es una strum del oponente (no controlada por el jugador)
 			{
 				// En StepMania, ocultar completamente las strums del oponente
 				if (isStepManiaChart) {
@@ -2309,7 +2312,7 @@ class PlayState extends MusicBeatState
 			// Opponent Mode: Invertir las strums
 			// player=1 normalmente va a playerStrums (boyfriend), pero en modo opponent debe ir a opponentStrums (porque ahora boyfriend es IA)
 			// player=0 normalmente va a opponentStrums (dad), pero en modo opponent debe ir a playerStrums (porque ahora dad es el jugador)
-			var isPlayerStrum:Bool = playOpponent ? (player == 0) : (player == 1);
+			// (Ya calculado arriba: isPlayerStrum)
 			
 			if (isPlayerStrum)
 				playerStrums.add(babyArrow);
@@ -2327,7 +2330,11 @@ class PlayState extends MusicBeatState
 			}
 
 			strumLineNotes.add(babyArrow);
-			babyArrow.playerPosition();
+			
+			// Usar el player correcto para calcular la posición considerando opponent mode
+			// En opponent mode, el player visual es el inverso del original
+			var visualPlayer:Int = isPlayerStrum ? 1 : 0;
+			babyArrow.playerPosition(visualPlayer);
 		}
 	}
 
