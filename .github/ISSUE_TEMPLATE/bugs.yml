@@ -55,6 +55,18 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: modver
+    attributes:
+      label: "Which version of Psych is the mod made for? (if you're using one)"
+      options:
+        - "Psych Engine 1.0.5+"
+        - "Psych Engine 1.0 - 1.0.4"
+        - "Psych Engine 0.7.x"
+        - "Psych Engine 0.6.x"
+        - "Psych Engine older"
+        - "Not using a mod"
+
   - type: input
     id: buildsummary
     attributes:
