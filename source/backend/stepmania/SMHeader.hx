@@ -1,7 +1,9 @@
 package backend.stepmania;
 
-import backend.stepmania.SMFile.TimingStruct;
-
+/**
+ * SMHeader - Clase simplificada para mantener compatibilidad
+ * Los datos ahora son manejados por Moonchart internamente
+ */
 class SMHeader {
 	public var TITLE:String = "";
 	public var SUBTITLE:String = "";
@@ -20,7 +22,9 @@ class SMHeader {
 	
 	public function new(data:String) {
 		headerData = data;
-		parseHeader();
+		if (data != null && data.length > 0) {
+			parseHeader();
+		}
 	}
 	
 	function parseHeader():Void {
@@ -59,7 +63,7 @@ class SMHeader {
 		parseBPMChanges();
 	}
 	
-	function parseBPMChanges():Void {
+	public function parseBPMChanges():Void {
 		bpmChanges = [];
 		
 		if (BPMS == null || BPMS.trim() == "") {
@@ -101,18 +105,6 @@ class SMHeader {
 				bpm: bpm,
 				time: currentTime
 			});
-			
-			if (i == 0) {
-				TimingStruct.clearTimings();
-			}
-			
-			var endBeat = (i < bpmPairs.length - 1) ? 
-				Std.parseFloat(bpmPairs[i + 1].split('=')[0]) : 
-				Math.POSITIVE_INFINITY;
-				
-			if (Math.isNaN(endBeat)) endBeat = Math.POSITIVE_INFINITY;
-				
-			TimingStruct.addTiming(beat, bpm, endBeat, currentTime);
 		}
 		
 		if (bpmChanges.length == 0) {
@@ -121,8 +113,6 @@ class SMHeader {
 				bpm: 120,
 				time: currentTime
 			});
-			TimingStruct.clearTimings();
-			TimingStruct.addTiming(0, 120, Math.POSITIVE_INFINITY, currentTime);
 		}
 	}
 	

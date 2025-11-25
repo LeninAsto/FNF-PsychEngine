@@ -1,18 +1,28 @@
 package backend.stepmania;
 
 import backend.Song;
-import backend.stepmania.SMHeader;
+import moonchart.formats.StepMania;
+import moonchart.formats.fnf.legacy.FNFPsych;
+import moonchart.formats.BasicFormat;
+import moonchart.backend.FormatData;
+import moonchart.backend.Timing;
 
+/**
+ * Wrapper para cargar archivos StepMania usando la librería Moonchart
+ * Mantiene compatibilidad con la interfaz anterior pero usa Moonchart internamente
+ */
 class SMFile {
 	public var header:SMHeader;
 	public var difficulties:Array<SMDifficulty> = [];
 	public var isValid:Bool = true;
 	
-	private var fileData:Array<String>;
+	// Moonchart objects
+	private var moonchartSM:StepMania;
+	private var smFilePath:String;
 	
-	public function new(data:String) {
-		fileData = data.split('\n');
-		parseFile();
+	public function new(data:String, ?filePath:String = null) {
+		this.smFilePath = filePath;
+		parseFile(data);
 	}
 	
 	public static function loadFile(path:String):SMFile {
@@ -23,95 +33,80 @@ class SMFile {
 		}
 		
 		var content = sys.io.File.getContent(path);
-		return new SMFile(content);
+		return new SMFile(content, path);
 		#else
 		trace('SM files not supported on this platform');
 		return null;
 		#end
 	}
 	
-	function parseFile():Void {
+	function parseFile(data:String):Void {
 		try {
-			var headerData = '';
-			var inc = 0;
+			// Inicializar Moonchart si no está inicializado
+			moonchart.Moonchart.init();
 			
-			while (inc < fileData.length && !fileData[inc].contains('#NOTES')) {
-				headerData += fileData[inc] + '\n';
-				inc++;
+			// Parsear el archivo SM usando Moonchart
+			moonchartSM = new StepMania();
+			moonchartSM.fromStepMania(data);
+			
+			// Extraer información del header
+			var basicChart = moonchartSM.toBasicFormat();
+			var meta = basicChart.meta;
+			
+			// Crear el header compatible con la implementación anterior
+			header = new SMHeader("");
+			header.TITLE = meta.title ?? "Unknown";
+			header.ARTIST = cast(meta.extraData.get("SONG_ARTIST"), String) ?? "Unknown";
+			header.MUSIC = cast(meta.extraData.get("AUDIO_FILE"), String) ?? "audio.ogg";
+			header.OFFSET = Std.string(meta.offset ?? 0.0);
+			
+			// Construir string de BPMS a partir de los cambios de BPM
+			var bpmsArray:Array<String> = [];
+			var totalBeats:Float = 0;
+			for (i in 0...meta.bpmChanges.length) {
+				var bpmChange = meta.bpmChanges[i];
+				
+				if (i > 0) {
+					var prevChange = meta.bpmChanges[i - 1];
+					var timeDiff = bpmChange.time - prevChange.time;
+					var beatsInPeriod = (timeDiff / 1000.0) * (prevChange.bpm / 60.0);
+					totalBeats += beatsInPeriod;
+				}
+				
+				bpmsArray.push('$totalBeats=${bpmChange.bpm}');
 			}
+			header.BPMS = bpmsArray.join(',');
 			
-			header = new SMHeader(headerData);
+			// Reconstruir los bpmChanges para el header
+			header.parseBPMChanges();
 			
+			// Validar que el archivo de música sea .ogg
 			if (!header.MUSIC.toLowerCase().endsWith('.ogg')) {
-				trace('ERROR: Music file must be .ogg format!');
-				isValid = false;
-				return;
+				trace('WARNING: Music file is not .ogg format: ${header.MUSIC}');
+				// No marcar como inválido, solo advertir
 			}
 			
-			while (inc < fileData.length) {
-				while (inc < fileData.length && !fileData[inc].contains('#NOTES')) {
-					inc++;
-				}
+			// Extraer dificultades del formato Moonchart
+			var smData:Dynamic = moonchartSM.data;
+			if (smData != null && smData.NOTES != null) {
+				var notesMap:Map<String, Dynamic> = smData.NOTES;
 				
-				if (inc >= fileData.length) break;
-				
-				inc++;
-				
-				if (inc >= fileData.length) break;
-				var chartType = fileData[inc].trim().toLowerCase();
-				var isDouble = chartType.contains('dance-double');
-				
-				if (!chartType.contains('dance-single') && !chartType.contains('dance-double')) {
-					trace('Skipping unsupported chart type: $chartType');
-					while (inc < fileData.length && !fileData[inc].contains(';')) {
-						inc++;
-					}
-					inc++;
-					continue;
-				}
-				
-				inc++; 
-				if (inc >= fileData.length) break;
-				
-				inc++; 
-				if (inc >= fileData.length) break;
-				
-				var difficultyRaw = fileData[inc].trim().replace(':', '');
-				var difficultyName = 'Normal';
-				if (difficultyRaw.length > 0) {
-					difficultyName = difficultyRaw.charAt(0).toUpperCase() + difficultyRaw.substr(1).toLowerCase();
-				}
-				
-				inc += 3;
-				
-				var measures:Array<SMMeasure> = [];
-				var currentMeasure = '';
-				
-				while (inc < fileData.length) {
-					var line = fileData[inc].trim();
+				for (diffName in notesMap.keys()) {
+					var diffData:Dynamic = notesMap.get(diffName);
 					
-					if (line == ',' || line == ';') {
-						if (currentMeasure.length > 0) {
-							measures.push(new SMMeasure(currentMeasure.split('\n')));
-							currentMeasure = '';
-						}
-						if (line == ';') {
-							inc++;
-							break; 
-						}
-					} else if (line.length > 0 && !line.startsWith('//')) {
-						currentMeasure += line + '\n';
+					// Determinar si es double basado en el tipo de danza
+					var isDouble = false;
+					if (Reflect.hasField(diffData, 'dance')) {
+						var danceType:String = Reflect.field(diffData, 'dance');
+						isDouble = (danceType == 'dance-double');
 					}
 					
-					inc++;
+					difficulties.push({
+						name: diffName,
+						isDouble: isDouble,
+						measures: [] // Las measures no son necesarias con Moonchart
+					});
 				}
-				
-				difficulties.push({
-					name: difficultyName,
-					isDouble: isDouble,
-					measures: measures
-				});
-				
 			}
 			
 			if (difficulties.length == 0) {
@@ -120,15 +115,17 @@ class SMFile {
 				return;
 			}
 			
+			trace('Successfully parsed SM file with ${difficulties.length} difficulties using Moonchart');
 			
 		} catch (e:Dynamic) {
-			trace('Error parsing SM file: ' + e);
+			trace('Error parsing SM file with Moonchart: ' + e);
+			trace(haxe.CallStack.toString(haxe.CallStack.exceptionStack()));
 			isValid = false;
 		}
 	}
 	
 	/**
-	 * Convert the SMFile to a FNF SwagSong format
+	 * Convert the SMFile to a FNF SwagSong format using Moonchart
 	 * @param songName 
 	 * @param difficultyIndex 
 	 */
@@ -153,173 +150,85 @@ class SMFile {
 			return null;
 		}
 		
-		var diff = difficulties[difficultyIndex];
-		var isDouble = diff.isDouble;
-		var measures = diff.measures;
-		
-		var bpm = header.getBPM(0);
-		if (bpm <= 0 || Math.isNaN(bpm)) {
-			trace('Invalid BPM detected, using default of 120');
-			bpm = 120;
-		}
-		
-		TimingStruct.clearTimings();
-		
-		var bpmChanges:Array<backend.stepmania.SMHeader.BPMChange> = header.bpmChanges;
-		if (bpmChanges.length == 0) {
-			TimingStruct.addTiming(0, bpm, 999999, 0);
-		} else {
-			bpmChanges.sort((a, b) -> a.beat < b.beat ? -1 : (a.beat > b.beat ? 1 : 0));
+		try {
+			// Obtener el nombre de la dificultad
+			var diffName = difficulties[difficultyIndex].name;
 			
-			for (i in 0...bpmChanges.length) {
-				var change = bpmChanges[i];
-				var startBeat = change.beat;
-				var endBeat = (i < bpmChanges.length - 1) ? bpmChanges[i + 1].beat : 999999;
-				
-				var timeOffset:Float = change.time;
-				
-				TimingStruct.addTiming(startBeat, change.bpm, endBeat, timeOffset);
+			// Convertir usando Moonchart: SM -> BasicFormat -> Psych
+			var basicChart = moonchartSM.toBasicFormat();
+			
+			// Crear el convertidor de Psych
+			var psychConverter = new FNFPsych();
+			
+			// Convertir de BasicFormat a Psych
+			psychConverter.fromBasicFormat(basicChart, diffName);
+			
+			// Obtener los datos en formato Psych
+			var psychData = psychConverter.data;
+			
+			if (psychData == null || psychData.song == null) {
+				trace('Failed to convert to Psych format');
+				return null;
 			}
-		}
-		
-		trace('Initialized TimingStruct with ${TimingStruct.allTimings.length} timing segments');
-		
-		var offsetValue:Float = Std.parseFloat(header.OFFSET);
-		if (Math.isNaN(offsetValue)) offsetValue = 0;
-		
-		var fnfOffset:Float = -offsetValue * 1000; 
-
-		var song:SwagSong = {
-			song: songName,
-			notes: [],
-			events: [],
-			bpm: bpm,
-			needsVoices: false,
-			player1: 'bf',
-			player2: 'dad',
-			gfVersion: 'gf',
-			speed: 2.0,
-			stage: 'notitg',
-			format: 'psych_v1',
-			offset: fnfOffset
-		};		var heldNotes:Array<Array<Dynamic>> = isDouble ? [[], [], [], [], [], [], [], []] : [[], [], [], []];
-		var currentBeat:Float = 0;
-		var measureIndex:Int = 0;
-		
-		var section:SwagSection = createNewSection(isDouble);
-		
-		if (measures == null || measures.length == 0) {
-			trace('No measures found in SM file');
+			
+			// Convertir de PsychJsonFormat a SwagSong
+			var psychSong = psychData.song;
+			
+			var song:SwagSong = {
+				song: songName,
+				notes: [],
+				events: [],
+				bpm: psychSong.bpm,
+				needsVoices: false,
+				player1: 'bf',
+				player2: 'dad',
+				gfVersion: psychSong.gfVersion ?? 'gf',
+				speed: psychSong.speed,
+				stage: psychSong.stage ?? 'notitg',
+				format: 'psych_v1',
+				offset: 0,
+				disableNoteRGB: false
+			};
+			
+			// Convertir las secciones
+			if (psychSong.notes != null) {
+				for (section in psychSong.notes) {
+					var swagSection:SwagSection = {
+						sectionNotes: [],
+						sectionBeats: 4, // Psych usa lengthInSteps, convertir o usar default
+						mustHitSection: section.mustHitSection,
+						gfSection: false, // FNFLegacySection no tiene este campo en Moonchart
+						bpm: section.bpm ?? 0,
+						changeBPM: section.changeBPM ?? false,
+						altAnim: section.altAnim ?? false
+					};
+					
+					// Copiar las notas
+					if (section.sectionNotes != null) {
+						for (note in section.sectionNotes) {
+							swagSection.sectionNotes.push(note);
+						}
+					}
+					
+					song.notes.push(swagSection);
+				}
+			}
+			
+			// Convertir los eventos
+			if (psychSong.events != null) {
+				for (event in psychSong.events) {
+					song.events.push(event);
+				}
+			}
+			
+			trace('Successfully converted ${diffName} to FNF format using Moonchart');
 			return song;
-		}
-		
-		for (measure in measures) {
-			if (measure == null || measure.noteRows == null) {
-				trace('Invalid measure found, skipping');
-				continue;
-			}
 			
-			var lengthInRows = Math.floor(192 / (measure.noteRows.length));
-			if (lengthInRows <= 0) lengthInRows = 1; 
-			
-			var rowIndex = 0;
-			
-			for (row in measure.noteRows) {
-				if (row == null || row.length == 0) {
-					rowIndex++;
-					continue;
-				}
-				
-				var noteRow = (measureIndex * 192) + (lengthInRows * rowIndex);
-				currentBeat = noteRow / 48;
-				
-				if (currentBeat % 4 == 0 && rowIndex == 0 && measureIndex > 0) {
-					song.notes.push(section);
-					section = createNewSection();
-				}
-				
-				var seg = TimingStruct.getTimingAtBeat(currentBeat);
-				if (seg == null) {
-					trace('No timing data found for beat $currentBeat');
-					rowIndex++;
-					continue;
-				}
-				
-				var beatsSinceStart = currentBeat - seg.startBeat;
-				var secondsPerBeat = 60.0 / seg.bpm;
-				var timeInSec = seg.startTime + (beatsSinceStart * secondsPerBeat);
-				
-				timeInSec -= (-offsetValue);
-				
-				var rowTime = timeInSec * 1000;
-				
-				if (Math.isNaN(rowTime) || rowTime < 0) {
-					trace('Invalid time calculated: $rowTime (beat: $currentBeat, seg.startBeat: ${seg.startBeat}, seg.startTime: ${seg.startTime}, seg.bpm: ${seg.bpm})');
-					rowIndex++;
-					continue;
-				}
-				
-				for (i in 0...row.length) {
-					var note = row.charAt(i);
-					
-					if (note == '0') continue;
-					
-					var lane = i;
-					
-					if (note == 'M') {
-						section.sectionNotes.push([rowTime, lane, 0, 'Hurt Note']);
-						continue;
-					}
-					
-					var noteType = Std.parseInt(note);
-					if (noteType == null || Math.isNaN(noteType)) continue;
-					
-					switch (noteType) {
-						case 1: 
-							section.sectionNotes.push([rowTime, lane, 0]);
-							
-						case 2: 
-							heldNotes[lane] = [rowTime, lane, 0];
-							
-						case 3:
-							if (heldNotes[lane].length > 0) {
-								var holdStart = heldNotes[lane];
-								var duration = rowTime - holdStart[0];
-								if (duration > 0) { 
-									holdStart[2] = duration;
-									section.sectionNotes.push(holdStart);
-								}
-								heldNotes[lane] = [];
-							}
-							
-						case 4: 
-							heldNotes[lane] = [rowTime, lane, 0];
-							
-					}
-				}
-				
-				rowIndex++;
-			}
-			measureIndex++;
+		} catch (e:Dynamic) {
+			trace('Error converting SM to FNF format: ' + e);
+			trace(haxe.CallStack.toString(haxe.CallStack.exceptionStack()));
+			return null;
 		}
-		
-		if (section.sectionNotes.length > 0) {
-			song.notes.push(section);
-		}
-		
-		if (header.bpmChanges.length > 1) { 
-			for (i in 1...header.bpmChanges.length) {
-				var change = header.bpmChanges[i];
-				var timeInMs = change.time * 1000; 
-				song.events.push([
-					timeInMs,
-					[['Change BPM', Std.string(change.bpm), '']]
-				]);
-				trace('Added BPM change event: ${change.bpm} at ${timeInMs}ms');
-			}
-		}
-		
-		return song;
 	}
 	
 	function createNewSection(isDouble:Bool = false):SwagSection {
@@ -341,6 +250,10 @@ typedef SMDifficulty = {
 	var measures:Array<SMMeasure>;
 }
 
+/**
+ * TimingStruct - Mantiene compatibilidad con código anterior
+ * Ahora es solo una cáscara, Moonchart maneja el timing internamente
+ */
 class TimingStruct {
 	public static var allTimings:Array<TimingData> = [];
 	

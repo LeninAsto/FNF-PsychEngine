@@ -140,6 +140,7 @@
 
 	<!-- Windows API -->
 	<haxelib name="sl-windows-api" if="windows" />
+	<haxelib name="moonchart" if="windows" />
 	
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
