@@ -119,6 +119,7 @@
 	<haxelib name="flixel-ui" version="2.6.2"/>
 	<haxelib name="flixel-addons" version="3.3.2"/>
 	<haxelib name="tjson" version="1.4.0"/>
+	<haxelib name="moonchart"/>
 
 	<!--Psych stuff needed-->
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
@@ -140,7 +141,6 @@
 
 	<!-- Windows API -->
 	<haxelib name="sl-windows-api" if="windows" />
-	<haxelib name="moonchart" if="windows" />
 	
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
