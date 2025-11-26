@@ -715,7 +715,6 @@ class PlayState extends MusicBeatState
 		versionText.borderSize = 1;
 		versionText.visible = true; // Siempre visible
 		versionText.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-		add(versionText);
 
 		Conductor.songPosition = -Conductor.crochet * 5 + Conductor.offset;
 		var showTime:Bool = (ClientPrefs.data.timeBarType != 'Disabled');
@@ -1007,11 +1006,11 @@ class PlayState extends MusicBeatState
 		super.create();
 		Paths.clearUnusedMemory();
 		
-		// Actualizar estadísticas de scripts en el FPSCounter
 		updateScriptStats();
 
 		cacheCountdown();
 		cachePopUpScore();
+		add(versionText);
 
 		if(eventNotes.length < 1) checkEventNote();
 	}

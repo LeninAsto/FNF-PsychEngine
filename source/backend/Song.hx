@@ -146,7 +146,38 @@ class Song
 		_lastPath = Paths.json('$formattedFolder/$formattedSong');
 
 		#if MODS_ALLOWED
-		if(FileSystem.exists(_lastPath))
+		// Compatibilidad con Psych 0.7.3: Si el chart no existe,
+		// intenta cargar con sufijo "-normal" para mods antiguos
+		var pathExists:Bool = FileSystem.exists(_lastPath);
+		if(!pathExists)
+		{
+			// Verifica si el jsonInput ya tiene un sufijo de dificultad
+			var hasDifficultySuffix:Bool = false;
+			for(diff in Difficulty.list)
+			{
+				var diffSuffix:String = '-' + Paths.formatToSongPath(diff);
+				if(formattedSong.endsWith(diffSuffix))
+				{
+					hasDifficultySuffix = true;
+					break;
+				}
+			}
+			
+			// Si no tiene sufijo, intenta con "-normal" (compatibilidad 0.7.3)
+			if(!hasDifficultySuffix)
+			{
+				var normalDiff:String = Paths.formatToSongPath(Difficulty.getDefault()); // "normal"
+				var altPath:String = Paths.json('$formattedFolder/$formattedSong-$normalDiff');
+				if(FileSystem.exists(altPath))
+				{
+					_lastPath = altPath;
+					pathExists = true;
+					trace('Psych 0.7.3 Compatibility: Using "$formattedSong-$normalDiff" chart');
+				}
+			}
+		}
+		
+		if(pathExists)
 			rawData = File.getContent(_lastPath);
 		else
 		#end
