@@ -122,6 +122,14 @@ class FPSCounter extends TextField
 	private var lastTextUpdateTime:Float = 0.0;
 	private var textUpdateInterval:Float = 0.5; // Actualizar texto estático cada 500ms
 	private var cachedStaticText:String = ""; // Cache del texto estático (OS, commit, etc.)
+	
+	/**
+		Frame timing para medición de delay
+	**/
+	private var lastFrameTime:Float = 0.0;
+	private var frameTimeMs:Float = 0.0;
+	private var frameTimesArray:Array<Float> = [];
+	private var avgFrameTimeMs:Float = 0.0;
 
 	@:noCompletion private var times:Array<Float>;
 	@:noCompletion private var lastFramerateUpdateTime:Float;
@@ -164,6 +172,10 @@ class FPSCounter extends TextField
 		lastFramerateUpdateTime = Timer.stamp();
 		prevTime = Lib.getTimer();
 		updateTime = prevTime + 500;
+		
+		// Inicializar medición de frame time
+		lastFrameTime = Timer.stamp();
+		frameTimesArray = [];
 
 		// Crear el fondo para el modo debug
 		bgShape = new Shape();
@@ -248,9 +260,10 @@ class FPSCounter extends TextField
 
 		switch (debugLevel) {
 			case 0:
-				// Modo normal - solo FPS
+				// Modo normal - FPS + Delay + Memory
 				displayText = '<font face="' + Paths.font("aller.ttf") + '" size="24" color="' + colorHex + '">' + currentFPS + '</font>' +
 						   '<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '"> FPS</font>' +
+						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">' + formatFloat(frameTimeMs, 1) + ' / ' + formatFloat(avgFrameTimeMs, 1) + ' ms</font>' +
 						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">' + currentMemoryStr + ' / ' + peakMemoryStr + '</font>';
 				
 				// Agregar texto del autor del mod si está disponible
@@ -261,73 +274,78 @@ class FPSCounter extends TextField
 			case 1:
 				// Modo debug básico - con fondo y datos básicos (fuentes más grandes)
 				displayText = '<font face="' + Paths.font("aller.ttf") + '" size="24" color="' + colorHex + '">' + currentFPS + '</font>' +
-						   '<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '"> FPS</font>' +
-						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Memory: ' + currentMemoryStr + '</font>' +
-						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Peak: ' + peakMemoryStr + '</font>' +
-						   '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">' + os.substring(1) + '</font>' +
-						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Commit: ' + lastCommit + '</font>';
+						   	'<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '"> FPS</font>' +
+						   	'\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Delay: ' + formatFloat(frameTimeMs, 1) + ' ms</font>' +
+						   	'\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Avg: ' + formatFloat(avgFrameTimeMs, 1) + ' ms</font>' +
+						   	'\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Memory: ' + currentMemoryStr + '</font>' +
+						   	'\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Peak: ' + peakMemoryStr + '</font>' +
+						   	'\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">' + os.substring(1) + '</font>' +
+						   	'\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Commit: ' + lastCommit + '</font>';
 			
 			case 2:
-			// Modo debug extendido - optimizado para mejor rendimiento
-			var currentTime = Timer.stamp();
+				// Modo debug extendido - optimizado para mejor rendimiento
+				var currentTime = Timer.stamp();
 			
-			// Actualizar texto estático solo cada textUpdateInterval segundos
-			if (cachedStaticText == "" || (currentTime - lastTextUpdateTime) >= textUpdateInterval) {
-				lastTextUpdateTime = currentTime;
-				
-				// Construir texto estático (que no cambia frecuentemente)
-				cachedStaticText = '<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">' + os.substring(1) + '</font>' +
-								 '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Last Commit: ' + lastCommit + '</font>';
-				
-				// Mostrar la fecha y hora del commit si están disponibles
-				if (commitDate != null && commitDate.length > 0) {
-					cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Date: ' + commitDate + '</font>';
+				// Actualizar texto estático solo cada textUpdateInterval segundos
+				if (cachedStaticText == "" || (currentTime - lastTextUpdateTime) >= textUpdateInterval) {
+					lastTextUpdateTime = currentTime;
+					
+					// Construir texto estático (que no cambia frecuentemente)
+					cachedStaticText = '<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">' + os.substring(1) + '</font>' +
+									 '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Last Commit: ' + lastCommit + '</font>';
+					
+					// Mostrar la fecha y hora del commit si están disponibles
+					if (commitDate != null && commitDate.length > 0) {
+						cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Date: ' + commitDate + '</font>';
+					}
+					if (commitTime != null && commitTime.length > 0) {
+						cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Time: ' + commitTime + ' UTC</font>';
+					}
+					
+					cachedStaticText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Objects: ' + FlxG.state.members.length + '</font>';
+					cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Uptime: ' + getUptime() + '</font>';
+					cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">State: ' + cachedCurrentState + '</font>';
+					
+					// Información de scripts (se actualiza poco)
+					var totalScripts = luaScriptsLoaded + hscriptsLoaded;
+					var totalFailed = luaScriptsFailed + hscriptsFailed;
+					cachedStaticText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FF00">Scripts: ' + totalScripts + '</font>';
+					if (totalFailed > 0) {
+						cachedStaticText += ' <font face="' + Paths.font("aller.ttf") + '" size="14" color="#FF8800">(Failed: ' + totalFailed + ')</font>';
+					}
+					if (totalScripts > 0) {
+						cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="12" color="#888888">  Lua: ' + luaScriptsLoaded + ' | HScript: ' + hscriptsLoaded + '</font>';
+					}
+					
+					cachedStaticText += '\n\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Plus Engine v'+ MainMenuState.plusEngineVersion +'</font>';
+					cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Psych v'+ MainMenuState.psychEngineVersion +'</font>';
 				}
-				if (commitTime != null && commitTime.length > 0) {
-					cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Time: ' + commitTime + ' UTC</font>';
-				}
 				
-				cachedStaticText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Objects: ' + FlxG.state.members.length + '</font>';
-				cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Uptime: ' + getUptime() + '</font>';
-				cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">State: ' + cachedCurrentState + '</font>';
+				// Construir texto dinámico (actualizado en cada frame para modders)
+				displayText = '<font face="' + Paths.font("aller.ttf") + '" size="24" color="' + colorHex + '">' + currentFPS + '</font>' +
+						   '<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '"> FPS</font>' +
+						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Delay: ' + formatFloat(frameTimeMs, 1) + ' ms</font>' +
+						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Avg: ' + formatFloat(avgFrameTimeMs, 1) + ' ms</font>' +
+						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Memory: ' + currentMemoryStr + '</font>' +
+						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Peak: ' + peakMemoryStr + '</font>';
 				
-				// Información de scripts (se actualiza poco)
-				var totalScripts = luaScriptsLoaded + hscriptsLoaded;
-				var totalFailed = luaScriptsFailed + hscriptsFailed;
-				cachedStaticText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FF00">Scripts: ' + totalScripts + '</font>';
-				if (totalFailed > 0) {
-					cachedStaticText += ' <font face="' + Paths.font("aller.ttf") + '" size="14" color="#FF8800">(Failed: ' + totalFailed + ')</font>';
-				}
-				if (totalScripts > 0) {
-					cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="12" color="#888888">  Lua: ' + luaScriptsLoaded + ' | HScript: ' + hscriptsLoaded + '</font>';
-				}
+				displayText += '\n\n' + cachedStaticText;
 				
-				cachedStaticText += '\n\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Plus Engine v'+ MainMenuState.plusEngineVersion +'</font>';
-				cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Psych v'+ MainMenuState.psychEngineVersion +'</font>';
-			}
-			
-			// Construir texto dinámico (actualizado en cada frame para modders)
-			displayText = '<font face="' + Paths.font("aller.ttf") + '" size="24" color="' + colorHex + '">' + currentFPS + '</font>' +
-					   '<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '"> FPS</font>' +
-					   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Memory: ' + currentMemoryStr + '</font>' +
-					   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Peak: ' + peakMemoryStr + '</font>' +
-					   '\n\n' + cachedStaticText;
-			
-			// Información crítica para modders - SIEMPRE actualizada en tiempo real
-			// Step, Beat y Section (CYAN)
-			displayText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FFFF">Step: ' + currentStep + '</font>';
-			displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FFFF">Beat: ' + currentBeat + '</font>';
-			displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FFFF">Section: ' + currentSection + '</font>';
-			
-			// PlayState debug info (YELLOW)
-			var healthPercent = Math.floor((playerHealth / 2) * 100);
-			displayText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FFFF00">Speed: ' + formatFloat(songSpeed, 2) + 'x</font>';
-			displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FFFF00">BPM: ' + currentBPM + '</font>';
-			displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FFFF00">Health: ' + healthPercent + '%</font>';
-			
-			// Rating y Combo (MAGENTA)
-			displayText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FF00FF">Rating: ' + lastRating + '</font>';
-			displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FF00FF">Combo: x' + comboCount + '</font>';
+				// Información crítica para modders - SIEMPRE actualizada en tiempo real
+				// Step, Beat y Section (CYAN)
+				displayText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FFFF">Step: ' + currentStep + '</font>';
+				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FFFF">Beat: ' + currentBeat + '</font>';
+				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FFFF">Section: ' + currentSection + '</font>';
+				
+				// PlayState debug info (YELLOW)
+				var healthPercent = Math.floor((playerHealth / 2) * 100);
+				displayText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FFFF00">Speed: ' + formatFloat(songSpeed, 2) + 'x</font>';
+				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FFFF00">BPM: ' + currentBPM + '</font>';
+				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FFFF00">Health: ' + healthPercent + '%</font>';
+				
+				// Rating y Combo (MAGENTA)
+				displayText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FF00FF">Rating: ' + lastRating + '</font>';
+				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FF00FF">Combo: x' + comboCount + '</font>';
 		}
 
 		// Usar htmlText para diferentes tamaños de fuente
@@ -373,6 +391,24 @@ class FPSCounter extends TextField
 	var deltaTimeout:Float = 0.0;
 	private override function __enterFrame(deltaTime:Float):Void
 	{
+		// Calcular frame time (delay)
+		var currentFrameTime = Timer.stamp();
+		frameTimeMs = (currentFrameTime - lastFrameTime) * 1000.0; // Convertir a milisegundos
+		lastFrameTime = currentFrameTime;
+		
+		// Mantener un promedio móvil de los últimos 10 frames
+		frameTimesArray.push(frameTimeMs);
+		if (frameTimesArray.length > 10) {
+			frameTimesArray.shift();
+		}
+		
+		// Calcular promedio
+		var sum:Float = 0.0;
+		for (time in frameTimesArray) {
+			sum += time;
+		}
+		avgFrameTimeMs = sum / frameTimesArray.length;
+		
 		if (ClientPrefs.data.fpsRework)
 		{
 			// Flixel keeps reseting this to 60 on focus gained
@@ -445,8 +481,8 @@ class FPSCounter extends TextField
 
 		// Calcular el tamaño del fondo basado en el texto
 		var lines = switch (debugLevel) {
-			case 1: 6; // FPS, Memory, Peak, espacio, OS, Commit
-			case 2: 29; // Aumentado para incluir: Date, Time, Scripts (hasta 3 líneas más)
+			case 1: 7; // FPS, Delay, Memory, Peak, espacio, OS, Commit
+			case 2: 32; // FPS, Delay, Avg, Memory, Peak + resto de info
 			default: 0;
 			}
 			
