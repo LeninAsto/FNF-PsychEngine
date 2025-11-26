@@ -92,7 +92,6 @@ jobs:
       - name: Install Haxelib
         run: |
           haxelib setup ~/haxelib
-          haxelib install hxcpp > /dev/null --quiet
           chmod +x ./setup/unish-lib.sh
           sh ./setup/unish-lib.sh
       - name: Skip SScript setup mode
