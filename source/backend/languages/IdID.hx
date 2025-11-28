@@ -134,7 +134,7 @@ class IdID
         "description_week6_nomiss" => "Selesaikan Minggu 6 pada Susah tanpa Misses.",
         "achievement_week7_nomiss" => "Ya Tuhan, sialan!",
         "description_week7_nomiss" => "Selesaikan Minggu 7 pada Susah tanpa Misses.",
-        "achievement_weekend1_nomiss" => "Hanya Latihan Bertarung Santai"
+        "achievement_weekend1_nomiss" => "Hanya Latihan Bertarung Santai",
         "description_weekend1_nomiss" => "Selesaikan Akhir Pekan 1 pada Susah tanpa Misses.",
         "achievement_ur_bad" => "Astaga, Betapa Mengenaskan!",
         "description_ur_bad" => "Selesaikan sebuah lagu dengan rating terendah lebih dari 20%",
