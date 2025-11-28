@@ -130,6 +130,8 @@ class IdID
         "description_week6_nomiss" => "Selesaikan Minggu 6 pada Susah tanpa Misses.",
         "achievement_week7_nomiss" => "Ya Tuhan, sialan!",
         "description_week7_nomiss" => "Selesaikan Minggu 7 pada Susah tanpa Misses.",
+        "achievement_weekend1_nomiss" => "Hanya Latihan Bertarung Santai"
+        "description_weekend1_nomiss" => "Selesaikan Akhir Pekan 1 pada Susah tanpa Misses.",
         "achievement_ur_bad" => "Astaga, Betapa Mengenaskan!",
         "description_ur_bad" => "Selesaikan sebuah lagu dengan rating terendah lebih dari 20%",
         "achievement_ur_good" => "Kesempurnaan",
@@ -158,12 +160,13 @@ class IdID
         "options_graphics" => "Grafik",
         "options_modchart" => "Modchart",
         "options_language" => "Bahasa",
-        "options_mobile" => "Pengaturan Seluler",
+        "options_mobile" => "Pengaturan Ponsel",
         "graphics_menu" => "Pengaturan Grafik",
         "visuals_menu" => "Pengaturan Visuals",
         "gameplay_menu" => "Pengaturan Gameplay",
         "modchart_menu" => "Pengaturan Modchart",
         "language_menu" => "Pengaturan Bahasa",
+        "options_mobile_menu" => "Pengaturan Ponsel",
         "mobile_controls_tip" => "Tekan {1} untuk pergi ke Menu Kontrol Seluler",
 
         // Note Colors Menu
@@ -220,8 +223,8 @@ class IdID
         "setting_scroll_type-constant" => "Konstan",
         "setting_scroll_speed" => "Kecepatan Gulungan",
         "setting_playback_rate" => "Kecepatan Pemutaran",
-        "setting_health_gain_multiplier" => "Peningkatan Kesehatan Pengganda.",
-        "setting_health_loss_multiplier" => "Kerugian Kesehatan Pengganda.",
+        "setting_health_gain_multiplier" => "Peningkatan Kesehatan Peng.",
+        "setting_health_loss_multiplier" => "Kerugian Kesehatan Peng.",
         "setting_instakill_on_miss" => "Instakill pada Miss",
         "setting_practice_mode" => "Mode Latihan",
         "setting_perfect_mode" => "Mode Sempurna",
@@ -397,7 +400,7 @@ class IdID
         "difficulty_easy" => "Mudah",
         "difficulty_normal" => "Biasa",
         "difficulty_hard" => "Susah",
-        "difficulty_erect" => "Erekt",
+        "difficulty_erect" => "Erektil",
         "difficulty_nightmare" => "Mimpi Buruk",
 
         // Debug and Time
@@ -416,7 +419,7 @@ class IdID
         "day_tuesday" => "Selesa",
         "day_wednesday" => "Rabu",
         "day_thursday" => "Kamis",
-        "day_friday" => "Jumat",
+        "day_friday" => "Jum'at",
         "day_saturday" => "Sabtu",
 
         // PlayState - Months
@@ -472,17 +475,20 @@ class IdID
         "results_rating" => "Rating",
         "results_played_on" => "Dimainkan pada",
         "results_press_enter" => "Tekan Enter\nuntuk Lanjutkan",
+        "results_press_enter_mobile" => "Tekan A\nuntuk Lanjutkan", 
         "results_practice_mode" => "Dimainkan dalam mode latihan",
+        "psych_engine_version" => "Mesin Psych v",
+        "fnf_version" => "Malam Jumat Funkin\' v",
 
         // Judgment counters  
-        "judgement_epics" => "Epik  ",
-        "judgement_sicks" => "Sick  ", 
-        "judgement_goods" => "Baik  ",
-        "judgement_bads" => "Buruk   ",
-        "judgement_shits" => "Jancok  ",
-        "judgement_misses" => "Misses ",
-        "judgement_combo" => "Kombo  ",
-        "judgement_max_combo" => "Maksimal Kombo",
+        "judgement_epics" => "Epik",
+        "judgement_sicks" => "Sick", 
+        "judgement_goods" => "Baik",
+        "judgement_bads" => "Buruk",
+        "judgement_shits" => "Jancok",
+        "judgement_misses" => "Misses",
+        "judgement_combo" => "Kombo",
+        "judgement_max_combo" => "Kombo Tertinggi",
 
         // ============== IMAGE TRANSLATIONS ==============
         
